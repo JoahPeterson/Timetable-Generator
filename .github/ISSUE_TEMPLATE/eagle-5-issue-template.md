@@ -1,7 +1,5 @@
 ---
 name: Eagle 5 issue template
-about: Describe this issue template's purpose here.
-title: ''
 labels: bug, story, task
 assignees: ''
 
@@ -15,3 +13,12 @@ assignees: ''
 +
 +
 +
+---
+number_box:
+  label: "Story Point Estimate"
+  type: "number"
+  min: 1
+  max: 52
+  step: 1
+
+---
