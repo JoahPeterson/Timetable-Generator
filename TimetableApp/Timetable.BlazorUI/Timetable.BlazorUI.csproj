@@ -4,8 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!--<UserSecretsId>aspnet-Timetable.BlazorUI-b39ad4f7-2b5f-4f61-99e3-1294235545ea</UserSecretsId>-->
-	  <UserSecretsId>aspnet-IndividualBlazor-703792f6-8b8d-4b63-970f-187191262f0e</UserSecretsId>
+    
+    <UserSecretsId>f4502aac-75dc-4acd-89b8-c91b0a890772</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
