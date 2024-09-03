@@ -2,15 +2,15 @@
 {
     public class Task
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
 
         public string Name { get; set; }
 
         public string Description { get; set; }
 
-        public Guid TypeId { get; set; }
+        public string TypeId { get; set; }
 
-        public Guid CreatedById { get; set; }
+        public string CreatedById { get; set; }
 
         public DateTime? DateCreated { get; set; }
 

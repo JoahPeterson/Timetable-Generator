@@ -2,7 +2,7 @@
 {
     public class Course
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
 
         public string Name { get; set; }
 
@@ -12,11 +12,11 @@
 
         public DateTime EndDate { get; set; }
 
-        public Guid CreatedById { get; set; }
+        public string CreatedById { get; set; }
 
         public IEnumerable<WorkUnit> WorkUnits { get; set; }
 
-        public Guid TermId { get; set; }
+        public string TermId { get; set; }
 
         public DateTime? DateCreated { get; set; }
 
