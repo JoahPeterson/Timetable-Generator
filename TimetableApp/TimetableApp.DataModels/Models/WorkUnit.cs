@@ -12,6 +12,6 @@
 
         public string CourseId { get; set; }
 
-        public IEnumerable<WorkUnitTask>? Tasks { get; set; }
+        public List<WorkUnitTask>? Tasks { get; set; }
     }
 }

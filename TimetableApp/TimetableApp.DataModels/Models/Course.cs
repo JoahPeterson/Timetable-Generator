@@ -14,7 +14,7 @@
 
         public string CreatedById { get; set; }
 
-        public IEnumerable<WorkUnit> WorkUnits { get; set; }
+        public List<WorkUnit> WorkUnits { get; set; }
 
         public string TermId { get; set; }
 

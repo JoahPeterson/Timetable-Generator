@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timetable.BlazorUI", "Timetable.BlazorUI\Timetable.BlazorUI.csproj", "{75D273E0-EDD0-45DF-945A-9AA003738C92}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timetable.BlazorUI", "Timetable.BlazorUI\Timetable.BlazorUI.csproj", "{75D273E0-EDD0-45DF-945A-9AA003738C92}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimetableApp.DataModels", "TimetableApp.DataModels\TimetableApp.DataModels.csproj", "{AE95DBB2-6856-405E-B04E-2088C5804D86}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{75D273E0-EDD0-45DF-945A-9AA003738C92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75D273E0-EDD0-45DF-945A-9AA003738C92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75D273E0-EDD0-45DF-945A-9AA003738C92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE95DBB2-6856-405E-B04E-2088C5804D86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE95DBB2-6856-405E-B04E-2088C5804D86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE95DBB2-6856-405E-B04E-2088C5804D86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE95DBB2-6856-405E-B04E-2088C5804D86}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

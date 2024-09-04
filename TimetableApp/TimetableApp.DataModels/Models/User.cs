@@ -10,12 +10,12 @@
 
         public string DisplayName { get; set; }
 
-        public IEnumerable<Course>? Courses { get; set; }
+        public List<Course>? Courses { get; set; }
 
-        public IEnumerable<CourseType>? CoursesType { get; set; }
+        public List<CourseType>? CoursesType { get; set; }
 
-        public IEnumerable<Task>? Tasks { get; set; }
+        public List<Task>? Tasks { get; set; }
 
-        public IEnumerable<TaskType>? TaskTypes { get; set; }
+        public List<TaskType>? TaskTypes { get; set; }
     }
 }
