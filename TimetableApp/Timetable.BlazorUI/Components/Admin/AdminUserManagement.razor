@@ -1,10 +1,9 @@
 ﻿@page "/admin/users"
 @using Microsoft.AspNetCore.Authorization
-
 @using Timetable.BlazorUI.Data
 @inject UserService UserService
 @rendermode InteractiveServer
-@* @attribute [Authorize(Roles = "Admin")] *@
+@attribute [Authorize(Roles = "Admin")]
 
 <h3>User Management</h3>
 

@@ -1,5 +1,6 @@
 using Timetable.BlazorUI;
 using Timetable.BlazorUI.Components;
+using Timetable.BlazorUI.SetupServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,4 +31,11 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
+// Creates an admin user if they do not exist already...
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    SetupFunctions.CreateAdminUser(services).Wait();
+}
 app.Run();
+
