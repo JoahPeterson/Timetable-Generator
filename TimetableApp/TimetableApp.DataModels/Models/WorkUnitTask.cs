@@ -6,11 +6,11 @@
 
         public string Duration { get; set; }
 
+        public string TaskId { get; set; }
+
         public int SequenceNumber { get; set; }
 
         public string WorkUnitId { get; set; }
-
-        public string TaskId { get; set; }
 
     }
 }
