@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timetable.BlazorUI", "Timet
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimetableApp.DataModels", "TimetableApp.DataModels\TimetableApp.DataModels.csproj", "{AE95DBB2-6856-405E-B04E-2088C5804D86}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timetable.ExcelApi", "Timetable.ExcelApi\Timetable.ExcelApi.csproj", "{F1095154-CC7F-4699-AEE2-32DE86496877}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,10 @@ Global
 		{75D273E0-EDD0-45DF-945A-9AA003738C92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75D273E0-EDD0-45DF-945A-9AA003738C92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75D273E0-EDD0-45DF-945A-9AA003738C92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1095154-CC7F-4699-AEE2-32DE86496877}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1095154-CC7F-4699-AEE2-32DE86496877}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1095154-CC7F-4699-AEE2-32DE86496877}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1095154-CC7F-4699-AEE2-32DE86496877}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AE95DBB2-6856-405E-B04E-2088C5804D86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AE95DBB2-6856-405E-B04E-2088C5804D86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE95DBB2-6856-405E-B04E-2088C5804D86}.Release|Any CPU.ActiveCfg = Release|Any CPU

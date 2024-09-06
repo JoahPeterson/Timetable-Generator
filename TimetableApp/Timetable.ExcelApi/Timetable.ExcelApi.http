@@ -1,0 +1,6 @@
+@Timetable.ExcelApi_HostAddress = http://localhost:5290
+
+GET {{Timetable.ExcelApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
