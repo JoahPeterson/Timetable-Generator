@@ -1,0 +1,53 @@
+﻿@inject ITaskTypeData taskTypeData
+@page "/CreateSampleData"
+@inject AuthenticationStateProvider authProvider
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Timetable.BlazorUI.Data
+@attribute [Authorize]
+<h3>SampleDataCreation</h3>
+
+
+
+@if (isTaskTypesCreated)
+{
+    <h4>Task Types have been created!!</h4>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="CreateTaskTypesAsync">Create Task Types</button>
+}
+
+
+
+@code {
+    bool isTaskTypesCreated = false;
+    private UserModel loggedInUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isTaskTypesCreated = await VerifyTaskTypes();
+    }
+
+    private async Task<bool> VerifyTaskTypes()
+    {
+        var taskTypes = await taskTypeData.GetTaskTypesAsync();
+
+        return taskTypes.Count > 0 ? true : false;
+    }
+
+
+    private async Task CreateTaskTypesAsync()
+    {
+
+        var taskType = new TaskType()
+            {
+                Name = "First Task Type",
+                Description = "This is the first ever task type"
+            };
+
+        await taskTypeData.CreateTaskTypeAsync(taskType);
+
+        isTaskTypesCreated = true;
+    }
+}
