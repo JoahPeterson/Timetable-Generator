@@ -1,5 +1,6 @@
 ﻿@page "/admin/users"
 @using Microsoft.AspNetCore.Authorization
+@inject AuthenticationStateProvider authProvider
 @using Timetable.BlazorUI.Data
 @inject UserService UserService
 @rendermode InteractiveServer

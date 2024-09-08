@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Timetable.BlazorUI.Components.Account;
 using Timetable.BlazorUI.Data;
+using TimetableApp.DataModels.DataAccess;
 using Timetable.BlazorUI.SetupServices;
 
 namespace Timetable.BlazorUI;
@@ -64,59 +65,10 @@ public static class RegisterServices
 
         builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
         builder.Services.AddScoped<UserService>();
+
+
+        builder.Services.AddSingleton<IDbConnection, DbConnection>();
+        builder.Services.AddSingleton<ITaskTypeData, MongoTaskTypeData>();
+
     }
-
-    //public static void ConfigureServices(this WebApplicationBuilder builder)
-    //{
-    //    // Add services to the container.
-    //    builder.Services.AddRazorComponents()
-    //        .AddInteractiveServerComponents();
-
-    //    builder.Services.AddCascadingAuthenticationState();
-    //    builder.Services.AddScoped<IdentityUserAccessor>();
-    //    builder.Services.AddScoped<IdentityRedirectManager>();
-    //    builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-
-    //    // Add authorization policies
-    //    builder.Services.AddAuthorizationCore(config =>
-    //    {
-    //        config.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    //    });
-
-    //    // Add DbContext and Identity services
-    //    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    //        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-    //    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    //        options.UseSqlServer(connectionString));
-
-    //    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-    //    // Add Identity services (register UserManager, RoleManager, etc.)
-    //    builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-    //    {
-    //        options.SignIn.RequireConfirmedAccount = true;
-    //    })
-    //        .AddEntityFrameworkStores<ApplicationDbContext>()
-    //        .AddSignInManager() // Add SignInManager if required
-    //        .AddDefaultTokenProviders();
-
-    //    // Add authentication services
-    //    builder.Services.AddAuthentication(options =>
-    //    {
-    //        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-    //        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    //    })
-    //    .AddGoogle(googleOptions =>
-    //    {
-    //        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-    //        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-    //    })
-    //    .AddIdentityCookies();
-
-    //    // Add email sender and user service
-    //    builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-    //    builder.Services.AddScoped<UserService>();
-    //}
-
 }
