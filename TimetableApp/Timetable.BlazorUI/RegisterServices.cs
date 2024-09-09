@@ -51,6 +51,12 @@ public static class RegisterServices
             googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
         })
         .AddIdentityCookies();
+        builder.Services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
+        {
+            microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
+            microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
+        });
+        
 
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
