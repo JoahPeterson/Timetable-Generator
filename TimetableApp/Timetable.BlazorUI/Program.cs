@@ -3,7 +3,6 @@ using Timetable.BlazorUI.Components;
 using Timetable.BlazorUI.SetupServices;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.ConfigureServices();
 
 var app = builder.Build();

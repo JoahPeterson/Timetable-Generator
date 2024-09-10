@@ -1,0 +1,36 @@
+﻿@page "/tasktype/create"
+@inject MongoTaskTypeData TaskTypeData
+@inject NavigationManager Navigation
+@using TimetableApp.DataModels.Models
+
+<h3>Create Task Type</h3>
+
+<EditForm Model="taskType" OnValidSubmit="@CreateTaskType">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="name">Task Type Name:</label>
+        <InputText id="name" @bind-Value="taskType.Name" class="form-control" />
+    </div>
+    <div>
+        <label for="name">Task Type Description:</label>
+        <InputText id="name" @bind-Value="taskType.Description" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Task Type</button>
+</EditForm>
+
+@code {
+
+    private TaskType taskType = new TaskType();
+
+    private async Task CreateTaskType()
+    {
+        // Use MongoTaskTypeData class to insert the new task type
+        await TaskTypeData.CreateTaskTypeAsync(taskType);
+
+        // Redirect to home page for now after creation
+        Navigation.NavigateTo("/");
+    }
+}
