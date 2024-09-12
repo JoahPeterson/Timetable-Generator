@@ -8,14 +8,12 @@ namespace TimetableApp.DataModels.Models
 {
     public class Auditable
     {
-        public int Id { get; set; }
-
         public string CreatedById { get; set; }
 
-        public DateTime? DateCreated { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.Now;
 
-        public bool IsArchived { get; set; }
+        public bool IsArchived { get; set; } = false; 
 
-        public DateTime? LastModified { get; set; }
+        public DateTime LastModified { get; set; } = DateTime.Now;
     }
 }
