@@ -33,6 +33,13 @@
 
     private async Task CreateTaskType()
     {
+        //create a new instance of the TaskType within the the create method and the initialize the values right away from the taskType property.
+        TaskType newTaskType = new TaskType
+        {
+            Name = taskType.Name,
+            Description = taskType.Description,
+        };
+
         // Use MongoTaskTypeData class to insert the new task type
         await TaskTypeData.CreateTaskTypeAsync(taskType);
 
