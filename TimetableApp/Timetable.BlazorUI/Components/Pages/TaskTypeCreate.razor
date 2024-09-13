@@ -1,0 +1,49 @@
+﻿@page "/tasktype/create"
+@inject ITaskTypeData TaskTypeData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@rendermode InteractiveServer
+@using TimetableApp.DataModels.Models
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
+<h3>Create Task Type</h3>
+
+<EditForm Model="taskType" OnValidSubmit="@CreateTaskType">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="Name">Task Type Name:</label>
+        <InputText id="name" @bind-Value="taskType.Name" class="form-control" />
+        <ValidationMessage For="@(() => taskType.Name)" />
+    </div>
+    <div>
+        <label for="Description">Task Type Description:</label>
+        <InputText id="description" @bind-Value="taskType.Description" class="form-control" />
+        <ValidationMessage For="@(() => taskType.Description)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Task Type</button>
+</EditForm>
+
+@code {
+
+    private TaskType taskType = new TaskType();
+
+    private async Task CreateTaskType()
+    {
+        //create a new instance of the TaskType within the the create method and the initialize the values right away from the taskType property.
+        TaskType newTaskType = new TaskType
+        {
+            Name = taskType.Name,
+            Description = taskType.Description,
+        };
+
+        // Use MongoTaskTypeData class to insert the new task type
+        await TaskTypeData.CreateTaskTypeAsync(taskType);
+
+        // Redirect to home page for now after creation
+        Navigation.NavigateTo("/");
+    }
+}
