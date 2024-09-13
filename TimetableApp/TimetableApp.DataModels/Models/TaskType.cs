@@ -6,6 +6,8 @@ public class TaskType
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
 
+    public Auditable AuditInformation { get; set; }
+
     public string CreatedById { get; set; }
 
     public string Description { get; set; }

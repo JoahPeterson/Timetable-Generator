@@ -4,17 +4,13 @@ public class Course
 {
     public string Id { get; set; }
 
-    public string CreatedById { get; set; }
+    public Auditable AuditInformation { get; set; }
 
     public DateTime? DateCreated { get; set; }
 
     public string? Description { get; set; }
 
     public DateTime EndDate { get; set; }
-
-    public bool IsArchived { get; set; }
-
-    public DateTime? LastModified { get; set; }
 
     public string Name { get; set; }
 
