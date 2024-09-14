@@ -35,7 +35,7 @@ public static class RegisterServices
         });
 
         builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-            .AddRoles<IdentityRole>() // Add this line to register RoleManager
+            .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddSignInManager()
             .AddDefaultTokenProviders();
@@ -50,12 +50,12 @@ public static class RegisterServices
             googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
             googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
         })
-        .AddIdentityCookies();
-        builder.Services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
+        .AddMicrosoftAccount(microsoftOptions =>
         {
             microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
             microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
-        });
+        })
+        .AddIdentityCookies();
         
 
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -75,6 +75,7 @@ public static class RegisterServices
 
         builder.Services.AddSingleton<IDbConnection, DbConnection>();
         builder.Services.AddSingleton<ITaskTypeData, MongoTaskTypeData>();
+        builder.Services.AddSingleton<IUserData, MongoUserData>();
 
     }
 }

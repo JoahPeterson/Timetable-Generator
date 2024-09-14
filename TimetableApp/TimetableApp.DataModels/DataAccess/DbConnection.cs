@@ -18,19 +18,30 @@ public class DbConnection : IDbConnection
     {
         _config = config;
 
-        // Retrieve the connection string using the connectionId
-        string connectionString = config[$"{_connectionId}"];
+        if (config == null)
+        {
+            throw new ArgumentNullException(nameof(config));
+        }
 
-        this.Client = new MongoClient(connectionString);
-        this.DbName = config["TimeTableDBName"];
+        string? connectionString = config[$"{_connectionId}"];
+
+        Client = new MongoClient(connectionString);
+        DbName = config["TimeTableDBName"];
         _db = Client.GetDatabase(DbName);
 
-        this.TaskTypeCollection = _db.GetCollection<TaskType>(TaskTypeCollectionName);
+        TaskTypeCollection = _db.GetCollection<TaskType>(TaskTypeCollectionName);
+        UserCollection = _db.GetCollection<User>(UserCollectionName);
     }
     public MongoClient Client { get; private set; }
-    public string DbName { get; private set; }
+    public string? DbName { get; private set; }
 
     public string TaskTypeCollectionName { get; private set; } = "taskTypes";
 
     public IMongoCollection<TaskType> TaskTypeCollection { get; private set; }
+
+    public string UserCollectionName { get; private set; } = "users";
+
+    public IMongoCollection<User> UserCollection { get; private set; }
+
+
 }

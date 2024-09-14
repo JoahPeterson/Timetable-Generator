@@ -1,7 +1,65 @@
 ﻿@page "/"
+@inject AuthenticationStateProvider authProvider
+@inject IUserData userData
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+@if (loggedInUser != null)
+{
+    <p>Welcome</p>
+}
+else
+{
+    <p>Welcome, please log in</p>
+}
+
+@code {
+    private User loggedInUser;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadAndVerifyUser();
+    }
+
+    private async Task LoadAndVerifyUser()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        string objectId = authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+        if (string.IsNullOrWhiteSpace(objectId) == false)
+        {
+            loggedInUser = await userData.GetUserFromAuthenticationAsync(objectId) ?? new();
+            string firstName = authState.User.Claims.FirstOrDefault(c => c.Type.Contains("givenname"))?.Value;
+            string lastName = authState.User.Claims.FirstOrDefault(c => c.Type.Contains("surname"))?.Value;
+            string displayName = authState.User.Claims.FirstOrDefault(c => c.Type.Equals("name"))?.Value;
+            string email = authState.User.Claims.FirstOrDefault(c => c.Type.Contains("email"))?.Value;
+            bool isDirty = false;
+            if (objectId.Equals(loggedInUser.ObjectIdentifier) == false)
+            {
+                isDirty = true;
+                loggedInUser.ObjectIdentifier = objectId;
+            }
+
+            if (email.Equals(loggedInUser.EmailAddress) == false)
+            {
+                isDirty = true;
+                loggedInUser.EmailAddress = email;
+            }
+
+            if (isDirty)
+            {
+                if (string.IsNullOrWhiteSpace(loggedInUser.Id))
+                {
+                    await userData.CreateAsync(loggedInUser);
+                }
+                else
+                {
+                    await userData.UpdateAsync(loggedInUser);
+                }
+            }
+        }
+    }
+}
