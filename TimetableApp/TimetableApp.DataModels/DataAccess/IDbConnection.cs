@@ -13,4 +13,8 @@ public interface IDbConnection
     IMongoCollection<TaskType> TaskTypeCollection { get; }
 
     string TaskTypeCollectionName { get; }
+
+    IMongoCollection<User> UserCollection { get; }
+
+    string UserCollectionName { get; }
 }
