@@ -49,6 +49,7 @@
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         username = await UserManager.GetUserNameAsync(user);
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);
+        
 
         Input.PhoneNumber ??= phoneNumber;
     }
@@ -58,6 +59,7 @@
         if (Input.PhoneNumber != phoneNumber)
         {
             var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+            
             if (!setPhoneResult.Succeeded)
             {
                 RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
