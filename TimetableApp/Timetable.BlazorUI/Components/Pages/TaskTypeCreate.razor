@@ -1,17 +1,23 @@
-﻿@page "/tasktype/create"
+﻿@page "/tasktype/create/{taskTypeId?}"
+@using Microsoft.AspNetCore.Authorization
 @inject ITaskTypeData TaskTypeData
+@inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
+@inject Blazored.Modal.Services.IModalService Modal
 @rendermode InteractiveServer
-@using TimetableApp.DataModels.Models
-@using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 
-<h3>Create Task Type</h3>
 
-<EditForm Model="taskType" OnValidSubmit="@CreateTaskType">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+@* Cascading Is Required for Modal to Work *@
+<CascadingBlazoredModal />
+
+<h3>@(isEditMode ? "Edit Task Type" : "Create Task Type")</h3>
+
+
+<EditForm Model="taskType" OnValidSubmit="@SaveTaskType">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
 
     <div>
         <label for="Name">Task Type Name:</label>
@@ -24,26 +30,99 @@
         <ValidationMessage For="@(() => taskType.Description)" />
     </div>
 
-    <button type="submit" class="btn btn-primary">Create Task Type</button>
+    <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
+
+    @if (isEditMode)
+    {
+        <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-1">Delete</button>
+    }
 </EditForm>
 
+
 @code {
+    [Parameter] public string? taskTypeId { get; set; }
 
     private TaskType taskType = new TaskType();
+    private bool isEditMode = false;
+    private bool showConfirmationModal = false;
 
-    private async Task CreateTaskType()
+    protected override async Task OnInitializedAsync()
     {
-        //create a new instance of the TaskType within the the create method and the initialize the values right away from the taskType property.
-        TaskType newTaskType = new TaskType
+        if (!string.IsNullOrEmpty(taskTypeId))
         {
-            Name = taskType.Name,
-            Description = taskType.Description,
-        };
 
-        // Use MongoTaskTypeData class to insert the new task type
-        await TaskTypeData.CreateTaskTypeAsync(taskType);
+            isEditMode = true;
+            taskType = await TaskTypeData.GetTaskTypeAsync(taskTypeId);
+        }
+        else
+        {
+            isEditMode = false;
+            taskType = new TaskType();
+        }
+    }
 
-        // Redirect to home page for now after creation
+    private async Task Archive()
+    {
+        if (isEditMode && !string.IsNullOrEmpty(taskTypeId))
+        {
+            taskType.AuditInformation.LastModified = DateTime.Now;
+            taskType.AuditInformation.IsArchived = true;
+            await TaskTypeData.UpdateTaskTypeAsync(taskType);
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task OnConfirmationResult(bool confirmed)
+    {
+        showConfirmationModal = false; // Hide the modal
+        if (confirmed)
+        {
+            await Archive();
+        }
+    }
+
+    private async Task SaveTaskType()
+    {
+        if (isEditMode)
+        {
+            taskType.AuditInformation.LastModified = DateTime.Now;
+            await TaskTypeData.UpdateTaskTypeAsync(taskType);
+        }
+        else
+        {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+            TaskType newTaskType = new TaskType
+            {
+                Name = taskType.Name,
+                Description = taskType.Description,
+            };
+
+            newTaskType.AuditInformation.CreatedById = mongoUser.Id;
+
+            await TaskTypeData.CreateTaskTypeAsync(newTaskType);
+        }
+
+        // Redirect to the task type list or home after save
         Navigation.NavigateTo("/");
+    }
+
+    private async Task ShowDeleteConfirmation()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Message", "Are you sure you want to delete this task type?");
+
+        var modal = Modal.Show<ConfirmationDialog>("Confirm Deletion", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            await Archive();
+        }
+        else
+        {
+            Console.WriteLine("Deletion canceled by the user.");
+        }
     }
 }
