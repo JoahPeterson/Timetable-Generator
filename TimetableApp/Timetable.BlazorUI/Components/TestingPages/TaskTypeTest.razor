@@ -1,12 +1,8 @@
 ﻿@page "/tasktype/test"
 @inject NavigationManager Navigation
 @inject ITaskTypeData TaskTypeData
-@attribute [StreamRendering]
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
-
-
-<h3>TaskTypeTest</h3>
+<h3>Task Type Testing Page</h3>
 
 @if (taskTypes == null)
 {
