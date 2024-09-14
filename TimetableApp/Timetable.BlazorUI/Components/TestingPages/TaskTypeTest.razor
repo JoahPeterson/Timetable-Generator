@@ -1,6 +1,12 @@
 ﻿@page "/tasktype/test"
+@using Microsoft.AspNetCore.Authorization
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
 @inject ITaskTypeData TaskTypeData
+@inject IUserData UserData
+@attribute [Authorize]
+
+ @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 <h3>Task Type Testing Page</h3>
 
@@ -35,10 +41,25 @@ else
 
 @code {
     private List<TaskType> taskTypes;
+    private User loggedInUser;
+
 
     protected override async Task OnInitializedAsync()
     {
-        taskTypes = await TaskTypeData.GetTaskTypesAsync();
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var loggedInUser = await UserData.GetUserFromAuthenticationAsync(user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+
+        if (user.IsInRole("Admin"))
+        {
+            taskTypes = await TaskTypeData.GetTaskTypesAsync();
+
+        }
+        else
+        {
+            taskTypes = await TaskTypeData.GetUsersTaskTypesAsync(loggedInUser.Id);
+        }
     }
 
     private void EditTaskType(string taskTypeId)

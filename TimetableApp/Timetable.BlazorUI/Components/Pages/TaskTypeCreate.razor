@@ -1,16 +1,19 @@
 ﻿@page "/tasktype/create/{taskTypeId?}"
 @using Microsoft.AspNetCore.Authorization
-@using Timetable.BlazorUI.Components.Components
-
 @inject ITaskTypeData TaskTypeData
+@inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @inject Blazored.Modal.Services.IModalService Modal
-
 @rendermode InteractiveServer
 @attribute [Authorize]
 
+
+@* Cascading Is Required for Modal to Work *@
+<CascadingBlazoredModal />
+
 <h3>@(isEditMode ? "Edit Task Type" : "Create Task Type")</h3>
+
 
 <EditForm Model="taskType" OnValidSubmit="@SaveTaskType">
     <DataAnnotationsValidator/>
@@ -35,6 +38,7 @@
     }
 </EditForm>
 
+
 @code {
     [Parameter] public string? taskTypeId { get; set; }
 
@@ -46,13 +50,34 @@
     {
         if (!string.IsNullOrEmpty(taskTypeId))
         {
+
             isEditMode = true;
-            taskType = await TaskTypeData.GetTaskTypeByIdAsync(taskTypeId);
+            taskType = await TaskTypeData.GetTaskTypeAsync(taskTypeId);
         }
         else
         {
             isEditMode = false;
             taskType = new TaskType();
+        }
+    }
+
+    private async Task Archive()
+    {
+        if (isEditMode && !string.IsNullOrEmpty(taskTypeId))
+        {
+            taskType.AuditInformation.LastModified = DateTime.Now;
+            taskType.AuditInformation.IsArchived = true;
+            await TaskTypeData.UpdateTaskTypeAsync(taskType);
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task OnConfirmationResult(bool confirmed)
+    {
+        showConfirmationModal = false; // Hide the modal
+        if (confirmed)
+        {
+            await Archive();
         }
     }
 
@@ -65,11 +90,17 @@
         }
         else
         {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
             TaskType newTaskType = new TaskType
             {
                 Name = taskType.Name,
                 Description = taskType.Description,
             };
+
+            newTaskType.AuditInformation.CreatedById = mongoUser.Id;
+
             await TaskTypeData.CreateTaskTypeAsync(newTaskType);
         }
 
@@ -92,26 +123,6 @@
         else
         {
             Console.WriteLine("Deletion canceled by the user.");
-        }
-    }
-
-    private async Task OnConfirmationResult(bool confirmed)
-    {
-        showConfirmationModal = false; // Hide the modal
-        if (confirmed)
-        {
-            await Archive();
-        }
-    }
-
-    private async Task Archive()
-    {
-        if (isEditMode && !string.IsNullOrEmpty(taskTypeId))
-        {
-            taskType.AuditInformation.LastModified = DateTime.Now;
-            taskType.AuditInformation.IsArchived = true;
-            await TaskTypeData.UpdateTaskTypeAsync(taskType);
-            Navigation.NavigateTo("/");
         }
     }
 }
