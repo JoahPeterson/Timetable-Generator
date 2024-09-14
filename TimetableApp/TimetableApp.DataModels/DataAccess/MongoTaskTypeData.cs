@@ -37,7 +37,7 @@ public class MongoTaskTypeData : ITaskTypeData
 
     public async Task<List<TaskType>> GetTaskTypesAsync()
     {
-        var results = await _taskTypes.FindAsync(_ => true);
+        var results = await _taskTypes.FindAsync(tt => tt.AuditInformation.IsArchived == false);
 
         return results.ToList();
     }

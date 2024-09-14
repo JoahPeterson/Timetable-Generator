@@ -4,6 +4,11 @@ namespace TimetableApp.DataModels.Models;
 
 public class TaskType
 {
+    public TaskType()
+    {
+        AuditInformation = new Auditable();
+    }
+
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }

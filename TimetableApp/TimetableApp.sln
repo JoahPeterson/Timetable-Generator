@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TimetableApp.DataModels", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timetable.ExcelApi", "Timetable.ExcelApi\Timetable.ExcelApi.csproj", "{F1095154-CC7F-4699-AEE2-32DE86496877}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timetable.XUnitTests", "Timetable.XUnitTests\Timetable.XUnitTests.csproj", "{756B55AC-A744-45C5-B933-996AA547A622}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timetable.XUnitTests", "Timetable.XUnitTests\Timetable.XUnitTests.csproj", "{756B55AC-A744-45C5-B933-996AA547A622}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

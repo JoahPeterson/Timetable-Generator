@@ -1,0 +1,52 @@
+﻿@page "/tasktype/test"
+@inject NavigationManager Navigation
+@inject ITaskTypeData TaskTypeData
+@attribute [StreamRendering]
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+
+
+<h3>TaskTypeTest</h3>
+
+@if (taskTypes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var taskType in taskTypes)
+            {
+                <tr>
+                    <td>@taskType.Name</td>
+                    <td>@taskType.Description</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditTaskType(taskType.Id)">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<TaskType> taskTypes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        taskTypes = await TaskTypeData.GetTaskTypesAsync();
+    }
+
+    private void EditTaskType(string taskTypeId)
+    {
+        Navigation.NavigateTo($"/tasktype/create/{taskTypeId}");
+    }
+}
