@@ -68,7 +68,7 @@ public static class RegisterServices
             .AddSignInManager()
             .AddDefaultTokenProviders();
 
-
+        builder.Services.AddBlazoredModal();
         builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
         builder.Services.AddScoped<UserService>();
 
