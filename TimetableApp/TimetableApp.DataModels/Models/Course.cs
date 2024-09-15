@@ -8,6 +8,8 @@ public class Course
 
     public Auditable AuditInformation { get; set; }
 
+    public string CourseTypeId { get; set; }
+
     [Required(ErrorMessage = "Description is required")]
     [StringLength(100, MinimumLength = 3, ErrorMessage = "Description must be between 3 and 100 characters.")]
     public string? Description { get; set; }
@@ -22,7 +24,7 @@ public class Course
     [DataType(DataType.Date, ErrorMessage = "Value must be a valid date.")]
     public DateTime StartDate { get; set; }
 
-    public Term Term { get; set; }
+    public string TermId { get; set; }
 
     public List<WorkUnit> WorkUnits { get; set; }
 

@@ -1,0 +1,77 @@
+﻿@page "/course/test"
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@inject ICourseData CourseData
+@inject IUserData UserData
+@attribute [Authorize]
+
+ @rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+<h3>Task Type Testing Page</h3>
+
+@if (courses == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Course Type</th>
+                <th>Term</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in courses)
+            {
+                <tr>
+                    <td>@course.Name</td>
+                    <td>@course.Description</td>
+                    <td>@course.StartDate</td>
+                    <td>@course.EndDate</td>
+                    <td>@course.CourseTypeId</td>
+                    <td>@course.TermId</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditCourse(course.Id)">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Course> courses;
+    private User loggedInUser;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var loggedInUser = await UserData.GetUserFromAuthenticationAsync(user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+
+        if (user.IsInRole("Admin"))
+        {
+            courses = await CourseData.GetCoursesAsync();
+
+        }
+        else
+        {
+            courses = await CourseData.GetUsersCoursesAsync(loggedInUser.Id);
+        }
+    }
+
+    private void EditCourse(string courseId)
+    {
+        Navigation.NavigateTo($"/course/create/{courseId}");
+    }
+}

@@ -1,13 +1,152 @@
-﻿@page "/course"
-@inject ITaskTypeData TaskTypeData
+﻿@page "/course/create/{courseId?}"
+@using Microsoft.AspNetCore.Authorization
+@inject ICourseData CourseData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
+@inject Blazored.Modal.Services.IModalService Modal
+@* @inject ICourseTypeData CourseTypeData *@
+@inject IUserData UserData
 @rendermode InteractiveServer
 @using TimetableApp.DataModels.Models
-@using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 
+@* Cascading Is Required for Modal to Work *@
+<CascadingBlazoredModal />
+
+<h3>@(isEditMode ? "Edit Course" : "Create Course")</h3>
+
+
+<EditForm Model="course" OnValidSubmit="@SaveCourse">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <div>
+        <label for="Name">Course Name:</label>
+        <InputText id="name" @bind-Value="course.Name" class="form-control" />
+        <ValidationMessage For="@(() => course.Name)" />
+    </div>
+    <div>
+        <label for="Description">Course Description:</label>
+        <InputText id="description" @bind-Value="course.Description" class="form-control" />
+        <ValidationMessage For="@(() => course.Description)" />
+    </div>
+    <div>
+        <label for="StartDate">Course Start Date:</label>
+        <input type="date" id="startDate" @bind="course.StartDate" class="form-control" />
+        <ValidationMessage For="@(() => course.StartDate)" />
+    </div>
+    <div>
+        <label for="EndDate">Course End Date:</label>
+        <input type="date" id="endDate" @bind="course.EndDate" class="form-control" />
+        <ValidationMessage For="@(() => course.EndDate)" />
+    </div>
+   @*  <div>
+        <label for="CourseTypeId">Course Type:</label>
+        <InputSelect id="courseTypeId" @bind-Value="course.CourseTypeId" class="form-control">
+            @foreach (var type in courseTypes)
+            {
+                <option value="@type.Id">@type.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => course.CourseTypeId)" />
+    </div> *@
+
+    <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
+
+    @if (isEditMode)
+    {
+        <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-1">Delete</button>
+    }
+</EditForm>
 
 @code {
+    [Parameter] public string? courseId { get; set; }
 
+    private Course course = new Course();
+    private bool isEditMode = false;
+    private bool showConfirmationModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(courseId))
+        {
+
+            isEditMode = true;
+            course = await CourseData.GetCourseAsync(courseId);
+        }
+        else
+        {
+            isEditMode = false;
+            course = new Course();
+        }
+    }
+
+    private async Task Archive()
+    {
+        if (isEditMode && !string.IsNullOrEmpty(courseId))
+        {
+            course.AuditInformation.LastModified = DateTime.Now;
+            course.AuditInformation.IsArchived = true;
+            await CourseData.UpdateCourseAsync(course);
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task OnConfirmationResult(bool confirmed)
+    {
+        showConfirmationModal = false; // Hide the modal
+        if (confirmed)
+        {
+            await Archive();
+        }
+    }
+
+    private async Task SaveCourse()
+    {
+        if (isEditMode)
+        {
+            course.AuditInformation.LastModified = DateTime.Now;
+            await CourseData.UpdateCourseAsync(course);
+        }
+        else
+        {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+            Course newCourse = new Course
+                {
+                    Name = course.Name,
+                    Description = course.Description,
+                    StartDate = course.StartDate,
+                    EndDate = course.EndDate,
+                    TermId = course.TermId,
+                    CourseTypeId = course.Id
+                };
+
+            newCourse.AuditInformation.CreatedById = mongoUser.Id;
+
+            await CourseData.CreateCourseAsync(newCourse);
+        }
+
+        // Redirect to the course list or home after save
+        Navigation.NavigateTo("/");
+    }
+
+    private async Task ShowDeleteConfirmation()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Message", "Are you sure you want to delete this course?");
+
+        var modal = Modal.Show<ConfirmationDialog>("Confirm Deletion", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            await Archive();
+        }
+        else
+        {
+            Console.WriteLine("Deletion canceled by the user.");
+        }
+    }
 }
