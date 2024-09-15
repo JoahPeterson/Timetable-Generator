@@ -30,6 +30,28 @@ public class SetupFunctions
         }
     }
 
+    internal static async Task CreateCourseTypeData(ICourseTypeData courseTypeData)
+    {
+        var courseTypes = await courseTypeData.GetAsync();
+        if (courseTypes.Any())
+            return;
+
+        var courseType = new CourseType();
+        courseType.Name = "Online";
+        courseType.ToolTip = "This course is 100% online";
+        await courseTypeData.CreateAsync(courseType);
+
+        courseType = new CourseType();
+        courseType.Name = "Hydrid";
+        courseType.ToolTip = "This course is a mix of online and in person";
+        await courseTypeData.CreateAsync(courseType);
+
+        courseType = new CourseType();
+        courseType.Name = "In Person";
+        courseType.ToolTip = "This course is 100% in person";
+        await courseTypeData.CreateAsync(courseType);
+    }
+
     internal static async Task CreateTermDurationsData(ITermDurationData termDurationData)
     {
         var termDurations = await termDurationData.GetAsync();
