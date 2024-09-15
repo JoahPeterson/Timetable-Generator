@@ -37,7 +37,7 @@ else
                     <td>@course.StartDate</td>
                     <td>@course.EndDate</td>
                     <td>@course.CourseTypeId</td>
-                    <td>@course.TermId</td>
+                    <td>@* @course.TermId *@</td>
                     <td>
                         <button class="btn btn-primary" @onclick="() => EditCourse(course.Id)">Edit</button>
                     </td>

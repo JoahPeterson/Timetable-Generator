@@ -4,7 +4,9 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @inject Blazored.Modal.Services.IModalService Modal
-@* @inject ICourseTypeData CourseTypeData *@
+@inject ICourseTypeData CourseTypeData
+@inject ITermData TermData
+@inject ITermDurationData TermDurationData
 @inject IUserData UserData
 @rendermode InteractiveServer
 @using TimetableApp.DataModels.Models
@@ -40,7 +42,7 @@
         <input type="date" id="endDate" @bind="course.EndDate" class="form-control" />
         <ValidationMessage For="@(() => course.EndDate)" />
     </div>
-   @*  <div>
+    <div>
         <label for="CourseTypeId">Course Type:</label>
         <InputSelect id="courseTypeId" @bind-Value="course.CourseTypeId" class="form-control">
             @foreach (var type in courseTypes)
@@ -49,8 +51,36 @@
             }
         </InputSelect>
         <ValidationMessage For="@(() => course.CourseTypeId)" />
+    </div>
+    @* <div>
+        <label for="TermId">Course Term:</label>
+        <InputSelect id="termId" @bind-Value="course.TermId" class="form-control">
+            @foreach (var term in terms)
+            {
+                <option value="@term.Id">@term.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => course.TermId)" />
     </div> *@
-
+    <div>
+        <label for="TermId">Course Term:</label>
+        <InputSelect id="term" @bind-Value="course.Term" class="form-control">
+            @foreach (var term in terms)
+            {
+                <option value="@term">@term.Name</option>
+            }
+        </InputSelect>
+    </div>
+    <div>
+        <label for="TermDuration">Term Duration:</label>
+        <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" class="form-control">
+            @foreach (var duration in termDurations)
+            {
+                <option value="@duration.Length">@duration.Length weeks</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => course.Term.Duration)" />
+    </div>
     <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
 
     @if (isEditMode)
@@ -63,6 +93,9 @@
     [Parameter] public string? courseId { get; set; }
 
     private Course course = new Course();
+    private List<CourseType> courseTypes = new List<CourseType>();
+    private List<Term> terms = new List<Term>();
+    private List<TermDuration> termDurations = new List<TermDuration>();
     private bool isEditMode = false;
     private bool showConfirmationModal = false;
 
@@ -79,6 +112,15 @@
             isEditMode = false;
             course = new Course();
         }
+
+        // Fetch course types from the database
+        courseTypes = await CourseTypeData.GetAsync();
+
+        // Fetch terms from the database
+        terms = await TermData.GetAsync();
+
+        // Fetch term durations from the database
+        termDurations = await TermDurationData.GetAsync();
     }
 
     private async Task Archive()
@@ -119,8 +161,9 @@
                     Description = course.Description,
                     StartDate = course.StartDate,
                     EndDate = course.EndDate,
-                    TermId = course.TermId,
-                    CourseTypeId = course.Id
+                    CourseTypeId = course.Id,
+                    Term = course.Term
+                   
                 };
 
             newCourse.AuditInformation.CreatedById = mongoUser.Id;

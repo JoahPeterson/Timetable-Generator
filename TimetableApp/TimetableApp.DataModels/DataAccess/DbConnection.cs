@@ -42,6 +42,10 @@ public class DbConnection : IDbConnection
 
     public IMongoCollection<CourseType> CourseTypeCollection { get; private set; }
 
+    public string CourseCollectionName { get; private set; } = "courses";
+
+    public IMongoCollection<Course> CourseCollection { get; private set; }
+
     public string TaskTypeCollectionName { get; private set; } = "taskTypes";
 
     public IMongoCollection<TaskType> TaskTypeCollection { get; private set; }

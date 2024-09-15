@@ -8,6 +8,7 @@ public class Course
 
     public Auditable AuditInformation { get; set; }
 
+    [Required(ErrorMessage = "A Course Type is required")]
     public string CourseTypeId { get; set; }
 
     [Required(ErrorMessage = "Description is required")]
@@ -24,8 +25,10 @@ public class Course
     [DataType(DataType.Date, ErrorMessage = "Value must be a valid date.")]
     public DateTime StartDate { get; set; }
 
-    public string TermId { get; set; }
+    //[Required(ErrorMessage = "A Term is required")]
+    //public string TermId { get; set; }
 
-    public List<WorkUnit> WorkUnits { get; set; }
+    public Term Term { get; set; }
+    public List<WorkUnit> WorkUnits { get; set; } = new();
 
 }
