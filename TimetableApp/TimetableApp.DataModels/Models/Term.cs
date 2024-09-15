@@ -2,11 +2,15 @@
 
 public class Term
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
 
-    public string Description { get; set; }
+    public Auditable AuditInformation { get; set; } = new();
 
-    public string Duration { get; set; }
+    public int Duration { get; set; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
+
+    public string ToolTip { get; } = "Time of year selection.";
 }

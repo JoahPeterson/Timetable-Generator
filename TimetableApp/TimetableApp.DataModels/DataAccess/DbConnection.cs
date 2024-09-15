@@ -31,6 +31,8 @@ public class DbConnection : IDbConnection
 
         TaskTypeCollection = _db.GetCollection<TaskType>(TaskTypeCollectionName);
         UserCollection = _db.GetCollection<User>(UserCollectionName);
+        TermCollection = _db.GetCollection<Term>(TermCollectionName);
+        TermDurationCollection = _db.GetCollection<TermDuration>(TermDurationCollectionName);
     }
     public MongoClient Client { get; private set; }
     public string? DbName { get; private set; }
@@ -38,6 +40,14 @@ public class DbConnection : IDbConnection
     public string TaskTypeCollectionName { get; private set; } = "taskTypes";
 
     public IMongoCollection<TaskType> TaskTypeCollection { get; private set; }
+
+    public string TermCollectionName { get; private set; } = "terms";
+
+    public IMongoCollection<Term> TermCollection { get; private set; }
+
+    public string TermDurationCollectionName { get; private set; } = "termDurations";
+
+    public IMongoCollection<TermDuration> TermDurationCollection { get; private set; }
 
     public string UserCollectionName { get; private set; } = "users";
 
