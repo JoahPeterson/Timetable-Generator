@@ -31,8 +31,6 @@ public class DbConnection : IDbConnection
 
         TaskTypeCollection = _db.GetCollection<TaskType>(TaskTypeCollectionName);
         UserCollection = _db.GetCollection<User>(UserCollectionName);
-        TermCollection = _db.GetCollection<Term>(TermCollectionName);
-        TermDurationCollection = _db.GetCollection<TermDuration>(TermDurationCollectionName);
         CourseTypeCollection = _db.GetCollection<CourseType>(CourseTypeCollectionName);
     }
     public MongoClient Client { get; private set; }

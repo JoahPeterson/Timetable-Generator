@@ -30,29 +30,6 @@ public class SetupFunctions
         }
     }
 
-    internal static async Task CreateTermDurationsData(ITermDurationData termDurationData)
-    {
-        var termDurations = await termDurationData.GetAsync();
-
-        if (termDurations.Any())
-        {
-            return;
-        }
-
-        var term = new TermDuration();
-
-        term.Length = 8;
-        await termDurationData.CreateAsync(term);
-
-        term = new TermDuration();
-        term.Length = 16;
-        await termDurationData.CreateAsync(term);
-
-        term = new TermDuration();
-        term.Length = 12;
-        await termDurationData.CreateAsync(term);
-    }
-
     internal static async Task CreateCourseTypeData(ICourseTypeData courseTypeData)
     {
         var courseTypes = await courseTypeData.GetAsync();
@@ -73,47 +50,5 @@ public class SetupFunctions
         courseType.Name = "In Person";
         courseType.ToolTip = "This course is 100% in person";
         await courseTypeData.CreateAsync(courseType);
-    }
-
-
-
-    internal static async Task CreateTermData(ITermData termData, ITermDurationData termDurationData)
-    {
-        var terms = await termData.GetAsync();
-        if (terms.Any())
-            return;
-
-        var durations = await termDurationData.GetAsync();
-
-        if (durations.Any() == false)
-        {
-            await CreateTermDurationsData(termDurationData);
-        }
-
-        durations = await termDurationData.GetAsync();
-
-        var Term = new Term();
-        Term.Name = "Fall";
-        var duration = durations.Where(d => d.Length == 12).FirstOrDefault();
-        Term.Duration = duration.Length;
-        await termData.CreateAsync(Term);
-
-        Term = new Term();
-        Term.Name = "Spring";
-        duration = durations.Where(d => d.Length == 16).FirstOrDefault();
-        Term.Duration = duration.Length;
-        await termData.CreateAsync(Term);
-
-        Term = new Term();
-        Term.Name = "Summer";
-        duration = durations.Where(d => d.Length == 8).FirstOrDefault();
-        Term.Duration = duration.Length;
-        await termData.CreateAsync(Term);
-
-        Term = new Term();
-        Term.Name = "Winter";
-        duration = durations.Where(d => d.Length == 8).FirstOrDefault();
-        Term.Duration = duration.Length;
-        await termData.CreateAsync(Term);
     }
 }
