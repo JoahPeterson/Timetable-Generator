@@ -86,9 +86,17 @@ namespace TimetableApp.DataModels.DataAccess
         /// <returns>List of NON archived Courses</returns>
         public async Task<List<Course>> GetCoursesAsync()
         {
-            var results = await _courses.FindAsync(course => course.AuditInformation.IsArchived == false);
+            try
+            {
+                var results = await _courses.FindAsync(course => course.AuditInformation.IsArchived == false);
 
-            return results.ToList();
+                return results.ToList();
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+          
         }
 
         /// <summary>

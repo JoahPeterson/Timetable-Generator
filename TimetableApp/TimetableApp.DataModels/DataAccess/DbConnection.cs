@@ -34,6 +34,7 @@ public class DbConnection : IDbConnection
         CourseTypeCollection = _db.GetCollection<CourseType>(CourseTypeCollectionName);
         TermCollection = _db.GetCollection<Term>(TermCollectionName);
         TermDurationCollection = _db.GetCollection<TermDuration>(TermDurationCollectionName);
+        CourseCollection = _db.GetCollection<Course>(CourseCollectionName);
     }
     public MongoClient Client { get; private set; }
     public string? DbName { get; private set; }

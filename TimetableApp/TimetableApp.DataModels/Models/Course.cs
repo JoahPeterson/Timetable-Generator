@@ -27,9 +27,6 @@ public class Course
     [DataType(DataType.Date, ErrorMessage = "Value must be a valid date.")]
     public DateTime StartDate { get; set; }
 
-    //[Required(ErrorMessage = "A Term is required")]
-    //public string TermId { get; set; }
-
     public Term Term { get; set; } = new Term();
     public List<WorkUnit> WorkUnits { get; set; } = new();
 
