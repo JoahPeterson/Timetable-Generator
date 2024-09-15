@@ -10,6 +10,10 @@ public interface IDbConnection
     MongoClient Client { get; }
     string DbName { get; }
 
+    IMongoCollection<CourseType> CourseTypeCollection { get; }
+
+    string CourseTypeCollectionName { get; }
+
     IMongoCollection<Course> CourseCollection { get; }
 
     string CourseCollectionName { get; }
@@ -17,6 +21,14 @@ public interface IDbConnection
     IMongoCollection<TaskType> TaskTypeCollection { get; }
 
     string TaskTypeCollectionName { get; }
+
+    IMongoCollection<Term> TermCollection { get; }
+
+    string TermCollectionName { get; }
+
+    IMongoCollection<TermDuration> TermDurationCollection { get; }
+
+    string TermDurationCollectionName { get; }
 
     IMongoCollection<User> UserCollection { get; }
 
