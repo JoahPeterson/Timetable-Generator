@@ -23,27 +23,27 @@
     <ValidationSummary/>
 
     <div>
-        <label for="Name">Course Name:</label>
+        <label class="form-label" for="Name">Course Name:</label>
         <InputText id="name" @bind-Value="course.Name" class="form-control" />
         <ValidationMessage For="@(() => course.Name)" />
     </div>
     <div>
-        <label for="Description">Course Description:</label>
+        <label class="form-label" for="Description">Course Description:</label>
         <InputText id="description" @bind-Value="course.Description" class="form-control" />
         <ValidationMessage For="@(() => course.Description)" />
     </div>
     <div>
-        <label for="StartDate">Course Start Date:</label>
+        <label class="form-label" for="StartDate">Course Start Date:</label>
         <input type="date" id="startDate" @bind="course.StartDate" class="form-control" />
         <ValidationMessage For="@(() => course.StartDate)" />
     </div>
     <div>
-        <label for="EndDate">Course End Date:</label>
+        <label class="form-label" for="EndDate">Course End Date:</label>
         <input type="date" id="endDate" @bind="course.EndDate" class="form-control" />
         <ValidationMessage For="@(() => course.EndDate)" />
     </div>
     <div>
-        <label for="CourseTypeId">Course Type:</label>
+        <label class="form-label" for="CourseTypeId">Course Type:</label>
         <InputSelect id="courseTypeId" @bind-Value="course.CourseTypeId" class="form-control">
             @foreach (var type in courseTypes)
             {
@@ -52,27 +52,17 @@
         </InputSelect>
         <ValidationMessage For="@(() => course.CourseTypeId)" />
     </div>
-    @* <div>
-        <label for="TermId">Course Term:</label>
-        <InputSelect id="termId" @bind-Value="course.TermId" class="form-control">
+    <div>
+        <label class="form-label" for="TermId">Course Term:</label>
+        <InputSelect id="term" @bind-Value="course.Term.Id" class="form-control">
             @foreach (var term in terms)
             {
                 <option value="@term.Id">@term.Name</option>
             }
         </InputSelect>
-        <ValidationMessage For="@(() => course.TermId)" />
-    </div> *@
-    <div>
-        <label for="TermId">Course Term:</label>
-        <InputSelect id="term" @bind-Value="course.Term" class="form-control">
-            @foreach (var term in terms)
-            {
-                <option value="@term">@term.Name</option>
-            }
-        </InputSelect>
     </div>
     <div>
-        <label for="TermDuration">Term Duration:</label>
+        <label class="form-label" for="TermDuration">Term Duration:</label>
         <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" class="form-control">
             @foreach (var duration in termDurations)
             {
@@ -81,11 +71,11 @@
         </InputSelect>
         <ValidationMessage For="@(() => course.Term.Duration)" />
     </div>
-    <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
+    <button type="submit" class="btn btn-primary d-block mt-2">Save</button>
 
     @if (isEditMode)
     {
-        <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-1">Delete</button>
+        <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-2">Delete</button>
     }
 </EditForm>
 
@@ -111,6 +101,8 @@
         {
             isEditMode = false;
             course = new Course();
+            course.StartDate = DateTime.Now;
+            course.EndDate = DateTime.Now;
         }
 
         // Fetch course types from the database
@@ -148,6 +140,7 @@
         if (isEditMode)
         {
             course.AuditInformation.LastModified = DateTime.Now;
+            course.Term = terms.FirstOrDefault(term => term.Id == course.Term.Id);
             await CourseData.UpdateCourseAsync(course);
         }
         else
@@ -161,9 +154,8 @@
                     Description = course.Description,
                     StartDate = course.StartDate,
                     EndDate = course.EndDate,
-                    CourseTypeId = course.Id,
-                    Term = course.Term
-                   
+                    CourseTypeId = course.CourseTypeId,
+                    Term = terms.FirstOrDefault(term => term.Id == course.Term.Id),
                 };
 
             newCourse.AuditInformation.CreatedById = mongoUser.Id;

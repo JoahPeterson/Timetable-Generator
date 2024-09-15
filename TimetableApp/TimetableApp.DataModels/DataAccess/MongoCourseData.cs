@@ -68,9 +68,16 @@ namespace TimetableApp.DataModels.DataAccess
         /// <returns>List of Courses</returns>
         public async Task<List<Course>> GetUsersCoursesAsync(string createdById)
         {
-            var results = await _courses.FindAsync(course => course.AuditInformation.CreatedById == createdById);
+            try
+            {
+                var results = await _courses.FindAsync(course => course.AuditInformation.CreatedById == createdById);
 
-            return results.ToList();
+                return results.ToList();
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
         }
 
         /// <summary>

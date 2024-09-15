@@ -4,9 +4,11 @@ namespace TimetableApp.DataModels.Models;
 
 public class Course
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
 
-    public Auditable AuditInformation { get; set; }
+    public Auditable AuditInformation { get; set; } = new Auditable();
 
     [Required(ErrorMessage = "A Course Type is required")]
     public string CourseTypeId { get; set; }
@@ -28,7 +30,7 @@ public class Course
     //[Required(ErrorMessage = "A Term is required")]
     //public string TermId { get; set; }
 
-    public Term Term { get; set; }
+    public Term Term { get; set; } = new Term();
     public List<WorkUnit> WorkUnits { get; set; } = new();
 
 }
