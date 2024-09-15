@@ -77,5 +77,8 @@ public static class RegisterServices
         builder.Services.AddSingleton<ITaskTypeData, MongoTaskTypeData>();
         builder.Services.AddSingleton<IUserData, MongoUserData>();
         builder.Services.AddSingleton<ICourseTypeData, MongoCourseTypeData>();
+        builder.Services.AddSingleton<ITermData, MongoTermData>();
+        builder.Services.AddSingleton<ITermDurationData, MongoTermDurationData>();
+
     }
 }

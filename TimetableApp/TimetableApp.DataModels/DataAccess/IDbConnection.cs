@@ -18,6 +18,14 @@ public interface IDbConnection
 
     string TaskTypeCollectionName { get; }
 
+    IMongoCollection<Term> TermCollection { get; }
+
+    string TermCollectionName { get; }
+
+    IMongoCollection<TermDuration> TermDurationCollection { get; }
+
+    string TermDurationCollectionName { get; }
+
     IMongoCollection<User> UserCollection { get; }
 
     string UserCollectionName { get; }
