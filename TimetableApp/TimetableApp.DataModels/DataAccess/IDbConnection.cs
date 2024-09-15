@@ -10,6 +10,10 @@ public interface IDbConnection
     MongoClient Client { get; }
     string DbName { get; }
 
+    IMongoCollection<CourseType> CourseTypeCollection { get; }
+
+    string CourseTypeCollectionName { get; }
+
     IMongoCollection<TaskType> TaskTypeCollection { get; }
 
     string TaskTypeCollectionName { get; }

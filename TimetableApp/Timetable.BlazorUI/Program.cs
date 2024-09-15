@@ -36,5 +36,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     SetupFunctions.CreateAdminUser(services).Wait();
 }
+
+SetupFunctions.CreateCourseTypeData(app.Services.GetRequiredService<ICourseTypeData>()).Wait();
 app.Run();
 
