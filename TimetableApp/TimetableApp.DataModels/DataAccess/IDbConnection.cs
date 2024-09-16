@@ -33,4 +33,8 @@ public interface IDbConnection
     IMongoCollection<User> UserCollection { get; }
 
     string UserCollectionName { get; }
+
+    IMongoCollection<WorkUnit> WorkUnitCollection { get; }
+
+    string WorkUnitCollectionName { get; }
 }

@@ -80,6 +80,7 @@ public static class RegisterServices
         builder.Services.AddSingleton<ICourseData, MongoCourseData>();
         builder.Services.AddSingleton<ITermData, MongoTermData>();
         builder.Services.AddSingleton<ITermDurationData, MongoTermDurationData>();
+        builder.Services.AddSingleton<IWorkUnitData, MongoWorkUnitData>();
 
     }
 }
