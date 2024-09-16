@@ -1,0 +1,69 @@
+﻿@page "/coursetype/test"
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@inject ICourseTypeData CourseTypeData
+@inject IUserData UserData
+@attribute [Authorize]
+
+ @rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+<h3>Course Type Testing Page</h3>
+
+@if (courseTypes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var courseType in courseTypes)
+            {
+                <tr>
+                    <td>@courseType.Name</td>
+                    <td>@courseType.ToolTip</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditCourseType(courseType.Id)">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<CourseType> courseTypes;
+    private User loggedInUser;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var loggedInUser = await UserData.GetUserFromAuthenticationAsync(user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+
+        if (user.IsInRole("Admin"))
+        {
+            courseTypes = await CourseTypeData.GetAsync();
+
+        }
+        else
+        {
+            courseTypes = await CourseTypeData.GetUsersCourseTypesAsync(loggedInUser.Id);
+        }
+    }
+
+    private void EditCourseType(string courseTypeId)
+    {
+        Navigation.NavigateTo($"/coursetype/create/{courseTypeId}");
+    }
+}
