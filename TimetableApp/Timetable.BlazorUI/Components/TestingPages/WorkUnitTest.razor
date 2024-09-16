@@ -1,0 +1,85 @@
+﻿@page "/workunit/test"
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@inject IWorkUnitData WorkUnitData
+@inject IUserData UserData
+@inject ICourseData CourseData
+@inject AuthenticationStateProvider authProvider
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@attribute [Authorize]
+
+@if (workUnit != null){
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var workUnit in workUnits)
+            {
+            <tr>
+                <td>@workUnit.Name</td>
+                <td>@workUnit.CourseId</td>
+                <td>
+                    @* <button class="btn btn-primary" @onclick="() => EditTaskType(taskType.Id)">Edit</button> *@
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<WorkUnit> workUnits;
+    private User loggedInUser;
+    private WorkUnit workUnit;
+    private bool workUnitCreated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        loggedInUser = await UserData.GetUserFromAuthenticationAsync(user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+
+        if (user.IsInRole("Admin"))
+        {
+            workUnits = await WorkUnitData.GetAsync();
+
+        }
+        else
+        {
+            workUnits = await WorkUnitData.GetUsersAsync(loggedInUser.Id);
+        }
+
+        CreateWorkUnit();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !workUnitCreated)
+        {
+            workUnitCreated = true;
+            await CreateWorkUnitAsync();
+        }
+    }
+
+    private async Task CreateWorkUnitAsync()
+    {
+        List<Course> courses = await CourseData.GetCoursesAsync();
+
+        Course course = courses[0];
+
+        workUnit = new WorkUnit();
+
+        workUnit.Name = "New Work Unit";
+        workUnit.CourseId = course.Id;
+        workUnit.AuditInformation.CreatedById= loggedInUser.Id;
+
+        await WorkUnitData.CreateAsync(workUnit);
+    }
+
+}
