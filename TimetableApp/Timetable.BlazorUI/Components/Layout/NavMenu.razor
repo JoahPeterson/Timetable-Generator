@@ -4,7 +4,7 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Timetable.BlazorUI</a>
+        <a class="navbar-brand" href="">Timetable Generator</a>
     </div>
 </div>
 
@@ -17,26 +17,6 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-@* --------Comment our the demo pages from navbar but left the pages in for working examples... Chris Cremeens _______ *@
-
-
-@*         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
-            </NavLink>
-        </div> *@
 
         <AuthorizeView Roles="Admin">
             <Authorized >
@@ -45,11 +25,26 @@
                         <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Admin Tool
                     </NavLink>
                 </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="coursetype/create">
+                        <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Course Types
+                    </NavLink>
+                </div>
             </Authorized>
         </AuthorizeView>
 
         <AuthorizeView>
             <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="course/create">
+                        <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Course Create
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="tasktype/create">
+                        <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Task Type Create
+                    </NavLink>
+                </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
                         <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
