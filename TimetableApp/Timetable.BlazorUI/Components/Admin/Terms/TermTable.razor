@@ -1,24 +1,36 @@
-﻿<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th @onclick="SortByName" style="cursor: pointer;">Name</th>
-            <th @onclick="SortByIsArchived" style="cursor: pointer;">Is Archived</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var term in Terms)
-        {
+﻿<div class="table-responsive mt-3" style="max-height: 50vh; overflow-y: auto;">
+    <table class="table table-bordered">
+        <thead>
             <tr>
-                <td>@term.Name</td>
-                <td>@term.AuditInformation.IsArchived</td>
-                <td>
-                    <button class="btn btn-secondary" @onclick="() => EditItem(term)">Edit</button>
-                </td>
+                <th>
+                    <button class="btn btn-link p-0" @onclick="SortByName">
+                        Name
+                        <i class="bi bi-sort-alpha-down-alt"></i><!-- Bootstrap Icons for sorting -->
+                    </button>
+                </th>
+                <th>
+                    <button class="btn btn-link p-0" @onclick="SortByIsArchived">
+                        Is Archived
+                        <i class="bi bi-sort-alpha-down-alt"></i><!-- Bootstrap Icons for sorting -->
+                    </button>
+                </th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var term in Terms)
+            {
+                <tr>
+                    <td>@term.Name</td>
+                    <td>@term.AuditInformation.IsArchived</td>
+                    <td>
+                        <button class="btn btn-secondary" @onclick="() => EditItem(term)">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 @code {
     [Parameter]

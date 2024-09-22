@@ -10,10 +10,8 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Item Form</h3>
-<TermForm TermToEdit="selectedTerm" OnArchive="RemoveItem" OnSave="SaveItem" />
+<TermForm TermToEdit="selectedTerm" OnSave="SaveItem"/>
 
-<h3>Items List</h3>
 <TermTable Terms="terms" OnEdit="EditItem" />
 
 @code {
@@ -30,29 +28,16 @@
         selectedTerm = item;
     }
 
-    private async Task RemoveItem(Term term)
-    {
-        terms.Remove(term);
-        selectedTerm = null;
-    }
 
     private async Task SaveItem(Term term)
     {
-        // if (term.Id == null)
-        // {
-        //     Term newTerm = new Term()
-        //         {
-        //             Name = term.Name
-        //         };
+        var index = terms.FindIndex(t => t.Id == term.Id);
 
-        //     await TermData.CreateAsync(newTerm);
-        // }
-        // else
-        // {
-        //     await TermData.UpdateAsync(term);
-        // }
+        if (index != -1)
+            terms[index] = term;
+        else
+            terms.Add(term);
 
-        terms.Add(term);
         selectedTerm = null;
     }
 }

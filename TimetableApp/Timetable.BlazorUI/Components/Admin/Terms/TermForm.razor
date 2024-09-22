@@ -1,7 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @inject ITermData TermData
 @inject IUserData UserData
-@inject ITermDurationData TermDurationData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @inject Blazored.Modal.Services.IModalService Modal
@@ -12,7 +11,6 @@
 <CascadingBlazoredModal />
 
 <h3>@(isEditMode ? "Edit Term" : "Create Term")</h3>
-
 
 <EditForm Model="term" OnValidSubmit="@SaveTerm">
     <DataAnnotationsValidator />
@@ -25,23 +23,25 @@
     </div>
 
 
-    <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
+    <div class="d-flex flex-row mt-3 justify-content-end">
+        <button type="submit" class="btn btn-primary d-block m-1">Save</button>
+        @if (isEditMode && term.AuditInformation.IsArchived == false)
+        {
+            <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block m-1">Delete</button>
+        }
 
-    @if (isEditMode)
-    {
-        <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-1">Delete</button>
-    }
+        @if (isEditMode && term.AuditInformation.IsArchived == true)
+        {
+            <button type="button" @onclick="Restore" class="btn btn-primary d-block m-1">Restore</button>
+        }
+    </div>
 </EditForm>
 
 @code {
     [Parameter] public Term TermToEdit { get; set; }
 
     [Parameter]
-    public EventCallback<Term> OnArchive { get; set; }
-
-    [Parameter]
     public EventCallback<Term> OnSave { get; set; }
-
 
     private Term term = new Term();
 
@@ -61,10 +61,8 @@
     {
         if (isEditMode && term != null)
         {
-            term.AuditInformation.LastModified = DateTime.Now;
             term.AuditInformation.IsArchived = true;
-            await TermData.UpdateAsync(term);
-            await OnArchive.InvokeAsync(term);
+            SaveTerm();
         }
     }
 
@@ -78,12 +76,22 @@
         }
     }
 
+    private async Task Restore()
+    {
+        if (isEditMode && term != null)
+        {
+            term.AuditInformation.IsArchived = false;
+            SaveTerm();
+        }
+    }
+
     private async Task SaveTerm()
     {
         if (isEditMode)
         {
             term.AuditInformation.LastModified = DateTime.Now;
             await TermData.UpdateAsync(term);
+            isEditMode = false;
         }
         else
         {
@@ -102,6 +110,7 @@
 
         await OnSave.InvokeAsync(term);
         term = new Term();
+        StateHasChanged();
     }
 
     private async Task ShowDeleteConfirmation()
