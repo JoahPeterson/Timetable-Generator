@@ -1,0 +1,124 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject ITermData TermData
+@inject IUserData UserData
+@inject ITermDurationData TermDurationData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@inject Blazored.Modal.Services.IModalService Modal
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@* Cascading Is Required for Modal to Work *@
+<CascadingBlazoredModal />
+
+<h3>@(isEditMode ? "Edit Term" : "Create Term")</h3>
+
+
+<EditForm Model="term" OnValidSubmit="@SaveTerm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="Name">Term Name:</label>
+        <InputText id="name" @bind-Value="term.Name" class="form-control" />
+        <ValidationMessage For="@(() =>term.Name)" />
+    </div>
+
+
+    <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
+
+    @if (isEditMode)
+    {
+        <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-1">Delete</button>
+    }
+</EditForm>
+
+@code {
+    [Parameter] public Term TermToEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<Term> OnArchive { get; set; }
+
+    [Parameter]
+    public EventCallback<Term> OnSave { get; set; }
+
+
+    private Term term = new Term();
+
+    private bool isEditMode = false;
+    private bool showConfirmationModal = false;
+
+    protected override void OnParametersSet()
+    {
+        if (TermToEdit != null)
+        {
+            term = TermToEdit;
+            isEditMode = true;
+        }
+    }
+
+    private async Task Archive()
+    {
+        if (isEditMode && term != null)
+        {
+            term.AuditInformation.LastModified = DateTime.Now;
+            term.AuditInformation.IsArchived = true;
+            await TermData.UpdateAsync(term);
+            await OnArchive.InvokeAsync(term);
+        }
+    }
+
+    private async Task OnConfirmationResult(bool confirmed)
+    {
+        showConfirmationModal = false; // Hide the modal
+        if (confirmed)
+        {
+            await Archive();
+            term = new Term();
+        }
+    }
+
+    private async Task SaveTerm()
+    {
+        if (isEditMode)
+        {
+            term.AuditInformation.LastModified = DateTime.Now;
+            await TermData.UpdateAsync(term);
+        }
+        else
+        {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+            Term newTerm = new Term()
+                {
+                    Name = term.Name,
+                };
+
+            term.AuditInformation.CreatedById = mongoUser.Id;
+
+            await TermData.CreateAsync(newTerm);
+        }
+
+        await OnSave.InvokeAsync(term);
+        term = new Term();
+    }
+
+    private async Task ShowDeleteConfirmation()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Message", "Are you sure you want to delete this course type?");
+
+        var modal = Modal.Show<ConfirmationDialog>("Confirm Deletion", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            await Archive();
+        }
+        else
+        {
+            Console.WriteLine("Deletion canceled by the user.");
+        }
+    }
+}
