@@ -10,7 +10,7 @@ namespace TimetableApp.DataModels.DataAccess
     /// <summary>
     /// Class that handles mongo DAL functions for WorkTask.
     /// </summary>
-    public class MongoWorkTask
+    public class MongoWorkTaskData : IWorkTaskData
     {
         private readonly IDbConnection _db;
         private readonly IMongoCollection<WorkTask> _tasks;
@@ -19,7 +19,7 @@ namespace TimetableApp.DataModels.DataAccess
         /// Instantiates a new instance of the Mongo WorkTask data class.
         /// </summary>
         /// <param name="db"></param>
-        public MongoWorkTask(IDbConnection db)
+        public MongoWorkTaskData(IDbConnection db)
         {
             _db = db;
             _tasks = db.WorkTaskCollection;
