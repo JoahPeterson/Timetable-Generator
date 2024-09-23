@@ -79,7 +79,7 @@ public class SetupFunctions
 
     internal static async Task CreateTermData(ITermData termData, ITermDurationData termDurationData)
     {
-        var terms = await termData.GetAsync();
+        var terms = await termData.GetAllAsync();
         if (terms.Any())
             return;
 

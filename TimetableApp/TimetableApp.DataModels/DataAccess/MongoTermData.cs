@@ -44,7 +44,18 @@ public class MongoTermData : ITermData
     /// Retrieve all terms in the database.
     /// </summary>
     /// <returns>List of Term Objects</returns>
-    public async Task<List<Term>> GetAsync()
+    public async Task<List<Term>> GetAllAsync()
+    {
+        var results = await _terms.FindAsync(term => term.AuditInformation.IsArchived == false);
+
+        return results.ToList();
+    }
+
+    /// <summary>
+    /// Retrieve all terms in the database.
+    /// </summary>
+    /// <returns>List of Term Objects</returns>
+    public async Task<List<Term>> GetAllWithArchivedAsync()
     {
         var results = await _terms.FindAsync(_ => true);
 

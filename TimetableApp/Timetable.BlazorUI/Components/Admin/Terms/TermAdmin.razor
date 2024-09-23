@@ -1,0 +1,43 @@
+﻿@page "/admin/term/"
+@using Microsoft.AspNetCore.Authorization
+@using Timetable.BlazorUI.Data
+@inject ITermData TermData
+@inject IUserData UserData
+@inject ITermDurationData TermDurationData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@inject Blazored.Modal.Services.IModalService Modal
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+<TermForm TermToEdit="selectedTerm" OnSave="SaveItem"/>
+
+<TermTable Terms="terms" OnEdit="EditItem" />
+
+@code {
+    private List<Term> terms = new List<Term>();
+    private Term? selectedTerm = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        terms = await TermData.GetAllWithArchivedAsync();
+    }
+
+    private async Task EditItem(Term item)
+    {
+        selectedTerm = item;
+    }
+
+
+    private async Task SaveItem(Term term)
+    {
+        var index = terms.FindIndex(t => t.Id == term.Id);
+
+        if (index != -1)
+            terms[index] = term;
+        else
+            terms.Add(term);
+
+        selectedTerm = null;
+    }
+}
