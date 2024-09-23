@@ -35,6 +35,7 @@ public class DbConnection : IDbConnection
         TermCollection = _db.GetCollection<Term>(TermCollectionName);
         TermDurationCollection = _db.GetCollection<TermDuration>(TermDurationCollectionName);
         CourseCollection = _db.GetCollection<Course>(CourseCollectionName);
+        WorkTaskCollection = _db.GetCollection<WorkTask>(WorkTaskCollectionName);
         WorkUnitCollection = _db.GetCollection<WorkUnit>(WorkUnitCollectionName);
     }
     public MongoClient Client { get; private set; }
@@ -62,7 +63,11 @@ public class DbConnection : IDbConnection
 
     public string UserCollectionName { get; private set; } = "users";
 
-    public IMongoCollection<User> UserCollection { get; private set; }    
+    public IMongoCollection<User> UserCollection { get; private set; }
+
+    public string WorkTaskCollectionName { get; private set; } = "workTasks";
+
+    public IMongoCollection<WorkTask> WorkTaskCollection { get; private set; }
 
     public string WorkUnitCollectionName { get; private set; } = "workUnits";
 
