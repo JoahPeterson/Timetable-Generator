@@ -10,7 +10,7 @@ public class WorkUnit
 
     public string CourseId { get; set; }
 
-    public string Duration { get; set; }
+    public int Duration { get; set; }
 
     public string Name { get; set; }
 

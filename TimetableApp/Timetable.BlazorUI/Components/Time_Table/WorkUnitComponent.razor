@@ -1,0 +1,24 @@
+﻿@using TimetableApp.DataModels.Models
+
+<div class="work-unit bg-success text-white border border-dark" draggable="true" @onclick="SelectWorkUnit" @onclick:stopPropagation="true" style="height: @(RowHeightPercentage)vh">
+    <p>@WorkUnit.Name</p>
+    <p>Duration: @WorkUnit.Duration</p>
+</div>
+
+@code {
+    [Parameter]
+    public WorkUnit WorkUnit { get; set; }
+
+    [Parameter]
+    public double SingleRowHeightPercentage { get; set; }
+
+    [Parameter]
+    public EventCallback<WorkUnit> OnSelected { get; set; }
+
+    private double RowHeightPercentage { get => SingleRowHeightPercentage * WorkUnit.Duration; }
+
+    private async Task SelectWorkUnit()
+    {
+        await OnSelected.InvokeAsync(WorkUnit);
+    }
+}

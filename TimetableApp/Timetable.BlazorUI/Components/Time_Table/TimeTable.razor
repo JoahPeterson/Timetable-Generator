@@ -1,0 +1,100 @@
+﻿@page "/timetable/{courseId?}"
+@inject ICourseData CourseData
+
+@using Microsoft.AspNetCore.Authorization
+@inject ITaskTypeData TaskTypeData
+@inject IUserData UserData
+@inject IWorkUnitData WorkUnitData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<div class="d-flex" @onclick="DivOnClick">
+    <!-- Week Column -->
+    <div class="week-column d-flex flex-column w-25">
+        @for (int i = 1; i <= course.Term.Duration; i++)
+        {
+            <div class="week-label d-flex align-items-center justify-content-center" style="height: @(SingleRowHeightPercentage())vh; background-color: @(i % 2 == 0 ? "#f8f9fa" : "#e9ecef")">
+                Week # @i
+            </div>
+        }
+    </div>
+
+    <div class="flex-grow-1 d-flex flex-column">
+        @foreach (WorkUnit workUnit in workUnits)
+        {
+            <div class="work-unit-container" >
+                <WorkUnitComponent WorkUnit="workUnit" SingleRowHeightPercentage="@SingleRowHeightPercentage()" OnSelected="HandleWorkUnitSelected" />
+            </div>
+        }
+    </div>
+
+    <div class="w-25 d-flex flex-column m-5">
+        <WorkUnitForm @ref="WorkUnitForm" Course="@course" WorkUnitToEdit="selectedWorkUnit" OnWorkUnitFormSubmit="UpdateWorkUnits" />
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string? courseId { get; set; }
+
+    private EventCallback<WorkUnit> OnWorkUnitChanged;
+
+    private List<WorkUnit> workUnits = new List<WorkUnit>();
+
+    private WorkUnit? selectedWorkUnit;
+
+    private Course course = new Course();
+
+    private int tableVhPercentage { get; } = 100;
+
+    private WorkUnitForm WorkUnitForm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(courseId))
+        {
+            course = await CourseData.GetCourseAsync(courseId);
+            var tempWorkUnits = await WorkUnitData.GetAsync();
+
+            if (tempWorkUnits.Any())
+            {
+                workUnits = tempWorkUnits.FindAll(workUnit => workUnit.CourseId == course.Id);
+                workUnits = workUnits.OrderBy(WorkUnit=> WorkUnit.SequenceNumber).ToList();
+            }
+        }
+    }
+
+    private double SingleRowHeightPercentage()
+    {
+        return tableVhPercentage / course.Term.Duration;
+    }
+
+
+    private async Task UpdateWorkUnits(WorkUnit workUnit)
+    {
+        var index = workUnits.FindIndex(wUnit => wUnit.Id == workUnit.Id);
+
+        if (index != -1)
+        {
+            workUnits[index] = workUnit;
+        }
+        else
+        {
+            workUnits.Add(workUnit);
+        }
+    }
+
+    private void HandleWorkUnitSelected(WorkUnit workUnit)
+    {
+        selectedWorkUnit = workUnit;
+        OnWorkUnitChanged.InvokeAsync(workUnit); // Raise the event
+    }
+
+    private async Task DivOnClick()
+    {
+        // selectedWorkUnit = null;
+        // await WorkUnitForm.ClearForm();
+    }
+}
