@@ -1,0 +1,67 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@inject ITaskTypeData TaskTypeData
+@inject IUserData UserData
+@attribute [Authorize]
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+<h3>Task Type Testing Page</h3>
+
+@if (taskTypes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var taskType in taskTypes)
+            {
+                <tr>
+                    <td>@taskType.Name</td>
+                    <td>@taskType.Description</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditTaskType(taskType.Id)">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<TaskType> taskTypes;
+    private User loggedInUser;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var loggedInUser = await UserData.GetUserFromAuthenticationAsync(user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+
+        if (user.IsInRole("Admin"))
+        {
+            taskTypes = await TaskTypeData.GetTaskTypesAsync();
+
+        }
+        else
+        {
+            taskTypes = await TaskTypeData.GetUsersTaskTypesAsync(loggedInUser.Id);
+        }
+    }
+
+    private void EditTaskType(string taskTypeId)
+    {
+        Navigation.NavigateTo($"/tasktype/create/{taskTypeId}");
+    }
+}

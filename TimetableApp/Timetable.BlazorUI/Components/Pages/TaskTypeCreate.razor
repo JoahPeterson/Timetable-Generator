@@ -1,5 +1,6 @@
 ﻿@page "/tasktype/create/{taskTypeId?}"
 @using Microsoft.AspNetCore.Authorization
+@using Timetable.BlazorUI.Components.Pages
 @inject ITaskTypeData TaskTypeData
 @inject IUserData UserData
 @inject NavigationManager Navigation
@@ -30,24 +31,63 @@
         <ValidationMessage For="@(() => taskType.Description)" />
     </div>
 
-    <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
+    <div class="d-flex flex-row-reverse">
+        <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
+    </div>
 
     @if (isEditMode)
     {
-        <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-1">Delete</button>
+        <button type="button" @onclick="ShowDeleteConfirmation"   class="btn btn-danger d-block mt-1">Delete</button>
     }
 </EditForm>
 
 
+@if (taskTypes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var taskType in taskTypes)
+            {
+                <tr>
+                    <td>@taskType.Name</td>
+                    <td>@taskType.Description</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditTaskType(taskType)">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@* <TaskTypeTable> </TaskTypeTable> *@
+
+
 @code {
     [Parameter] public string? taskTypeId { get; set; }
-
+    private List<TaskType>? taskTypes;
     private TaskType taskType = new TaskType();
     private bool isEditMode = false;
     private bool showConfirmationModal = false;
+    private User loggedInUser;
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var loggedInUser = await UserData.GetUserFromAuthenticationAsync(user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
         if (!string.IsNullOrEmpty(taskTypeId))
         {
 
@@ -59,17 +99,38 @@
             isEditMode = false;
             taskType = new TaskType();
         }
+
+        if (user.IsInRole("Admin"))
+        {
+            taskTypes = await TaskTypeData.GetTaskTypesAsync();
+
+        }
+        else
+        {
+            taskTypes = await TaskTypeData.GetUsersTaskTypesAsync(loggedInUser.Id);
+        }
     }
 
     private async Task Archive()
     {
-        if (isEditMode && !string.IsNullOrEmpty(taskTypeId))
+        if (isEditMode)
         {
             taskType.AuditInformation.LastModified = DateTime.Now;
             taskType.AuditInformation.IsArchived = true;
             await TaskTypeData.UpdateTaskTypeAsync(taskType);
-            Navigation.NavigateTo("/");
+
+            if (taskTypes is not null)
+                taskTypes.Remove(taskType);
+
+            taskType = new TaskType();
+            isEditMode = false;
         }
+    }
+
+    private void EditTaskType(TaskType selectTask)
+    {
+        taskType = selectTask;
+        isEditMode = true;
     }
 
     private async Task OnConfirmationResult(bool confirmed)
@@ -87,6 +148,7 @@
         {
             taskType.AuditInformation.LastModified = DateTime.Now;
             await TaskTypeData.UpdateTaskTypeAsync(taskType);
+            isEditMode = false;
         }
         else
         {
@@ -101,11 +163,12 @@
 
             newTaskType.AuditInformation.CreatedById = mongoUser.Id;
 
+            taskTypes.Add(newTaskType);
             await TaskTypeData.CreateTaskTypeAsync(newTaskType);
         }
-
+        
         // Redirect to the task type list or home after save
-        Navigation.NavigateTo("/");
+        taskType = new TaskType();
     }
 
     private async Task ShowDeleteConfirmation()

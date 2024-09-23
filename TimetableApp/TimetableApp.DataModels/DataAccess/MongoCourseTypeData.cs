@@ -1,4 +1,6 @@
-﻿namespace TimetableApp.DataModels.DataAccess;
+﻿using TimetableApp.DataModels.Models;
+
+namespace TimetableApp.DataModels.DataAccess;
 
 /// <summary>
 /// Class that handles mongo DAL functions for Term.
@@ -38,6 +40,18 @@ public class MongoCourseTypeData : ICourseTypeData
         var results = await _courseTypes.FindAsync(t => t.Id == id);
 
         return results.FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Gets a list of CourseTypes for a user.
+    /// </summary>
+    /// <param name="createdById">The id value from the user in MongoDB</param>
+    /// <returns>List of CourseTypes</returns>
+    public async Task<List<CourseType>> GetUsersCourseTypesAsync(string createdById)
+    {
+        var results = await _courseTypes.FindAsync(tt => tt.AuditInformation.CreatedById == createdById);
+
+        return results.ToList();
     }
 
     /// <summary>

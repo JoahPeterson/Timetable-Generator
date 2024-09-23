@@ -1,0 +1,128 @@
+﻿@page "/coursetype/create/{courseTypeId?}"
+@using Microsoft.AspNetCore.Authorization
+@inject ICourseTypeData CourseTypeData
+@inject IUserData UserData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@inject Blazored.Modal.Services.IModalService Modal
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+
+@* Cascading Is Required for Modal to Work *@
+<CascadingBlazoredModal />
+
+<h3>@(isEditMode ? "Edit Course Type" : "Create Course Type")</h3>
+
+
+<EditForm Model="courseType" OnValidSubmit="@SaveCourseType">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="Name">Course Type Name:</label>
+        <InputText id="name" @bind-Value="courseType.Name" class="form-control" />
+        <ValidationMessage For="@(() =>courseType.Name)" />
+    </div>
+    <div>
+        <label for="ToolTip">Course Type Description:</label>
+        <InputText id="toolTip" @bind-Value="courseType.ToolTip" class="form-control" />
+        <ValidationMessage For="@(() => courseType.ToolTip)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
+
+    @if (isEditMode)
+    {
+        <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-1">Delete</button>
+    }
+</EditForm>
+
+
+@code {
+    [Parameter] public string? courseTypeId { get; set; }
+
+    private CourseType courseType = new CourseType();
+    private bool isEditMode = false;
+    private bool showConfirmationModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(courseTypeId))
+        {
+
+            isEditMode = true;
+            courseType = await CourseTypeData.GetByIdAsync(courseTypeId);
+        }
+        else
+        {
+            isEditMode = false;
+            courseType = new CourseType();
+        }
+    }
+
+    private async Task Archive()
+    {
+        if (isEditMode && !string.IsNullOrEmpty(courseTypeId))
+        {
+            courseType.AuditInformation.LastModified = DateTime.Now;
+            courseType.AuditInformation.IsArchived = true;
+            await CourseTypeData.UpdateAsync(courseType);
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task OnConfirmationResult(bool confirmed)
+    {
+        showConfirmationModal = false; // Hide the modal
+        if (confirmed)
+        {
+            await Archive();
+        }
+    }
+
+    private async Task SaveCourseType()
+    {
+        if (isEditMode)
+        {
+            courseType.AuditInformation.LastModified = DateTime.Now;
+            await CourseTypeData.UpdateAsync(courseType);
+        }
+        else
+        {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+            CourseType newCourseType = new CourseType
+                {
+                    Name = courseType.Name,
+                    ToolTip = courseType.ToolTip,
+                };
+
+            newCourseType.AuditInformation.CreatedById = mongoUser.Id;
+
+            await CourseTypeData.CreateAsync(newCourseType);
+        }
+
+        // Redirect to the course type list or home after save
+        Navigation.NavigateTo("/");
+    }
+
+    private async Task ShowDeleteConfirmation()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Message", "Are you sure you want to delete this course type?");
+
+        var modal = Modal.Show<ConfirmationDialog>("Confirm Deletion", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            await Archive();
+        }
+        else
+        {
+            Console.WriteLine("Deletion canceled by the user.");
+        }
+    }
+}
