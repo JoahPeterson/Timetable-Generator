@@ -9,6 +9,7 @@ public interface ITermData
 {
     Task CreateAsync(Term term);
     Task<Term?> GetByIdAsync(string id);
-    Task<List<Term>> GetAsync();
+    Task<List<Term>> GetAllAsync();
+    Task<List<Term>> GetAllWithArchivedAsync();
     Task UpdateAsync(Term term);
 }

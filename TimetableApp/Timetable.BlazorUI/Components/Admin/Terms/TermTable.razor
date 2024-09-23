@@ -1,0 +1,77 @@
+﻿<div class="table-responsive mt-3" style="max-height: 50vh; overflow-y: auto;">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>
+                    <button class="btn btn-link p-0" @onclick="SortByName">
+                        Name
+                        <i class="bi bi-sort-alpha-down-alt"></i><!-- Bootstrap Icons for sorting -->
+                    </button>
+                </th>
+                <th>
+                    <button class="btn btn-link p-0" @onclick="SortByIsArchived">
+                        Is Archived
+                        <i class="bi bi-sort-alpha-down-alt"></i><!-- Bootstrap Icons for sorting -->
+                    </button>
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var term in Terms)
+            {
+                <tr>
+                    <td>@term.Name</td>
+                    <td>@term.AuditInformation.IsArchived</td>
+                    <td>
+                        <button class="btn btn-secondary" @onclick="() => EditItem(term)">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<Term> Terms { get; set; } = new List<Term>();
+
+    [Parameter]
+    public EventCallback<Term> OnEdit { get; set; }
+
+    private bool sortByNameAscending = true;
+    private bool sortByIsArchivedAscending = true;
+
+    private async Task EditItem(Term term)
+    {
+        await OnEdit.InvokeAsync(term);
+    }
+
+    private void SortByName()
+    {
+        if (sortByNameAscending)
+        {
+            Terms = Terms.OrderBy(t => t.Name).ToList();
+        }
+        else
+        {
+            Terms = Terms.OrderByDescending(t => t.Name).ToList();
+        }
+        sortByNameAscending = !sortByNameAscending;
+    }
+
+    private void SortByIsArchived()
+    {
+        if (sortByIsArchivedAscending)
+        {
+            Terms = Terms.OrderBy(t => t.AuditInformation.IsArchived).ToList();
+        }
+        else
+        {
+            Terms = Terms.OrderByDescending(t => t.AuditInformation.IsArchived).ToList();
+        }
+        sortByIsArchivedAscending = !sortByIsArchivedAscending;
+    }
+
+
+}

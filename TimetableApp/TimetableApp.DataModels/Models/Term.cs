@@ -1,4 +1,6 @@
-﻿namespace TimetableApp.DataModels.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TimetableApp.DataModels.Models;
 
 public class Term
 {
@@ -10,6 +12,8 @@ public class Term
 
     public int Duration { get; set; }
 
+    [Required(ErrorMessage = "Name is required")]
+    [StringLength(30, MinimumLength = 3, ErrorMessage = "Name must be between 3 and 30 characters.")]
     public string? Name { get; set; }
 
     public string ToolTip { get; } = "Time of year selection.";
