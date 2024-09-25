@@ -3,18 +3,7 @@
     background-color: #811C32!important;
 }
 
-/* Custom tooltip styling */
-.tooltip {
-    background-color: #333; /* Dark background color */
-    color: #fff; /* Text color */
-    border-radius: 5px; /* Rounded corners */
-    padding: 8px; /* Padding around text */
-    font-size: 14px; /* Font size */
-}
 
-    .tooltip .arrow {
-        border-top-color: #333; /* Match arrow color with tooltip background */
-    }
 /*Card Styling Start*/
 
 .scrollable-card

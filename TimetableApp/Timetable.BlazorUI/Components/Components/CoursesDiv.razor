@@ -16,7 +16,7 @@ var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2", "Cardcolor-3
         <ul class="list-group list-group-flush">
        @for (int i = 0; i < courses.Count; i++)
         {
-            <li class="list-group-item CardText text-white px-3 @colorClasses[i % colorClasses.Count]"><i class="bi bi-journal-bookmark h4"></i> @courses[i].Name</li>
+            <li class="list-group-item CardText text-white px-3 @colorClasses[i % colorClasses.Count]" data-toggle="tooltip" data-placement="top" title="@courses[i].Description"><i class="bi bi-journal-bookmark h4"></i> @courses[i].Name</li>
         }
         </ul>
     </div>

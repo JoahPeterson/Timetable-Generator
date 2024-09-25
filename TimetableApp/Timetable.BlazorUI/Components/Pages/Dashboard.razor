@@ -15,5 +15,48 @@
     </div>
 </div>
 
+<div class="row mt-5 justify-content-center">
+     <AuthorizeView Roles="Admin">
+    <div class="col-4">
+        <h2 class="text-center">Admin Tools</h2>
+        <div class="bg-light row">
+            <div class="col-4">
+                <a href="admin/users" class="text-decoration-none">
+                    <div class="card text-white Cardcolor-1 mb-3" style="max-width: 18rem;">
+                        <div class="card-body text-center">
+                            <i class="bi bi-people-fill h1"></i>
+                            <h5 class="card-title text-center">Users</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-4">
+                <a href="coursetype/create" class="text-decoration-none">
+                    <div class="card text-white Cardcolor-2 mb-3" style="max-width: 18rem;">
+                        <div class="card-body text-center">
+                            <i class="bi bi-book h1"></i>
+                            <h5 class="card-title text-center">Modalities</h5>
+                        </div>
+                    </div>
+                </a> 
+            </div>
+            <div class="col-4">
+                <a href="admin/term" class="text-decoration-none">
+                    <div class="card text-white Cardcolor-3 mb-3" style="max-width: 18rem;">
+                        <div class="card-body text-center">
+                            <i class="bi bi-list-stars h1"></i>
+                            <h5 class="card-title text-center">Terms</h5>
+                        </div>
+                    </div>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+    </AuthorizeView>
+    <div class="col-5">
+        @* <h2>My Timetables</h2> *@
+    </div>
+</div>
 
 
