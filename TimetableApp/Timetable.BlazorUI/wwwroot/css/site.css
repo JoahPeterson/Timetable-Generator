@@ -3,7 +3,18 @@
     background-color: #811C32!important;
 }
 
+/* Custom tooltip styling */
+.tooltip {
+    background-color: #333; /* Dark background color */
+    color: #fff; /* Text color */
+    border-radius: 5px; /* Rounded corners */
+    padding: 8px; /* Padding around text */
+    font-size: 14px; /* Font size */
+}
 
+    .tooltip .arrow {
+        border-top-color: #333; /* Match arrow color with tooltip background */
+    }
 /*Card Styling Start*/
 
 .scrollable-card
@@ -38,13 +49,20 @@
 .Cardcolor-1 {
     background-color: #3C6C5E;
 }
-
+.Cardcolor-1:hover {
+    background-color: #2D4D4A; /* Darker shade for hover */
+}
 .Cardcolor-2 {
     background-color: #AABC61;
 }
-
+.Cardcolor-2:hover {
+    background-color: #8FAE4B; /* Darker shade for hover */
+}
 .Cardcolor-3 {
     background-color: #9C3542;
+}
+.Cardcolor-3:hover {
+    background-color: #7B2A34; /* Darker shade for hover */
 }
 
 .CardText {
