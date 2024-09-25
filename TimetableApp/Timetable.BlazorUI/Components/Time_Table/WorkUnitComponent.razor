@@ -1,6 +1,6 @@
 ﻿@using TimetableApp.DataModels.Models
 
-<div class="work-unit bg-success text-white border border-dark" draggable="true" @onclick="SelectWorkUnit" @onclick:stopPropagation="true" style="height: @(RowHeightPercentage)vh">
+<div class="work-unit bg-success text-white border border-dark" draggable="true" @onclick="SelectWorkUnit" style="height: @(RowHeightPercentage)vh">
     <p>@WorkUnit.Name</p>
     <p>Duration: @WorkUnit.Duration</p>
 </div>

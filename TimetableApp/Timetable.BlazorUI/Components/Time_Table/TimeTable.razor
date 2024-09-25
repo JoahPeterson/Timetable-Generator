@@ -10,7 +10,7 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-<div class="d-flex" @onclick="DivOnClick">
+<div class="d-flex">
     <!-- Week Column -->
     <div class="week-column d-flex flex-column w-25">
         @for (int i = 1; i <= course.Term.Duration; i++)
@@ -38,8 +38,6 @@
 @code {
     [Parameter]
     public string? courseId { get; set; }
-
-    private EventCallback<WorkUnit> OnWorkUnitChanged;
 
     private List<WorkUnit> workUnits = new List<WorkUnit>();
 
@@ -84,17 +82,14 @@
         {
             workUnits.Add(workUnit);
         }
+
+        course.WorkUnits = workUnits;
+
+        CourseData.UpdateCourseAsync(course);
     }
 
     private void HandleWorkUnitSelected(WorkUnit workUnit)
     {
         selectedWorkUnit = workUnit;
-        OnWorkUnitChanged.InvokeAsync(workUnit); // Raise the event
-    }
-
-    private async Task DivOnClick()
-    {
-        // selectedWorkUnit = null;
-        // await WorkUnitForm.ClearForm();
     }
 }

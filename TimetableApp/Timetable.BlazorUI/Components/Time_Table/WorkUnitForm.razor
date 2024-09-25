@@ -8,8 +8,6 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-Work Unit Data
-
 <EditForm Model="workUnit" OnValidSubmit="@SaveWorkUnit">
     <DataAnnotationsValidator />
     <ValidationSummary />
@@ -20,8 +18,8 @@ Work Unit Data
         <ValidationMessage For="@(() => workUnit.Name)" />
     </div>
     <div>
-        <label class="form-label" for="duration">Course Type:</label>
-        <InputSelect id="duration" @bind-Value="workUnit.Duration" class="form-control">
+        <label class="form-label" for="duration">Duration:</label>
+        <InputSelect id="duration" @bind-Value="workUnit.Duration" class="form-control" >
             @for (int i = 1; i <= 4; i++)
             {
                 <option value="@i">@i</option>
@@ -47,9 +45,6 @@ Work Unit Data
     [Parameter]
     public Action MyProperty { get; set; }
 
-
-    private int duration { get; set; }
-
     private bool isEditMode = false;
 
     private WorkUnit workUnit = new WorkUnit();
@@ -63,15 +58,6 @@ Work Unit Data
             return;
         }
         workUnit = new WorkUnit();
-    }
-
-    public async Task ClearForm()
-    {
-        if (isEditMode)
-        {
-            WorkUnitToEdit = null;
-            isEditMode = false;
-        }
     }
 
     private async Task SaveWorkUnit()
