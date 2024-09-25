@@ -16,7 +16,11 @@ var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2", "Cardcolor-3
         <ul class="list-group list-group-flush">
        @for (int i = 0; i < taskTypes.Count; i++)
         {
-            <li class="list-group-item CardText text-white px-3 @colorClasses[i % colorClasses.Count]"  data-toggle="tooltip" data-placement="top" title="@taskTypes[i].Description"><i class="bi bi-clipboard h4"></i> @taskTypes[i].Name</li>
+            if(taskTypes[i].AuditInformation.IsArchived == false)
+            {
+                    <li class="list-group-item CardText text-white px-3 @colorClasses[i % colorClasses.Count]"  data-toggle="tooltip" data-placement="top" title="@taskTypes[i].Description"><i class="bi bi-clipboard h4"></i> @taskTypes[i].Name</li>
+            }
+                   
         }
         </ul>
     </div>
