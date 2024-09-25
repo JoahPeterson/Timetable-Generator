@@ -8,23 +8,24 @@
 
 @if (taskTypes != null && loggedInUser != null)
 {
-    @* <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var taskType in taskTypes)
-            {
-                <tr>
-                    <td>@taskType.Name</td>
-                    <td>@taskType.Description</td> 
-                </tr>
-            }
-        </tbody>
-    </table> *@
+ 
+var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2", "Cardcolor-3" };
+
+<div class="bg-light p-3">
+    <div class="card scrollable-card">
+        <ul class="list-group list-group-flush">
+       @for (int i = 0; i < taskTypes.Count; i++)
+        {
+            <li class="list-group-item CardText px-3 @colorClasses[i % colorClasses.Count]"><i class="bi bi-clipboard h4"></i> @taskTypes[i].Name</li>
+        }
+        </ul>
+    </div>
+    <div class="mt-4 fixed">
+        <a href="tasktype/create" class="text-black text-decoration-none CardText"><i class="bi bi-plus-circle h5"></i> Add</a>
+    </div>
+    
+</div>
+ 
 }
 else
 {
