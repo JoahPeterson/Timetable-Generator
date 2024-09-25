@@ -1,0 +1,105 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using Timetable.BlazorUI.Components.Pages
+@inject IWorkUnitData WorkUnitData
+@inject IUserData UserData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@inject Blazored.Modal.Services.IModalService Modal
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<EditForm Model="workUnit" OnValidSubmit="@SaveWorkUnit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="w-75">
+        <label class="form-label" for="Name">Work Unit Name:</label>
+        <InputText id="name" @bind-Value="workUnit.Name" class="form-control" />
+        <ValidationMessage For="@(() => workUnit.Name)" />
+    </div>
+    <div>
+        <label class="form-label" for="duration">Duration:</label>
+        <InputSelect id="duration" @bind-Value="workUnit.Duration" class="form-control" >
+            @for (int i = 1; i <= 4; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="d-flex flex-row-reverse">
+        <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Course Course { get; set; }
+
+    [Parameter]
+    public WorkUnit? WorkUnitToEdit{ get; set; }
+
+    [Parameter]
+    public EventCallback<WorkUnit> OnWorkUnitFormSubmit { get; set; }
+
+    [Parameter]
+    public Action MyProperty { get; set; }
+
+    private bool isEditMode = false;
+
+    private WorkUnit workUnit = new WorkUnit();
+
+    protected override void OnParametersSet()
+    {
+        if (WorkUnitToEdit != null)
+        {
+            workUnit = WorkUnitToEdit;
+            isEditMode = true;
+            return;
+        }
+        workUnit = new WorkUnit();
+    }
+
+    private async Task SaveWorkUnit()
+    {
+
+        if (isEditMode)
+        {
+            workUnit.AuditInformation.LastModified = DateTime.Now;
+            await WorkUnitData.UpdateTaskTypeAsync(workUnit);
+            isEditMode = false;
+        }
+        else
+        {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+            WorkUnit newWorkUnit = new WorkUnit
+                {
+                    Name = workUnit.Name,
+                    SequenceNumber = Course.WorkUnits.Count() + 1,
+                    Duration = workUnit.Duration,
+                    CourseId = Course.Id
+                };
+
+            newWorkUnit.AuditInformation.CreatedById = mongoUser.Id;
+
+            await WorkUnitData.CreateAsync(newWorkUnit);
+
+            await HandleSubmit(newWorkUnit);
+            workUnit = new WorkUnit();
+        }
+    }
+
+    private async Task HandleSubmit(WorkUnit workUnit)
+    {
+        OnWorkUnitFormSubmit.InvokeAsync(workUnit);
+    }
+
+    private Task HandleWorkUnitChange(WorkUnit updatedWorkUnit)
+    {
+        // Update the form with the new WorkUnit
+        workUnit = updatedWorkUnit;
+        return Task.CompletedTask;
+    }
+}
