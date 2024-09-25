@@ -1,0 +1,60 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject ITaskTypeData TaskTypeData
+@inject IUserData UserData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@if (taskTypes != null && loggedInUser != null)
+{
+    @* <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var taskType in taskTypes)
+            {
+                <tr>
+                    <td>@taskType.Name</td>
+                    <td>@taskType.Description</td> 
+                </tr>
+            }
+        </tbody>
+    </table> *@
+}
+else
+{
+    <p>Loading task types...</p>
+}
+
+@code {
+
+    private List<TaskType>? taskTypes;
+    private User? loggedInUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        
+        // Get the user's ID claim
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+        
+        if (!string.IsNullOrEmpty(userIdClaim))
+        {
+            loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+            
+            if (loggedInUser != null)
+            {
+                // Fetch task types for the logged-in user
+                taskTypes = await TaskTypeData.GetUsersTaskTypesAsync(loggedInUser.Id);
+            }
+        }
+    }
+
+    
+}
