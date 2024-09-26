@@ -1,0 +1,133 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject ITermDurationData TermDurationData
+@inject IUserData UserData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@inject Blazored.Modal.Services.IModalService Modal
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@* Cascading Is Required for Modal to Work *@
+<CascadingBlazoredModal />
+
+<h3>@(isEditMode ? "Edit Term" : "Create Term")</h3>
+
+<EditForm Model="termDuration" OnValidSubmit="@SaveDuration">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="Duration">Term Name:</label>
+        <InputNumber id="duration" @bind-Value="termDuration.Length" class="form-control" />
+        <ValidationMessage For="@(() =>termDuration.Length)" />
+    </div>
+
+
+    <div class="d-flex flex-row mt-3 justify-content-end">
+        <button type="submit" class="btn btn-primary d-block m-1">Save</button>
+        @if (isEditMode && termDuration.AuditInformation.IsArchived == false)
+        {
+            <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block m-1">Delete</button>
+        }
+
+        @if (isEditMode && termDuration.AuditInformation.IsArchived == true)
+        {
+            <button type="button" @onclick="Restore" class="btn btn-primary d-block m-1">Restore</button>
+        }
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public TermDuration TermDurationToEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<TermDuration> OnSave { get; set; }
+
+    private TermDuration termDuration = new TermDuration();
+
+    private bool isEditMode = false;
+    private bool showConfirmationModal = false;
+
+    protected override void OnParametersSet()
+    {
+        if (TermDurationToEdit != null)
+        {
+            termDuration = TermDurationToEdit;
+            isEditMode = true;
+        }
+    }
+
+    private async Task Archive()
+    {
+        if (isEditMode && termDuration != null)
+        {
+            termDuration.AuditInformation.IsArchived = true;
+            await SaveDuration();
+        }
+    }
+
+    private async Task OnConfirmationResult(bool confirmed)
+    {
+        showConfirmationModal = false; // Hide the modal
+        if (confirmed)
+        {
+            await Archive();
+            termDuration = new TermDuration();
+        }
+    }
+
+    private async Task Restore()
+    {
+        if (isEditMode && termDuration != null)
+        {
+            termDuration.AuditInformation.IsArchived = false;
+            await SaveDuration();
+        }
+    }
+
+    private async Task SaveDuration()
+    {
+        if (isEditMode)
+        {
+            termDuration.AuditInformation.LastModified = DateTime.Now;
+            await TermDurationData.UpdateAsync(termDuration);
+            isEditMode = false;
+        }
+        else
+        {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+            TermDuration newTermDuration = new TermDuration()
+                {
+                    Length = termDuration.Length,
+                };
+
+            termDuration.AuditInformation.CreatedById = mongoUser.Id;
+
+            await TermDurationData.CreateAsync(newTermDuration);
+        }
+
+        await OnSave.InvokeAsync(termDuration);
+        termDuration = new TermDuration();
+        StateHasChanged();
+    }
+
+    private async Task ShowDeleteConfirmation()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Message", "Are you sure you want to delete this course type?");
+
+        var modal = Modal.Show<ConfirmationDialog>("Confirm Deletion", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            await Archive();
+        }
+        else
+        {
+            Console.WriteLine("Deletion canceled by the user.");
+        }
+    }
+}

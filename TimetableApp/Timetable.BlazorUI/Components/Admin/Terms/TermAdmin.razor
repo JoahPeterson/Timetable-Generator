@@ -10,10 +10,13 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 
-<TermForm TermToEdit="selectedTerm" OnSave="SaveItem"/>
-
-<TermTable Terms="terms" OnEdit="EditItem" />
-
+<div>
+    <TermForm TermToEdit="selectedTerm" OnSave="SaveItem"/>
+    <TermTable Terms="terms" OnEdit="EditItem" />
+</div>
+<div>
+    <TermDurationFrom DurationToEdit= "" Onsave =" "/>
+</div>
 @code {
     private List<Term> terms = new List<Term>();
     private Term? selectedTerm = null;
