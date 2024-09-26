@@ -155,7 +155,7 @@
                     StartDate = course.StartDate,
                     EndDate = course.EndDate,
                     CourseTypeId = course.CourseTypeId,
-                    Term = terms.FirstOrDefault(term => term.Id == course.Term.Id),
+                    Term = await TermData.GetByIdAsync(course.Term.Id),
                 };
 
             newCourse.AuditInformation.CreatedById = mongoUser.Id;

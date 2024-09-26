@@ -18,7 +18,7 @@ var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2", "Cardcolor-3
         {
             if(taskTypes[i].AuditInformation.IsArchived == false)
             {
-                    <li class="list-group-item CardText text-white px-3 @colorClasses[i % colorClasses.Count]"  data-toggle="tooltip" data-placement="top" title="@taskTypes[i].Description"><i class="bi bi-clipboard h4"></i> @taskTypes[i].Name</li>
+                    <li class="list-group-item CardText text-white px-3 @colorClasses[i % colorClasses.Count]"  data-toggle="tooltip" data-placement="top" title="@taskTypes[i].Description"><i class="bi bi-clipboard h4"></i> <a href="tasktype/create/@taskTypes[i].Id" class="text-decoration-none text-white fw-bold">@taskTypes[i].Name</a></li>
             }
                    
         }
