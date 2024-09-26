@@ -17,11 +17,11 @@ var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2", "Cardcolor-3
        @for (int i = 0; i < courses.Count; i++)
         {
             <li class="list-group-item px-3 @colorClasses[i % colorClasses.Count]"
-                        data-toggle="tooltip" data-placement="top" title="@courses[i].Description">
-                        <a href="/course/create/@courses[i].Id" class="text-white text-decoration-none fw-bold">
-                            <i class="bi bi-journal-bookmark h4"></i> @courses[i].Name
-                        </a>
-                    </li>
+                data-toggle="tooltip" data-placement="top" title="@courses[i].Description">
+                <a href="/course/create/@courses[i].Id" class="text-white text-decoration-none fw-bold">
+                    <i class="bi bi-journal-bookmark h4"></i> @courses[i].Name
+                </a>
+            </li>
         }
         </ul>
     </div>
