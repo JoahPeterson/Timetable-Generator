@@ -16,7 +16,7 @@
 <h3>@(isEditMode ? "Edit Task Type" : "Create Task Type")</h3>
 
 
-<EditForm Model="taskType" OnValidSubmit="@SaveTaskType">
+<EditForm Model="taskType" OnValidSubmit="@SaveTaskType" FormName="TasktypeForm">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
 
