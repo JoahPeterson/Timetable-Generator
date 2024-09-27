@@ -2,3 +2,64 @@
 .bg-red {
     background-color: #811C32!important;
 }
+
+
+/*Card Styling Start*/
+
+.scrollable-card
+{
+    height: 167px;
+    overflow-y: scroll;
+}
+
+.scrollable-card::-webkit-scrollbar 
+{
+        width: 12px; /* Width of the scrollbar */
+}
+
+.scrollable-card::-webkit-scrollbar-track 
+{
+    background: #f1f1f1; /* Background of the scrollbar track */
+    border-radius: 10px; /* Rounded corners for the track */
+}
+
+.scrollable-card::-webkit-scrollbar-thumb 
+{
+    background: #888; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+.scrollable-card::-webkit-scrollbar-thumb 
+{
+    background: #888; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+.Cardcolor-1 {
+    background-color: #3C6C5E;
+}
+.Cardcolor-1:hover {
+    background-color: #2D4D4A; /* Darker shade for hover */
+}
+.Cardcolor-2 {
+    background-color: #AABC61;
+}
+.Cardcolor-2:hover {
+    background-color: #8FAE4B; /* Darker shade for hover */
+}
+.Cardcolor-3 {
+    background-color: #9C3542;
+}
+.Cardcolor-3:hover {
+    background-color: #7B2A34; /* Darker shade for hover */
+}
+
+.CardText {
+    font-weight: bold;
+}
+
+.CardIcon {
+    transform: scale(1.5);
+}
+
+/*Card Styling End*/

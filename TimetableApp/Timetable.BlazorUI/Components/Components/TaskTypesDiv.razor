@@ -1,0 +1,68 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject ITaskTypeData TaskTypeData
+@inject IUserData UserData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@if (taskTypes != null && loggedInUser != null)
+{
+ 
+var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2", "Cardcolor-3" };
+
+<div class="bg-light p-3">
+    <div class="card scrollable-card">
+        <ul class="list-group list-group-flush">
+       @for (int i = 0; i < taskTypes.Count; i++)
+        {
+            if(taskTypes[i].AuditInformation.IsArchived == false)
+            {
+                <li class="list-group-item CardText text-white px-3 @colorClasses[i % colorClasses.Count]"  
+                    data-toggle="tooltip" data-placement="top" title="@taskTypes[i].Description"><i class="bi bi-clipboard h4"></i> 
+                    <a href="tasktype/create/@taskTypes[i].Id" class="text-decoration-none text-white fw-bold">@taskTypes[i].Name</a>
+                </li>
+            }
+                   
+        }
+        </ul>
+    </div>
+    <div class="mt-4 fixed">
+        <a href="tasktype/create" class="text-black text-decoration-none CardText"><i class="bi bi-plus-circle h5"></i> Add</a>
+    </div>
+    
+</div>
+ 
+}
+else
+{
+    <p>Loading task types...</p>
+}
+
+@code {
+
+    private List<TaskType>? taskTypes;
+    private User? loggedInUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        
+        // Get the user's ID claim
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+        
+        if (!string.IsNullOrEmpty(userIdClaim))
+        {
+            loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+            
+            if (loggedInUser != null)
+            {
+                // Fetch task types for the logged-in user
+                taskTypes = await TaskTypeData.GetUsersTaskTypesAsync(loggedInUser.Id);
+            }
+        }
+    }
+
+    
+}
