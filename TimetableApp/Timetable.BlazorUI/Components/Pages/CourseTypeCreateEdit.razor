@@ -15,7 +15,7 @@
 <h3>@(isEditMode ? "Edit Course Type" : "Create Course Type")</h3>
 
 
-<EditForm Model="courseType" OnValidSubmit="@SaveCourseType">
+<EditForm Model="courseType" OnValidSubmit="@SaveCourseType" FormName="CourseTypeForm">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
