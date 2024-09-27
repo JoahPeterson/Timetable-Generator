@@ -1,6 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
-@inject ITermData TermData
+@inject ITermDurationData TermDurationData
 @inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
@@ -9,28 +9,27 @@
 @attribute [Authorize(Roles = "Admin")]
 
 
+<h3>@(isEditMode ? "Edit Duration" : "Create Duration")</h3>
 
-<h3>@(isEditMode ? "Edit Term" : "Create Term")</h3>
-
-<EditForm FormName="TermForm" Model="term" OnValidSubmit="SaveTerm">
+<EditForm FormName="TermDuration" Model="termDuration" OnValidSubmit="SaveDuration">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
     <div>
-        <label for="Name">Term Name:</label>
-        <InputText id="name" @bind-Value="term.Name" class="form-control" />
-        <ValidationMessage For="@(() =>term.Name)" />
+        <label for="Duration">Term Duration:</label>
+        <InputNumber id="duration" @bind-Value="termDuration.Length" class="form-control" />
+        <ValidationMessage For="@(() =>termDuration.Length)" />
     </div>
 
 
     <div class="d-flex flex-row mt-3 justify-content-end">
         <button type="submit" class="btn btn-primary d-block m-1">Save</button>
-        @if (isEditMode && term.AuditInformation.IsArchived == false)
+        @if (isEditMode && termDuration.AuditInformation.IsArchived == false)
         {
             <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block m-1">Delete</button>
         }
 
-        @if (isEditMode && term.AuditInformation.IsArchived == true)
+        @if (isEditMode && termDuration.AuditInformation.IsArchived == true)
         {
             <button type="button" @onclick="Restore" class="btn btn-primary d-block m-1">Restore</button>
         }
@@ -38,31 +37,31 @@
 </EditForm>
 
 @code {
-    [Parameter] public Term? TermToEdit { get; set; }
+    [Parameter] public TermDuration? TermDurationToEdit { get; set; }
 
     [Parameter]
-    public EventCallback<Term> OnSave { get; set; }
+    public EventCallback<TermDuration> OnSave { get; set; }
 
-    private Term term = new Term();
+    private TermDuration termDuration = new TermDuration();
 
     private bool isEditMode = false;
     private bool showConfirmationModal = false;
 
     protected override void OnParametersSet()
     {
-        if (TermToEdit != null)
+        if (TermDurationToEdit != null)
         {
-            term = TermToEdit;
+            termDuration = TermDurationToEdit;
             isEditMode = true;
         }
     }
 
     private async Task Archive()
     {
-        if (isEditMode && term != null)
+        if (isEditMode && termDuration != null)
         {
-            term.AuditInformation.IsArchived = true;
-            await SaveTerm();
+            termDuration.AuditInformation.IsArchived = true;
+            await SaveDuration();
         }
     }
 
@@ -72,25 +71,25 @@
         if (confirmed)
         {
             await Archive();
-            term = new Term();
+            termDuration = new TermDuration();
         }
     }
 
     private async Task Restore()
     {
-        if (isEditMode && term != null)
+        if (isEditMode && termDuration != null)
         {
-            term.AuditInformation.IsArchived = false;
-            await SaveTerm();
+            termDuration.AuditInformation.IsArchived = false;
+            await SaveDuration();
         }
     }
 
-    private async Task SaveTerm()
+    private async Task SaveDuration()
     {
         if (isEditMode)
         {
-            term.AuditInformation.LastModified = DateTime.Now;
-            await TermData.UpdateAsync(term);
+            termDuration.AuditInformation.LastModified = DateTime.Now;
+            await TermDurationData.UpdateAsync(termDuration);
             isEditMode = false;
         }
         else
@@ -98,18 +97,18 @@
             var authState = await authProvider.GetAuthenticationStateAsync();
             var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
 
-            Term newTerm = new Term()
+            TermDuration newTermDuration = new TermDuration()
                 {
-                    Name = term.Name,
+                    Length = termDuration.Length,
                 };
 
-            newTerm.AuditInformation.CreatedById = mongoUser.Id;
+            newTermDuration.AuditInformation.CreatedById = mongoUser.Id;
 
-            await TermData.CreateAsync(newTerm);
+            await TermDurationData.CreateAsync(newTermDuration);
         }
 
-        await OnSave.InvokeAsync(term);
-        term = new Term();
+        await OnSave.InvokeAsync(termDuration);
+        termDuration = new TermDuration();
         StateHasChanged();
     }
 
@@ -123,8 +122,8 @@
 
         if (!result.Cancelled)
         {
-            await OnConfirmationResult(true);
-            //await Archive();
+            await Archive();
+            modal.Close();
         }
         else
         {
