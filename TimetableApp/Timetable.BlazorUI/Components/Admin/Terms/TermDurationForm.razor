@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
 @inject ITermDurationData TermDurationData
 @inject IUserData UserData
 @inject NavigationManager Navigation
@@ -7,17 +8,15 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 
-@* Cascading Is Required for Modal to Work *@
-<CascadingBlazoredModal />
 
-<h3>@(isEditMode ? "Edit Term" : "Create Term")</h3>
+<h3>@(isEditMode ? "Edit Duration" : "Create Duration")</h3>
 
-<EditForm Model="termDuration" OnValidSubmit="@SaveDuration">
+<EditForm FormName="TermDuration" Model="termDuration" OnValidSubmit="SaveDuration">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
     <div>
-        <label for="Duration">Term Name:</label>
+        <label for="Duration">Term Duration:</label>
         <InputNumber id="duration" @bind-Value="termDuration.Length" class="form-control" />
         <ValidationMessage For="@(() =>termDuration.Length)" />
     </div>
@@ -38,7 +37,7 @@
 </EditForm>
 
 @code {
-    [Parameter] public TermDuration TermDurationToEdit { get; set; }
+    [Parameter] public TermDuration? TermDurationToEdit { get; set; }
 
     [Parameter]
     public EventCallback<TermDuration> OnSave { get; set; }
@@ -103,7 +102,7 @@
                     Length = termDuration.Length,
                 };
 
-            termDuration.AuditInformation.CreatedById = mongoUser.Id;
+            newTermDuration.AuditInformation.CreatedById = mongoUser.Id;
 
             await TermDurationData.CreateAsync(newTermDuration);
         }
@@ -124,6 +123,7 @@
         if (!result.Cancelled)
         {
             await Archive();
+            modal.Close();
         }
         else
         {

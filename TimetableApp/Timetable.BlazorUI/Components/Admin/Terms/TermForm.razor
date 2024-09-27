@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
 @inject ITermData TermData
 @inject IUserData UserData
 @inject NavigationManager Navigation
@@ -7,12 +8,11 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 
-@* Cascading Is Required for Modal to Work *@
-<CascadingBlazoredModal />
+
 
 <h3>@(isEditMode ? "Edit Term" : "Create Term")</h3>
 
-<EditForm Model="term" OnValidSubmit="@SaveTerm">
+<EditForm FormName="TermForm" Model="term" OnValidSubmit="SaveTerm">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -38,7 +38,7 @@
 </EditForm>
 
 @code {
-    [Parameter] public Term TermToEdit { get; set; }
+    [Parameter] public Term? TermToEdit { get; set; }
 
     [Parameter]
     public EventCallback<Term> OnSave { get; set; }
@@ -62,7 +62,7 @@
         if (isEditMode && term != null)
         {
             term.AuditInformation.IsArchived = true;
-            SaveTerm();
+            await SaveTerm();
         }
     }
 
@@ -81,7 +81,7 @@
         if (isEditMode && term != null)
         {
             term.AuditInformation.IsArchived = false;
-            SaveTerm();
+            await SaveTerm();
         }
     }
 
@@ -103,7 +103,7 @@
                     Name = term.Name,
                 };
 
-            term.AuditInformation.CreatedById = mongoUser.Id;
+            newTerm.AuditInformation.CreatedById = mongoUser.Id;
 
             await TermData.CreateAsync(newTerm);
         }
@@ -123,7 +123,8 @@
 
         if (!result.Cancelled)
         {
-            await Archive();
+            await OnConfirmationResult(true);
+            //await Archive();
         }
         else
         {
