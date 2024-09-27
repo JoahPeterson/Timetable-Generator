@@ -5,5 +5,5 @@ public interface IHelpArticleData
     Task<List<HelpArticle>> GetAllAsync();
     Task<HelpArticle> GetByIdAsync(string id);
     Task<List<HelpArticle>> GetAllWithArchivedAsync();
-    Task<HelpArticle> UpdateAsync(HelpArticle);
+    Task<HelpArticle> UpdateAsync(HelpArticle article);
 }
