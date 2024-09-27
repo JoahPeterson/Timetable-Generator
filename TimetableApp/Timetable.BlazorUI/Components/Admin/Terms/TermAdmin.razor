@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Timetable.BlazorUI.Data
 @inject ITermData TermData
+@inject ITermDurationData DurationData
 @inject IUserData UserData
 @inject ITermDurationData TermDurationData
 @inject NavigationManager Navigation
@@ -10,26 +11,51 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 
-<TermForm TermToEdit="selectedTerm" OnSave="SaveItem"/>
+@* Cascading Is Required for Modal to Work *@
+<CascadingBlazoredModal />
 
-<TermTable Terms="terms" OnEdit="EditItem" />
-
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6">
+            <TermForm TermToEdit="selectedTerm" OnSave="SaveTerm"/>
+            <TermTable Terms="terms" OnEdit="EditTerm" />
+        </div>
+        <div class="col-lg-6">
+            <TermDurationForm TermDurationToEdit="selectedTermDuration" OnSave="SaveTermDuration"/>
+            <TermDurationTable TermDurations="termDurations" OnEdit="EditTermDuration"/>
+        </div>
+    </div>
+</div>
 @code {
     private List<Term> terms = new List<Term>();
+    private List<TermDuration> termDurations = new List<TermDuration>();
     private Term? selectedTerm = null;
+    private TermDuration? selectedTermDuration = null;
 
     protected override async Task OnInitializedAsync()
     {
-        terms = await TermData.GetAllWithArchivedAsync();
+        var termTask = TermData.GetAllWithArchivedAsync();
+        var termDurationTask = TermDurationData.GetAsync();
+
+        await Task.WhenAll(termTask, termDurationTask);
+
+        terms = termTask.Result;
+        termDurations = termDurationTask.Result;
     }
 
-    private async Task EditItem(Term item)
+
+    private async Task EditTerm(Term item)
     {
         selectedTerm = item;
     }
 
+    private async Task EditTermDuration(TermDuration termDuration)
+    {
+        selectedTermDuration = termDuration;
+    }
 
-    private async Task SaveItem(Term term)
+
+    private async Task SaveTerm(Term term)
     {
         var index = terms.FindIndex(t => t.Id == term.Id);
 
@@ -39,5 +65,17 @@
             terms.Add(term);
 
         selectedTerm = null;
+    }
+
+    private async Task SaveTermDuration(TermDuration termDuration)
+    {
+        var index = termDurations.FindIndex(td => td.Id == termDuration.Id);
+
+        if (index != -1)
+            termDurations[index] = termDuration;
+        else
+            termDurations.Add(termDuration);
+
+        selectedTermDuration = null;
     }
 }

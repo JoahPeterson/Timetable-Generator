@@ -1,0 +1,75 @@
+﻿<div class="table-responsive mt-3" style="max-height: 50vh; overflow-y: auto;">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>
+                    <button class="btn btn-link p-0" @onclick="SortByLength">
+                        Name
+                        <i class="bi bi-sort-alpha-down-alt"></i><!-- Bootstrap Icons for sorting -->
+                    </button>
+                </th>
+                <th>
+                    <button class="btn btn-link p-0" @onclick="SortByIsArchived">
+                        Is Archived
+                        <i class="bi bi-sort-alpha-down-alt"></i><!-- Bootstrap Icons for sorting -->
+                    </button>
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var termDuration in TermDurations)
+            {
+                <tr>
+                    <td>@termDuration.Length</td>
+                    <td>@termDuration.AuditInformation.IsArchived</td>
+                    <td>
+                        <button class="btn btn-secondary" @onclick="() => EditItem(termDuration)">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<TermDuration> TermDurations { get; set; } = new List<TermDuration>();
+
+    [Parameter]
+    public EventCallback<TermDuration> OnEdit { get; set; }
+
+    private bool sortByLengthAscending = true;
+    private bool sortByIsArchivedAscending = true;
+
+    private async Task EditItem(TermDuration termDuration)
+    {
+        await OnEdit.InvokeAsync(termDuration);
+    }
+
+    private void SortByLength()
+    {
+        if (sortByLengthAscending)
+        {
+            TermDurations = TermDurations.OrderBy(t => t.Length).ToList();
+        }
+        else
+        {
+            TermDurations = TermDurations.OrderByDescending(t => t.Length).ToList();
+        }
+        sortByLengthAscending = !sortByLengthAscending;
+    }
+
+    private void SortByIsArchived()
+    {
+        if (sortByIsArchivedAscending)
+        {
+            TermDurations = TermDurations.OrderBy(t => t.AuditInformation.IsArchived).ToList();
+        }
+        else
+        {
+            TermDurations = TermDurations.OrderByDescending(t => t.AuditInformation.IsArchived).ToList();
+        }
+        sortByIsArchivedAscending = !sortByIsArchivedAscending;
+    }
+}
