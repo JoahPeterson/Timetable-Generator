@@ -5,6 +5,7 @@
 @inject ITaskTypeData TaskTypeData
 @inject IUserData UserData
 @inject IWorkUnitData WorkUnitData
+@inject IWorkTaskData WorkTaskData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @rendermode InteractiveServer
@@ -24,30 +25,51 @@
     <div class="flex-grow-1 d-flex flex-column">
         @foreach (WorkUnit workUnit in workUnits)
         {
-            <div class="work-unit-container" >
+            <div class="work-unit-container">
                 <WorkUnitComponent WorkUnit="workUnit" SingleRowHeightPercentage="@SingleRowHeightPercentage()" OnSelected="HandleWorkUnitSelected" />
             </div>
         }
     </div>
 
+    <!-- WorkUnit Form -->
     <div class="w-25 d-flex flex-column m-5">
         <WorkUnitForm @ref="WorkUnitForm" Course="@course" WorkUnitToEdit="selectedWorkUnit" OnWorkUnitFormSubmit="UpdateWorkUnits" />
     </div>
+
+    <!-- WorkTask Form -->
+    <div class="w-25 d-flex flex-column m-5">
+        <WorkTaskForm @ref="WorkTaskForm" OnWorkTaskFormSubmit="UpdateWorkTasks" />
+    </div>
 </div>
+
+@if (workTasks != null && workTasks.Count > 0)
+{
+    <div class="task-list w-50 mx-auto mt-4">
+        <h3>Task List</h3>
+        <ul class="list-group">
+            @foreach (var task in workTasks)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>@task.Name</span>
+                </li>
+            }
+        </ul>
+    </div>
+}
 
 @code {
     [Parameter]
     public string? courseId { get; set; }
 
     private List<WorkUnit> workUnits = new List<WorkUnit>();
+    private List<WorkTask> workTasks = new List<WorkTask>(); 
 
     private WorkUnit? selectedWorkUnit;
-
     private Course course = new Course();
 
     private int tableVhPercentage { get; } = 100;
-
     private WorkUnitForm WorkUnitForm;
+    private WorkTaskForm WorkTaskForm;
 
     protected override async Task OnInitializedAsync()
     {
@@ -59,8 +81,11 @@
             if (tempWorkUnits.Any())
             {
                 workUnits = tempWorkUnits.FindAll(workUnit => workUnit.CourseId == course.Id);
-                workUnits = workUnits.OrderBy(WorkUnit=> WorkUnit.SequenceNumber).ToList();
+                workUnits = workUnits.OrderBy(WorkUnit => WorkUnit.SequenceNumber).ToList();
             }
+
+            // Load existing work tasks (if any)
+            workTasks = await WorkTaskData.GetAsync();
         }
     }
 
@@ -68,7 +93,6 @@
     {
         return tableVhPercentage / course.Term.Duration;
     }
-
 
     private async Task UpdateWorkUnits(WorkUnit workUnit)
     {
@@ -84,8 +108,37 @@
         }
 
         course.WorkUnits = workUnits;
+        await CourseData.UpdateCourseAsync(course);
+    }
 
-        CourseData.UpdateCourseAsync(course);
+    private async Task UpdateWorkTasks(WorkTask workTask)
+    {
+        // Check if the task already exists in the list
+        var index = workTasks.FindIndex(t => t.Id == workTask.Id);
+
+        if (index != -1)
+        {
+            // Update existing task
+            workTasks[index] = workTask;
+        }
+        else
+        {
+            // Add new task
+            workTasks.Add(workTask);
+        }
+
+        // Save or update task in database
+        if (index == -1)
+        {
+            await WorkTaskData.CreateAsync(workTask);
+        }
+        else
+        {
+            await WorkTaskData.UpdateAsync(workTask);
+        }
+
+        // Update UI
+        StateHasChanged();
     }
 
     private void HandleWorkUnitSelected(WorkUnit workUnit)
@@ -93,3 +146,4 @@
         selectedWorkUnit = workUnit;
     }
 }
+
