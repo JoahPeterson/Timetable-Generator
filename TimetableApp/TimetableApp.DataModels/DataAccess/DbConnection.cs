@@ -29,6 +29,7 @@ public class DbConnection : IDbConnection
         DbName = config["TimeTableDBName"];
         _db = Client.GetDatabase(DbName);
 
+        HelpArticleCollection = _db.GetCollection<HelpArticle>(HelpArticleCollectionName);
         TaskTypeCollection = _db.GetCollection<TaskType>(TaskTypeCollectionName);
         UserCollection = _db.GetCollection<User>(UserCollectionName);
         CourseTypeCollection = _db.GetCollection<CourseType>(CourseTypeCollectionName);
@@ -48,6 +49,10 @@ public class DbConnection : IDbConnection
     public string CourseCollectionName { get; private set; } = "courses";
 
     public IMongoCollection<Course> CourseCollection { get; private set; }
+
+    public string HelpArticleCollectionName { get; private set; } = "helpArticles";
+
+    public IMongoCollection<HelpArticle> HelpArticleCollection { get; private set; }
 
     public string TaskTypeCollectionName { get; private set; } = "taskTypes";
 
