@@ -11,6 +11,7 @@ namespace TimetableApp.DataModels.DataAccess
         Task CreateAsync(WorkTask task);
         Task<WorkTask?> GetByIdAsync(string id);
         Task<List<WorkTask>> GetAsync();
+        Task<List<WorkTask>> GetUsersWorkTasksAsync(string id);
         Task UpdateAsync(WorkTask task);
     }
 }

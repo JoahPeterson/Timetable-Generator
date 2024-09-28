@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @inject IWorkTaskData WorkTaskData
 @inject IUserData UserData
+@inject ITaskTypeData TaskTypeData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @inject Blazored.Modal.Services.IModalService Modal
@@ -24,7 +25,16 @@
     </div>
     <div class="w-75">
         <label class="form-label" for="type">Type ID:</label>
-        <InputText id="type" @bind-Value="workTask.TypeId" class="form-control" />
+        <InputSelect id="type" @bind-Value="workTask.TypeId" class="form-control">
+            @foreach (var type in taskTypes)
+            {
+                if(type.AuditInformation.IsArchived == false)
+                {
+                    <option value="@type.Id">@type.Name</option>
+                }
+                
+            }
+        </InputSelect>
         <ValidationMessage For="@(() => workTask.TypeId)" />
     </div>
     
@@ -40,7 +50,6 @@
 
 @if (workTasks != null && loggedInUser != null)
 {
-
     <div class="bg-light p-3">
         <div class="card scrollable-card">
             <ul class="list-group list-group-flush">
@@ -48,10 +57,10 @@
             {
                 if(workTasks[i].AuditInformation.IsArchived == false)
                 {
-                    <li class="list-group-item CardText text-white px-3"  
+                    <li class="list-group-item CardText text-dark px-3"  
                         data-toggle="tooltip" data-placement="top" title="@workTasks[i].Description">
                         <i class="bi bi-clipboard h4"></i> 
-                        <a href="worktask/create/@workTasks[i].Id" class="text-decoration-none text-white fw-bold">@workTasks[i].Name</a>
+                        @workTasks[i].Name
                     </li>
                 }
             }
@@ -65,14 +74,13 @@ else
 }
 
 @code {
-     [Parameter]
+    [Parameter]
     public EventCallback<WorkTask> OnWorkTaskFormSubmit { get; set; } 
     private List<WorkTask>? workTasks;
     private User? loggedInUser;
-    private WorkTask workTask = new WorkTask
-    {
-        AuditInformation = new Auditable()
-    };
+    private WorkTask workTask = new WorkTask();
+
+    private List<TaskType> taskTypes = new List<TaskType>();
 
     private bool isEditMode = false;
 
@@ -90,8 +98,9 @@ else
 
             if (loggedInUser != null)
             {
-                // Fetch work tasks for the logged-in user
-                workTasks = await WorkTaskData.GetAsync();
+                // Fetch tasktypes from the database
+                taskTypes = await TaskTypeData.GetUsersTaskTypesAsync(loggedInUser.Id);
+                workTasks = await WorkTaskData.GetUsersWorkTasksAsync(loggedInUser.Id);
             }
         }
     }
@@ -124,10 +133,7 @@ else
 
             await WorkTaskData.CreateAsync(newWorkTask);
             await UpdateWorkTaskList();
-            workTask = new WorkTask
-            {
-                AuditInformation = new Auditable()
-            };
+
         }
     }
 
@@ -138,9 +144,7 @@ else
 
     private void HandleReset()
     {
-        workTask = new WorkTask
-        {
-            AuditInformation = new Auditable()
-        };
+        workTask = new WorkTask();
+
     }
 }
