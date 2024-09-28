@@ -1,0 +1,29 @@
+﻿<h3>HelpArticleForm</h3>
+
+<EditForm Model="helpArticle" OnValidSubmit="SaveArticle">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="Title">Title:</label>
+        <InputText id="title" @bind-Value="helpArticle.Title" class="form-control" />
+        <ValidationMessage For="@(() => helpArticle.Title)" />
+    </div>
+
+    <div>
+        <label for="Content">Content:</label>
+        <InputText id="content" @bind-Value="helpArticle.Content" class="form-control" />
+        <ValidationMessage For="@(() => helpArticle.Content)" />
+    </div>
+
+    <div class="d-flex flex-row mt-3 justify-content-end">
+        <button type="submit" class="btn btn-primary d-block m-1">Save</button>
+    </div>
+
+
+@code {
+    [Parameter]
+    public HelpArticle HelpArticleToEdit { get; set; }
+
+    // EventCallback<HelpArticle> OnSave = new EventCallback<HelpArticle>();
+}

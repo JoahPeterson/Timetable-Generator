@@ -1,0 +1,32 @@
+﻿@page "/help"
+@using Microsoft.AspNetCore.Authorization
+@* @inject IHelpArticleData HelpArticleData *@
+
+@foreach (HelpArticle article in HelpArticles)
+{
+    <HelpArticleComponent HelpArticle="article"></HelpArticleComponent>
+}
+
+<AuthorizeView Roles="Admin">
+    <Authorized >
+        <HelpArticleForm ></HelpArticleForm>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    // List<HelpArticle> HelpArticles = new List<HelpArticle>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Task getHelpArticlesTask = HelpArticleData.GetAllAsync();
+    }
+
+    public async Task SaveArticle(HelpArticle helpArticle)
+    {
+        var index = HelpArticles.FindIndex(ha => ha.Id == helpArticle.Id);
+
+        if (index == -1)
+            HelpArticles.Add(helpArticle);
+        else
+            HelpArticles[index] = helpArticle;
+}
