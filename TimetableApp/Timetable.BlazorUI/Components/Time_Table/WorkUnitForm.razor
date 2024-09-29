@@ -70,7 +70,7 @@
         if (isEditMode)
         {
             workUnit.AuditInformation.LastModified = DateTime.Now;
-            await WorkUnitData.UpdateTaskTypeAsync(workUnit);
+            await WorkUnitData.UpdateAsync(workUnit);
             await HandleSubmit(workUnit);
             isEditMode = false;
         }

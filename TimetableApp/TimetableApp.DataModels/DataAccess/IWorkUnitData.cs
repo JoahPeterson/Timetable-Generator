@@ -11,5 +11,5 @@ public interface IWorkUnitData
     Task<List<WorkUnit>> GetUsersAsync(string id);
     Task<WorkUnit?> GetByIdAsync(string id);
     Task<List<WorkUnit>> GetAsync();
-    Task UpdateTaskTypeAsync(WorkUnit workUnit);
+    Task UpdateAsync(WorkUnit workUnit);
 }

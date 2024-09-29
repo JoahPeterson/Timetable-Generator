@@ -53,7 +53,7 @@
 </EditForm>
 
  <!-- List of Work Tasks -->
-@if (workTasks != null && loggedInUser != null)
+@* @if (workTasks != null && loggedInUser != null)
 {
     <div class="bg-light p-3">
         <div class="card scrollable-card">
@@ -62,7 +62,42 @@
             {
                 if(workTasks[i].AuditInformation.IsArchived == false)
                 {
+                   @*  <li class="list-group-item CardText text-dark px-3"  
+                        data-toggle="tooltip" data-placement="top" title="@workTasks[i].Description">
+                        <i class="bi bi-clipboard h4"></i> 
+                        @workTasks[i].Name
+                    </li> *@
+                    <!-- Draggable Version -->
+                   @*  <li class="list-group-item CardText text-dark px-3"  
+                        draggable="true"
+                        @ondragstart="(e) => HandleDragStart(e, workTasks[i].Id)"
+                        data-toggle="tooltip" data-placement="top" title="@workTasks[i].Description">
+                        <i class="bi bi-clipboard h4"></i> 
+                        @workTasks[i].Name
+                    </li>
+                }
+            }
+            </ul>
+        </div>
+    </div> *@
+@* } 
+else
+{
+    <p>Loading work tasks...</p>
+} *@
+
+@if (workTasks != null && loggedInUser != null)
+{
+    <div class="bg-light p-3">
+        <div class="card scrollable-card">
+            <ul class="list-group list-group-flush">
+            @for (int i = 0; i < workTasks.Count; i++)
+            {
+                if (i >= 0 && i < workTasks.Count && workTasks[i] != null && !workTasks[i].AuditInformation.IsArchived)
+                {
                     <li class="list-group-item CardText text-dark px-3"  
+                        draggable="true"
+                        @ondragstart="(e) => HandleDragStart(e, workTasks[i].Id)"
                         data-toggle="tooltip" data-placement="top" title="@workTasks[i].Description">
                         <i class="bi bi-clipboard h4"></i> 
                         @workTasks[i].Name
@@ -73,10 +108,7 @@
         </div>
     </div>
 }
-else
-{
-    <p>Loading work tasks...</p>
-}
+
 
 @code {
     [Parameter]
@@ -94,6 +126,17 @@ else
     private List<TaskType> taskTypes = new List<TaskType>();
 
     private bool isEditMode = false;
+
+    //Draggable Code
+
+    private string? draggedTaskId;
+
+    private void HandleDragStart(DragEventArgs e, string taskId)
+    {
+        draggedTaskId = taskId;
+    }
+
+    // -------------
 
     protected override void OnParametersSet()
     {
