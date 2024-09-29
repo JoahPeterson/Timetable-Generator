@@ -21,37 +21,47 @@
 <EditForm Model="course" OnValidSubmit="@SaveCourse" FormName="CourseForm">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
-
-    <div>
-        <label class="form-label" for="Name">Course Name:</label>
-        <InputText id="name" @bind-Value="course.Name" class="form-control" />
-        <ValidationMessage For="@(() => course.Name)" />
+    <div class="form-group row">
+        <label for="Name" class="col-sm-2 col-form-label">Course Name</label>
+        <div class="col-6">
+            <InputText id="name" @bind-Value="course.Name" class="form-control" />
+            <ValidationMessage For="@(() => course.Name)" />
+        </div>
     </div>
-    <div>
-        <label class="form-label" for="Description">Course Description:</label>
-        <InputText id="description" @bind-Value="course.Description" class="form-control" />
-        <ValidationMessage For="@(() => course.Description)" />
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="Description">Course Description</label>
+        <div class="col-6">
+            <InputText id="description" @bind-Value="course.Description" class="form-control" />
+            <ValidationMessage For="@(() => course.Description)" />
+        </div>
     </div>
-    <div>
-        <label class="form-label" for="StartDate">Course Start Date:</label>
-        <input type="date" id="startDate" @bind="course.StartDate" class="form-control" />
-        <ValidationMessage For="@(() => course.StartDate)" />
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="StartDate">Course Start Date</label>
+        <div class="col-6">
+            <input type="date" id="startDate" @bind="course.StartDate" class="form-control" />
+            <ValidationMessage For="@(() => course.StartDate)" />
+        </div>
+    </div> 
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="EndDate">Course Start Date</label>
+        <div class="col-6">
+            <input type="date" id="endDate" @bind="course.EndDate" class="form-control" />
+            <ValidationMessage For="@(() => course.EndDate)" />
+        </div>
     </div>
-    <div>
-        <label class="form-label" for="EndDate">Course End Date:</label>
-        <input type="date" id="endDate" @bind="course.EndDate" class="form-control" />
-        <ValidationMessage For="@(() => course.EndDate)" />
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="CourseTypeId">Course Type</label>
+        <div class="col-6">
+            <InputSelect id="courseTypeId" @bind-Value="course.CourseTypeId" class="form-control">
+                @foreach (var type in courseTypes)
+                {
+                    <option value="@type.Id">@type.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => course.CourseTypeId)" />
+        </div>
     </div>
-    <div>
-        <label class="form-label" for="CourseTypeId">Course Type:</label>
-        <InputSelect id="courseTypeId" @bind-Value="course.CourseTypeId" class="form-control">
-            @foreach (var type in courseTypes)
-            {
-                <option value="@type.Id">@type.Name</option>
-            }
-        </InputSelect>
-        <ValidationMessage For="@(() => course.CourseTypeId)" />
-    </div>
+    
     <div>
         <label class="form-label" for="TermId">Course Term:</label>
         <InputSelect id="term" @bind-Value="course.Term.Id" class="form-control">
