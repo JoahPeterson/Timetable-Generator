@@ -9,22 +9,25 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-<EditForm Model="workTask" OnValidSubmit="@SaveWorkTask">
+<EditForm Model="workTask" OnValidSubmit="@SaveWorkTask" FormName="WorkTaskForm">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
+    <!-- Work Task Name Field -->
     <div class="w-75">
-        <label class="form-label" for="Name">Work Task Name:</label>
+        <label class="form-label" for="Name">Name</label>
         <InputText id="name" @bind-Value="workTask.Name" class="form-control" />
         <ValidationMessage For="@(() => workTask.Name)" />
     </div>
+    <!-- Work Task Description Field -->
     <div class="w-75">
-        <label class="form-label" for="description">Description:</label>
+        <label class="form-label" for="description">Description</label>
         <InputTextArea id="description" @bind-Value="workTask.Description" class="form-control" />
         <ValidationMessage For="@(() => workTask.Description)" />
     </div>
+    <!-- Work Task Type Field -->
     <div class="w-75">
-        <label class="form-label" for="type">Type ID:</label>
+        <label class="form-label" for="type">Type</label>
         <InputSelect id="type" @bind-Value="workTask.TypeId" class="form-control">
             @foreach (var type in taskTypes)
             {
@@ -37,17 +40,19 @@
         </InputSelect>
         <ValidationMessage For="@(() => workTask.TypeId)" />
     </div>
-    
     <div class="d-flex flex-row mt-3 justify-content-end w-75">
+         <!-- Form Reset Button -->
         <div class="d-block m-1">
             <button type="reset" class="btn btn-secondary d-block mt-1" @onclick="HandleReset">Reset</button>
         </div>
+            <!-- Work Task Name Field -->
         <div class="d-block m-1">
             <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
         </div>
     </div>
 </EditForm>
 
+ <!-- List of Work Tasks -->
 @if (workTasks != null && loggedInUser != null)
 {
     <div class="bg-light p-3">
@@ -76,13 +81,30 @@ else
 @code {
     [Parameter]
     public EventCallback<WorkTask> OnWorkTaskFormSubmit { get; set; } 
+
+    [Parameter]
+    public WorkTask? WorkTaskToEdit{ get; set; }
+
     private List<WorkTask>? workTasks;
+
     private User? loggedInUser;
+
     private WorkTask workTask = new WorkTask();
 
     private List<TaskType> taskTypes = new List<TaskType>();
 
     private bool isEditMode = false;
+
+    protected override void OnParametersSet()
+    {
+        if (WorkTaskToEdit != null)
+        {
+            workTask = WorkTaskToEdit;
+            isEditMode = true;
+            return;
+        }
+        workTask = new WorkTask();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -98,8 +120,10 @@ else
 
             if (loggedInUser != null)
             {
-                // Fetch tasktypes from the database
+                // Fetch user's tasktypes from the database
                 taskTypes = await TaskTypeData.GetUsersTaskTypesAsync(loggedInUser.Id);
+
+                // Fetch user's worktasks from the database
                 workTasks = await WorkTaskData.GetUsersWorkTasksAsync(loggedInUser.Id);
             }
         }
@@ -119,6 +143,7 @@ else
             var authState = await authProvider.GetAuthenticationStateAsync();
             var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
 
+            // Instantiate a new Work Task object 
             WorkTask newWorkTask = new WorkTask
             {
                 Id = Guid.NewGuid().ToString(),
@@ -131,12 +156,19 @@ else
                 }
             };
 
+            // Create the new Work Task 
             await WorkTaskData.CreateAsync(newWorkTask);
+
+            // Make the list current
             await UpdateWorkTaskList();
 
         }
     }
 
+    /// <summary>
+    /// Updates the list of work tasks to be current
+    /// </summary>
+    /// <returns></returns>
     private async Task UpdateWorkTaskList()
     {
         workTasks = await WorkTaskData.GetAsync();
