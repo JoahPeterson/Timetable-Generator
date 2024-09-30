@@ -142,7 +142,15 @@
         if (isEditMode)
         {
             course.AuditInformation.LastModified = DateTime.Now;
-            course.Term = await TermData.GetByIdAsync(course.Term.Id);
+
+            // Fetch the term from the database
+            var termFromDb = await TermData.GetByIdAsync(course.Term.Id);
+
+            // Update the term duration from the form
+            termFromDb.Duration = course.Term.Duration;
+
+            course.Term = termFromDb; // Assign the updated term back to the course
+
             await CourseData.UpdateCourseAsync(course);
         }
         else
