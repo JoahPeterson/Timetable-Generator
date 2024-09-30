@@ -18,6 +18,9 @@ public interface IDbConnection
 
     string CourseCollectionName { get; }
 
+    IMongoCollection<HelpArticle> HelpArticleCollection { get; }
+    string HelpArticleCollectionName { get; }
+
     IMongoCollection<TaskType> TaskTypeCollection { get; }
 
     string TaskTypeCollectionName { get; }
