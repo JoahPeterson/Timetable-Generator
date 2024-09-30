@@ -3,7 +3,7 @@
 @inject IHttpContextAccessor httpContextAccessor
 @inject IJSRuntime JS
 @inject IWorkUnitData WorkUnitData
-
+@inject IWorkUnitTaskData WorkUnitTaskData
 @inject IWorkTaskData WorkTaskData
 @inject IUserData UserData
 @inject AuthenticationStateProvider authProvider
@@ -22,7 +22,18 @@
      style="height: @(RowHeightPercentage)vh">
     <p>@WorkUnit.Name</p>
     <p>Duration: @WorkUnit.Duration</p>
-    
+    <ul>
+        @foreach (var task in WorkUnit.Tasks)
+        {
+            <li class="list-group-item CardText text-dark px-3"
+                draggable="true"
+                @ondragstart="(e) => HandleDragStart(e, task.TaskId)">
+                @task.TaskId
+            </li>
+        }
+    </ul>
+   
+
 </div>
 
 @code {
@@ -43,24 +54,24 @@
 
     private double RowHeightPercentage { get => SingleRowHeightPercentage * WorkUnit.Duration; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await authProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     var authState = await authProvider.GetAuthenticationStateAsync();
+    //     var user = authState.User;
 
-        // Get the user's ID claim
-        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+    //     // Get the user's ID claim
+    //     var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
 
-        if (!string.IsNullOrEmpty(userIdClaim))
-        {
-            loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+    //     if (!string.IsNullOrEmpty(userIdClaim))
+    //     {
+    //         loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
 
-            if (loggedInUser != null)
-            {
-                
-            }
-        }
-    }
+    //         if (loggedInUser != null)
+    //         {
+    //             tasks = await WorkUnitTaskData.GetUsersWorkUnitTasksAsync(loggedInUser.Id);
+    //         }
+    //     }
+    // }
 
     private async Task SelectWorkUnit()
     {
@@ -104,9 +115,9 @@
         }
     }
 
-    private void HandleDragStart(DragEventArgs e, string taskId)
+    private async Task HandleDragStart(DragEventArgs e, string taskId)
     {
-        draggedTaskId = taskId;
+        await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
     }
  
 
