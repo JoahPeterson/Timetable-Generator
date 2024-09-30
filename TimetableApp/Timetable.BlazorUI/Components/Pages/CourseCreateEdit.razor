@@ -76,8 +76,10 @@
     @if (isEditMode)
     {
         <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-2">Delete</button>
+        <a href="/timetable/@course.Id">Course Time Table</a>
     }
 </EditForm>
+
 
 @code {
     [Parameter] public string? courseId { get; set; }
@@ -140,7 +142,7 @@
         if (isEditMode)
         {
             course.AuditInformation.LastModified = DateTime.Now;
-            course.Term = terms.FirstOrDefault(term => term.Id == course.Term.Id);
+            course.Term = await TermData.GetByIdAsync(course.Term.Id);
             await CourseData.UpdateCourseAsync(course);
         }
         else
@@ -158,13 +160,14 @@
                     Term = await TermData.GetByIdAsync(course.Term.Id),
                 };
 
+            newCourse.Term.Duration = course.Term.Duration;
             newCourse.AuditInformation.CreatedById = mongoUser.Id;
 
             await CourseData.CreateCourseAsync(newCourse);
         }
 
         // Redirect to the course list or home after save
-        Navigation.NavigateTo("/");
+        Navigation.NavigateTo("/dashboard");
     }
 
     private async Task ShowDeleteConfirmation()

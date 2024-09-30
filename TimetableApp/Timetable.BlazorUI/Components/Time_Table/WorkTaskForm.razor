@@ -159,7 +159,7 @@ else
         {
             Console.WriteLine(ex.Message);
         }
-        
+
     }
 
     // -------------
@@ -200,18 +200,18 @@ else
 
     private async Task SaveWorkTask()
     {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+        
         if (isEditMode)
         {
             workTask.AuditInformation.LastModified = DateTime.Now;
             await WorkTaskData.UpdateAsync(workTask);
-            await UpdateWorkTaskList();
+            await UpdateWorkTaskList(mongoUser.Id);
             isEditMode = false;
         }
         else
         {
-            var authState = await authProvider.GetAuthenticationStateAsync();
-            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
-
             // Instantiate a new Work Task object 
             WorkTask newWorkTask = new WorkTask
             {
@@ -229,7 +229,7 @@ else
             await WorkTaskData.CreateAsync(newWorkTask);
 
             // Make the list current
-            await UpdateWorkTaskList();
+            await UpdateWorkTaskList(mongoUser.Id);
 
         }
     }
@@ -238,10 +238,12 @@ else
     /// Updates the list of work tasks to be current
     /// </summary>
     /// <returns></returns>
-    private async Task UpdateWorkTaskList()
+    private async Task UpdateWorkTaskList(string mongoUserId)
     {
-        workTasks = await WorkTaskData.GetAsync();
+        List<WorkTask> tempWorkTasks = await WorkTaskData.GetAsync();
+        workTasks = tempWorkTasks.Where(tempTask => tempTask.AuditInformation.CreatedById == mongoUserId).ToList();
     }
+
 
     private void HandleReset()
     {
