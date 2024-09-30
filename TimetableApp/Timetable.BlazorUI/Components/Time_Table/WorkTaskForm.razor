@@ -1,8 +1,11 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
 @inject IWorkTaskData WorkTaskData
 @inject IUserData UserData
 @inject ITaskTypeData TaskTypeData
+@inject IJSRuntime JS
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @inject Blazored.Modal.Services.IModalService Modal
@@ -91,7 +94,7 @@ else
     <div class="bg-light p-3">
         <div class="card scrollable-card">
             <ul class="list-group list-group-flush">
-            @for (int i = 0; i < workTasks.Count; i++)
+           @*  @for (int i = 0; i < workTasks.Count; i++)
             {
                 if (i >= 0 && i < workTasks.Count && workTasks[i] != null && !workTasks[i].AuditInformation.IsArchived)
                 {
@@ -103,7 +106,20 @@ else
                         @workTasks[i].Name
                     </li>
                 }
-            }
+            } *@
+                @foreach (var task in workTasks)
+                {
+                    if (task != null && !task.AuditInformation.IsArchived)
+                    {
+                        <li class="list-group-item CardText text-dark px-3"
+                            draggable="true"
+                            @ondragstart="(e) => HandleDragStart(e, task.Id)"
+                            data-toggle="tooltip" data-placement="top" title="@task.Description">
+                            <i class="bi bi-clipboard h4"></i>
+                            @task.Name
+                        </li>
+                    }
+                }
             </ul>
         </div>
     </div>
@@ -131,9 +147,19 @@ else
 
     private string? draggedTaskId;
 
-    private void HandleDragStart(DragEventArgs e, string taskId)
+    private async Task HandleDragStart(DragEventArgs e, string taskId)
     {
-        draggedTaskId = taskId;
+        try
+        {
+            draggedTaskId = taskId;
+            await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
+            //httpContextAccessor.HttpContext.Session.SetString("taskID", taskId);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        
     }
 
     // -------------

@@ -1,4 +1,6 @@
 ﻿@using TimetableApp.DataModels.Models
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
 @inject IJSRuntime JS
 @inject IWorkUnitData WorkUnitData
 @inject IWorkTaskData WorkTaskData
@@ -8,13 +10,12 @@
     <p>Duration: @WorkUnit.Duration</p>
 </div>
  *@
-
+@*   *@
  <!-- Droppable Version for Drag n Drop-->
  <div class="work-unit bg-success text-white border border-dark" 
-     draggable="true" 
+    ondragover="event.preventDefault();"
      @onclick="SelectWorkUnit" 
-     @ondragover="HandleDragOver" 
-     @ondrop="(e) => HandleDrop(e, WorkUnit.Id)" 
+     @ondrop="(e) => HandleDrop(e, WorkUnit.Id)"
      style="height: @(RowHeightPercentage)vh">
     <p>@WorkUnit.Name</p>
     <p>Duration: @WorkUnit.Duration</p>
@@ -30,7 +31,7 @@
     [Parameter]
     public EventCallback<WorkUnit> OnSelected { get; set; }
 
-     private string? draggedTaskId;
+    private string? draggedTaskId;
 
     private double RowHeightPercentage { get => SingleRowHeightPercentage * WorkUnit.Duration; }
 
@@ -39,14 +40,21 @@
         await OnSelected.InvokeAsync(WorkUnit);
     }
 
-     private async Task HandleDragOver(DragEventArgs e)
-     {
-        // Prevent default behavior to allow drop
-        await JS.InvokeVoidAsync("preventDefault", e);
-     }
-
-     private async Task HandleDrop(DragEventArgs e, string workUnitId)
+    private async Task HandleDragOver(DragEventArgs e)
     {
+        // Prevent default behavior to allow drop
+        //await JS.InvokeVoidAsync("preventDefault", e);
+    }
+
+    private async Task Drop()
+    {
+
+    }
+
+    private async Task HandleDrop(DragEventArgs e, string workUnitId)
+    {
+        //draggedTaskId = httpContextAccessor.HttpContext.Session.GetString("taskID");
+        draggedTaskId = await JS.InvokeAsync<string>("GetSession", "TaskId");
         if (!string.IsNullOrEmpty(draggedTaskId))
         {
             // Get the task by ID and assign it to this work unit
@@ -56,7 +64,7 @@
                 // Add task to this WorkUnit's task list
                 WorkUnit.Tasks.Add(new WorkUnitTask
                 {
-                    Id = task.Id,
+                    TaskId = task.Id,
                     WorkUnitId = WorkUnit.Id
                 });
 
