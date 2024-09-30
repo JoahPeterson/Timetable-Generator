@@ -63,3 +63,14 @@
 }
 
 /*Card Styling End*/
+
+/*Custom color-profile Classes Start*/
+
+.mstc-gold-btn {
+    background-color: #F8B62A;
+    color: black;
+}
+
+    .mstc-gold-btn:hover {
+        background-color: #C59125;
+    }
