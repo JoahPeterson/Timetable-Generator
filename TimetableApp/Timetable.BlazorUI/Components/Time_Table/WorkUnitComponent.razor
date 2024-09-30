@@ -3,7 +3,10 @@
 @inject IHttpContextAccessor httpContextAccessor
 @inject IJSRuntime JS
 @inject IWorkUnitData WorkUnitData
+
 @inject IWorkTaskData WorkTaskData
+@inject IUserData UserData
+@inject AuthenticationStateProvider authProvider
 
 @* <div class="work-unit bg-success text-white border border-dark" draggable="true" @onclick="SelectWorkUnit" style="height: @(RowHeightPercentage)vh">
     <p>@WorkUnit.Name</p>
@@ -19,6 +22,7 @@
      style="height: @(RowHeightPercentage)vh">
     <p>@WorkUnit.Name</p>
     <p>Duration: @WorkUnit.Duration</p>
+    
 </div>
 
 @code {
@@ -31,9 +35,32 @@
     [Parameter]
     public EventCallback<WorkUnit> OnSelected { get; set; }
 
+    private List<WorkUnitTask> tasks;
+
+    private User? loggedInUser;
+
     private string? draggedTaskId;
 
     private double RowHeightPercentage { get => SingleRowHeightPercentage * WorkUnit.Duration; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        // Get the user's ID claim
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim))
+        {
+            loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+
+            if (loggedInUser != null)
+            {
+                
+            }
+        }
+    }
 
     private async Task SelectWorkUnit()
     {

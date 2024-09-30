@@ -89,6 +89,6 @@ public static class RegisterServices
         builder.Services.AddSingleton<IUserData, MongoUserData>();
         builder.Services.AddSingleton<IWorkTaskData, MongoWorkTaskData>();
         builder.Services.AddSingleton<IWorkUnitData, MongoWorkUnitData>();
-
+        builder.Services.AddSingleton<IWorkUnitTaskData, MongoWorkUnitTaskData>();
     }
 }

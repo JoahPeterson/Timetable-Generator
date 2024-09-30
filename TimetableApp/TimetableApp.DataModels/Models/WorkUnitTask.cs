@@ -4,6 +4,8 @@ public class WorkUnitTask
 {
     public string Id { get; set; }
 
+    public Auditable AuditInformation { get; set; }
+
     public string? Duration { get; set; }
 
     public string TaskId { get; set; }
