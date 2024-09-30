@@ -12,29 +12,38 @@
     <HelpArticleComponent HelpArticle="article" ></HelpArticleComponent>
 }
 
-<AuthorizeView Roles="Admin">
-    <Authorized>
-        <EditForm FormName="HelpArticleForm" Model="helpArticle" OnValidSubmit="SaveArticle">
-            <ChildContent Context="editContext">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
+<div class="container mt-4 w-75">
+    <div class="row justify-content-center">
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <EditForm FormName="HelpArticleForm" Model="helpArticle" OnValidSubmit="SaveArticle">
+                    <ChildContent Context="editContext">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
 
-                <div>
-                    <label for="Title">Title:</label>
-                    <InputText id="title" @bind-Value="helpArticle.Title" class="form-control" />
-                    <ValidationMessage For="@(() => helpArticle.Title)" />
-                </div>
+                        <div>
+                            <label for="Title">Title:</label>
+                            <InputText id="title" @bind-Value="helpArticle.Title" class="form-control" />
+                            <ValidationMessage For="@(() => helpArticle.Title)" />
+                        </div>
 
 
+                        <div class="form-group mt-3">
+                            <label for="Content">Content:</label>
+                            <Editor ApiKey="@_apikey" Conf="@_conf" @bind-Value="helpArticle.Content" Field="@(() => helpArticle.Content)" />
+                            <ValidationMessage For="@(() => helpArticle.Content)" />
+                        </div>
 
-                <div class="d-flex flex-row mt-3 justify-content-end">
-                    <button type="submit" class="btn btn-primary d-block m-1">Save</button>
-                </div>
-            </ChildContent>
-        </EditForm>
-        <Editor ApiKey="@_apikey" Conf="@_conf" @bind-Value=helpArticle.Content />
-    </Authorized>
-</AuthorizeView>
+                        <div class="d-flex flex-row mt-3 justify-content-end">
+                            <button type="submit" class="btn btn-primary d-block m-1">Save</button>
+                        </div>
+                    </ChildContent>
+                </EditForm>
+                @* <Editor ApiKey="@_apikey" Conf="@_conf" @bind-Value=helpArticle.Content /> *@
+            </Authorized>
+        </AuthorizeView>
+    </div>
+</div>
 
 
 
@@ -75,6 +84,7 @@
             newHelpArticle.AuditInformation.CreatedById = mongoUser.Id;
 
             await HelpArticleData.CreateAsync(newHelpArticle);
+            HelpArticles.Add(helpArticle);
         }
 
         helpArticle = new HelpArticle();
