@@ -1,24 +1,89 @@
 ﻿@page "/help"
 @using Microsoft.AspNetCore.Authorization
-@* @inject IHelpArticleData HelpArticleData *@
+@inject IHelpArticleData HelpArticleData
+@inject IUserData UserData
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@using TinyMCE.Blazor
 
 @foreach (HelpArticle article in HelpArticles)
 {
-    <HelpArticleComponent HelpArticle="article"></HelpArticleComponent>
+    <HelpArticleComponent HelpArticle="article" ></HelpArticleComponent>
 }
 
 <AuthorizeView Roles="Admin">
-    <Authorized >
-        <HelpArticleForm ></HelpArticleForm>
+    <Authorized>
+        <EditForm FormName="HelpArticleForm" Model="helpArticle" OnValidSubmit="SaveArticle">
+            <ChildContent Context="editContext">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div>
+                    <label for="Title">Title:</label>
+                    <InputText id="title" @bind-Value="helpArticle.Title" class="form-control" />
+                    <ValidationMessage For="@(() => helpArticle.Title)" />
+                </div>
+
+
+
+                <div class="d-flex flex-row mt-3 justify-content-end">
+                    <button type="submit" class="btn btn-primary d-block m-1">Save</button>
+                </div>
+            </ChildContent>
+        </EditForm>
+        <Editor ApiKey="@_apikey" Conf="@_conf" @bind-Value=helpArticle.Content />
     </Authorized>
 </AuthorizeView>
 
+
+
 @code {
-    // List<HelpArticle> HelpArticles = new List<HelpArticle>();
+    List<HelpArticle> HelpArticles = new List<HelpArticle>();
+
+    HelpArticle helpArticle = new HelpArticle();
+
+    private bool isEditMode = false;
+
+    private readonly string _initialValue = "Welcome to TinyMCE Blazor";
+    private readonly string _apikey = "34ycrvhdyzo6k07flrafyitn9gjt51na0jm3s9g30rmu2giq";
+    private Dictionary<string, object> _conf = new Dictionary<string, object> {
+    { "height", 500},
+    { "toolbar", "undo redo | a11ycheck casechange blocks | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist checklist outdent indent | removeformat | advcode table help"},
+    { "plugins", "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code help wordcount"}
+    };
+
+    private async Task SaveArticle()
+    {
+        if (isEditMode)
+        {
+            helpArticle.AuditInformation.LastModified = DateTime.Now;
+            await HelpArticleData.UpdateAsync(helpArticle);
+            isEditMode = false;
+        }
+        else
+        {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+            HelpArticle newHelpArticle = new HelpArticle()
+                {
+                    Title = helpArticle.Title,
+                    Content = helpArticle.Content
+                };
+
+            newHelpArticle.AuditInformation.CreatedById = mongoUser.Id;
+
+            await HelpArticleData.CreateAsync(newHelpArticle);
+        }
+
+        helpArticle = new HelpArticle();
+        StateHasChanged();
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        // Task getHelpArticlesTask = HelpArticleData.GetAllAsync();
+        HelpArticles = await HelpArticleData.GetAllAsync();
     }
 
     public async Task SaveArticle(HelpArticle helpArticle)
@@ -29,4 +94,5 @@
             HelpArticles.Add(helpArticle);
         else
             HelpArticles[index] = helpArticle;
+    }
 }

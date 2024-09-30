@@ -1,11 +1,18 @@
-﻿<div>
-    <div>
-        <div class="HelpArticleTitle">@Article.Title</div=div>
+﻿<div class="helpArticle container mt-4">
+    <div class="articleTitle row justify-content-center">
+        <div class="col-12 text-center">
+            <div class="helpArticle-title display-4 mb-3">
+                @HelpArticle.Title
+            </div>
+        </div>
     </div>
-    <dib>
-        <div class="HelpArticleContent">Atricle.Content </div>
-    </dib>
-
+    <div class="articlContent row">
+        <div class="col-12">
+            <div class="HelpArticleContent">
+                @((MarkupString)HelpArticle.Content)
+            </div>
+        </div>
+    </div>
 </div>
 
 @code {
