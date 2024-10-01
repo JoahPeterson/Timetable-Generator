@@ -8,7 +8,7 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-<EditForm Model="workUnit" OnValidSubmit="@SaveWorkUnit">
+<EditForm FormName="WorkUnitForm" Model="workUnit" OnValidSubmit="@SaveWorkUnit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -70,7 +70,7 @@
         if (isEditMode)
         {
             workUnit.AuditInformation.LastModified = DateTime.Now;
-            await WorkUnitData.UpdateTaskTypeAsync(workUnit);
+            await WorkUnitData.UpdateAsync(workUnit);
             await HandleSubmit(workUnit);
             isEditMode = false;
         }

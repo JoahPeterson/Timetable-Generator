@@ -29,6 +29,12 @@ public static class RegisterServices
         builder.Services.AddScoped<IdentityRedirectManager>();
         builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
+        builder.Services.AddDistributedMemoryCache(); 
+        builder.Services.AddSession(options => 
+        { options.IdleTimeout = TimeSpan.FromMinutes(15); options.Cookie.HttpOnly = true; options.Cookie.IsEssential = true; });
+
+        builder.Services.AddHttpContextAccessor();
+
         builder.Services.AddAuthorizationCore(config =>
         {
             config.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
@@ -81,7 +87,8 @@ public static class RegisterServices
         builder.Services.AddSingleton<ITermData, MongoTermData>();
         builder.Services.AddSingleton<ITermDurationData, MongoTermDurationData>();
         builder.Services.AddSingleton<IUserData, MongoUserData>();
+        builder.Services.AddSingleton<IWorkTaskData, MongoWorkTaskData>();
         builder.Services.AddSingleton<IWorkUnitData, MongoWorkUnitData>();
-
+        builder.Services.AddSingleton<IWorkUnitTaskData, MongoWorkUnitTaskData>();
     }
 }

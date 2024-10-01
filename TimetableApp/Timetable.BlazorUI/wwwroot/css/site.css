@@ -63,3 +63,29 @@
 }
 
 /*Card Styling End*/
+
+.dropzone {
+    padding: 30px;
+    border: 1px solid #75868a;
+    border-radius: 5px;
+    list-style: none;
+}
+
+.no-drop {
+    border: 2px dashed red;
+}
+
+.can-drop {
+    border: 2px dashed green;
+}
+
+.draggable {
+    margin-bottom: 10px;
+    padding: 10px 25px;
+    border: 1px solid #424d5c;
+    cursor: grab;
+    background: #5c6b7f;
+    color: #ffffff;
+    border-radius: 5px;
+    width: 250px;
+}
