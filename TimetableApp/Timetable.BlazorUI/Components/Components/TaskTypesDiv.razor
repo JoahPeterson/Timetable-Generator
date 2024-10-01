@@ -3,33 +3,40 @@
 @inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
+@inject Blazored.Modal.Services.IModalService Modal
+@using Blazored.Modal
+@using Blazored.Modal.Services
 @rendermode InteractiveServer
 @attribute [Authorize]
 
 @if (taskTypes != null && loggedInUser != null)
 {
-
     var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2" };
-
     <div class="bg-light p-3">
         <div class="card scrollable-card">
             <ul class="list-group list-group-flush">
-                @for (int i = 0; i < taskTypes.Count; i++)
+                @foreach (var (taskType, index) in taskTypes.Select((value, i) => (value, i)))
                 {
-                    <li class="list-group-item CardText text-white px-3 @colorClasses[i % colorClasses.Count]"
-                        data-toggle="tooltip" data-placement="top" title="@taskTypes[i].Description">
-                        <i class="bi bi-clipboard h4"></i>
-                        <a href="tasktype/create/@taskTypes[i].Id" class="text-decoration-none text-white fw-bold">@taskTypes[i].Name</a>
+                    var colorClass = colorClasses.ElementAtOrDefault(index % colorClasses.Count) ?? "Cardcolor-1";  // Ensure safe access
+                    <li class="list-group-item CardText text-white px-3 d-flex justify-content-between @colorClass"
+                        data-toggle="tooltip" data-placement="top" title="@taskType.Description">
+                        <div>
+                            <i class="bi bi-clipboard h4"></i>
+                            <a href="tasktype/create/@taskType.Id" class="text-decoration-none text-white fw-bold">@taskType.Name</a>
+                        </div>
+                        <a class="text-decoration-none text-white fw-bold ms-auto" @onclick="() => ShowDeleteConfirmation(taskType)">
+                            <i class="bi bi-dash-circle"></i>
+                        </a>
                     </li>
                 }
             </ul>
         </div>
         <div class="mt-4 fixed">
-            <a href="tasktype/create" class="text-black text-decoration-none CardText"><i class="bi bi-plus-circle h5"></i> Add</a>
+            <a href="tasktype/create" class="text-black text-decoration-none CardText">
+                <i class="bi bi-plus-circle h5"></i> Add
+            </a>
         </div>
-
     </div>
-
 }
 else
 {
@@ -37,7 +44,6 @@ else
 }
 
 @code {
-
     private List<TaskType>? taskTypes;
     private User? loggedInUser;
 
@@ -52,7 +58,6 @@ else
         if (!string.IsNullOrEmpty(userIdClaim))
         {
             loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
-
             if (loggedInUser != null)
             {
                 // Fetch task types for the logged-in user
@@ -61,5 +66,21 @@ else
         }
     }
 
+    private async Task ShowDeleteConfirmation(TaskType taskType)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Message", $"Are you sure you want to delete the task type '{taskType.Name}'?");
 
+        var modal = Modal.Show<ConfirmationDialog>("Confirm Delete", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            // Will do stuff once I get it displayed
+        }
+        else
+        {
+            // Nothing right now
+        }
+    }
 }

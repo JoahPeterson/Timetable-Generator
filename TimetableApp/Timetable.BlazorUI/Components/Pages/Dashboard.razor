@@ -2,7 +2,11 @@
 @using Timetable.BlazorUI.Components.Components
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
+@inject Blazored.Modal.Services.IModalService Modal
+@using Blazored.Modal
+@using Blazored.Modal.Services
 
+<CascadingBlazoredModal />
 
 <div class="row justify-content-center">
     <div class="col-5">
@@ -42,7 +46,7 @@
             </div>
             <div class="col-4">
                 <a href="admin/term" class="text-decoration-none">
-                    <div class="card text-white Cardcolor-3 mb-3" style="max-width: 18rem;">
+                    <div class="card text-white Cardcolor-1 mb-3" style="max-width: 18rem;">
                         <div class="card-body text-center">
                             <i class="bi bi-list-stars h1"></i>
                             <h5 class="card-title text-center">Terms</h5>
@@ -58,5 +62,4 @@
         @* <h2>My Timetables</h2> *@
     </div>
 </div>
-
 

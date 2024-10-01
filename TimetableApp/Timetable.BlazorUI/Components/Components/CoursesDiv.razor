@@ -18,9 +18,14 @@
                 {
                     <li class="list-group-item px-3 @colorClasses[i % colorClasses.Count]"
                         data-toggle="tooltip" data-placement="top" title="@courses[i].Description">
-                        <a href="/course/create/@courses[i].Id" class="text-white text-decoration-none fw-bold">
-                            <i class="bi bi-journal-bookmark h4"></i> @courses[i].Name
-                        </a>
+                        <div class="d-flex justify-content-between">
+                            <a href="/course/edit/@courses[i].Id" class="text-white text-decoration-none fw-bold">
+                                <i class="bi bi-journal-bookmark h4"></i> @courses[i].Name
+                            </a>
+                            <a class="text-white text-decoration-none fw-bold">
+                                <i class="bi bi-dash-circle"></i>
+                            </a>
+                        </div>
                     </li>
                 }
             </ul>
