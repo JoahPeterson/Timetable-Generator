@@ -98,6 +98,7 @@
     </div>
 </EditForm>
 
+
 @code {
     [Parameter] public string? courseId { get; set; }
 
@@ -159,7 +160,15 @@
         if (isEditMode)
         {
             course.AuditInformation.LastModified = DateTime.Now;
-            course.Term = terms.FirstOrDefault(term => term.Id == course.Term.Id);
+
+            // Fetch the term from the database
+            var termFromDb = await TermData.GetByIdAsync(course.Term.Id);
+
+            // Update the term duration from the form
+            termFromDb.Duration = course.Term.Duration;
+
+            course.Term = termFromDb; // Assign the updated term back to the course
+
             await CourseData.UpdateCourseAsync(course);
         }
         else
@@ -177,13 +186,14 @@
                     Term = await TermData.GetByIdAsync(course.Term.Id),
                 };
 
+            newCourse.Term.Duration = course.Term.Duration;
             newCourse.AuditInformation.CreatedById = mongoUser.Id;
 
             await CourseData.CreateCourseAsync(newCourse);
         }
 
         // Redirect to the course list or home after save
-        Navigation.NavigateTo("/");
+        Navigation.NavigateTo("/dashboard");
     }
 
     private async Task ShowDeleteConfirmation()

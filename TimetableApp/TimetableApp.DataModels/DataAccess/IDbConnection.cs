@@ -44,4 +44,8 @@ public interface IDbConnection
     IMongoCollection<WorkUnit> WorkUnitCollection { get; }
 
     string WorkUnitCollectionName { get; }
+
+    IMongoCollection<WorkUnitTask> WorkUnitTaskCollection { get; }
+
+    string WorkUnitTaskCollectionName { get; }
 }

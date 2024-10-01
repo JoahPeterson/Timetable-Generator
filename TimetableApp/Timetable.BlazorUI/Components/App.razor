@@ -19,5 +19,14 @@
     <Routes/>
     <script src="_framework/blazor.web.js"></script>
     <script src="~/js/site.js"></script>
+    <script>
+        function SetSession(name, taskId) {
+            localStorage.setItem(name, taskId);
+        }
+
+        function GetSession(name) {
+            return localStorage.getItem(name);
+        }
+    </script>
 </body>
 </html>

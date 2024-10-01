@@ -59,6 +59,18 @@ namespace TimetableApp.DataModels.DataAccess
         }
 
         /// <summary>
+        /// Gets a list of WorkTasks for a user.
+        /// </summary>
+        /// <param name="createdById">The id value from the user in MongoDB</param>
+        /// <returns>List of WorkTasks</returns>
+        public async Task<List<WorkTask>> GetUsersWorkTasksAsync(string createdById)
+        {
+            var results = await _tasks.FindAsync(tt => tt.AuditInformation.CreatedById == createdById);
+
+            return results.ToList();
+        }
+
+        /// <summary>
         /// Update a WorkTask in the database.
         /// </summary>
         /// <param name="task">The updated WorkTask Object</param>
