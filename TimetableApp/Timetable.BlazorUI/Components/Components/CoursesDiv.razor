@@ -3,29 +3,29 @@
 @inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
+@inject Blazored.Modal.Services.IModalService Modal
 @rendermode InteractiveServer
 @attribute [Authorize]
 
 @if (courses != null && loggedInUser != null)
 {
-    // Use only two colors in the list
     var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2" };
 
     <div class="bg-light p-3">
         <div class="card scrollable-card">
             <ul class="list-group list-group-flush">
-                @for (int i = 0; i < courses.Count; i++)
+                @foreach (var (course, index) in courses.Select((value, i) => (value, i)))
                 {
-                    <li class="list-group-item px-3 @colorClasses[i % colorClasses.Count]"
-                        data-toggle="tooltip" data-placement="top" title="@courses[i].Description">
-                        <div class="d-flex justify-content-between">
-                            <a href="/course/edit/@courses[i].Id" class="text-white text-decoration-none fw-bold">
-                                <i class="bi bi-journal-bookmark h4"></i> @courses[i].Name
-                            </a>
-                            <a class="text-white text-decoration-none fw-bold">
-                                <i class="bi bi-dash-circle"></i>
-                            </a>
+                    var colorClass = colorClasses.ElementAtOrDefault(index % colorClasses.Count) ?? "Cardcolor-1";  // Ensure safe access
+                    <li class="list-group-item CardText text-white px-3 d-flex justify-content-between @colorClass"
+                        data-toggle="tooltip" data-placement="top" title="@course.Description">
+                        <div>
+                            <i class="bi bi-journal-bookmark h4"></i>
+                            <a href="/course/create/@course.Id" class="text-white text-decoration-none fw-bold">@course.Name</a>
                         </div>
+                        <a class="text-white text-decoration-none fw-bold ms-auto" @onclick="() => ShowDeleteConfirmation(course)">
+                            <i class="bi bi-dash-circle h5"></i>
+                        </a>
                     </li>
                 }
             </ul>
@@ -45,13 +45,13 @@ else
 @code {
     private List<Course>? courses;
     private User? loggedInUser;
+    private bool showConfirmationModal = false;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await authProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        // Get the user's ID claim
         var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
 
         if (!string.IsNullOrEmpty(userIdClaim))
@@ -60,9 +60,47 @@ else
 
             if (loggedInUser != null)
             {
-                // Fetch courses for the logged-in user
                 courses = await CourseData.GetUsersCoursesAsync(loggedInUser.Id);
             }
         }
     }
+
+    private async Task Archive(Course course)
+    {
+        showConfirmationModal = false;
+
+        course.AuditInformation.LastModified = DateTime.Now;
+        course.AuditInformation.IsArchived = true;
+        await CourseData.UpdateCourseAsync(course);
+
+        if (courses is not null)
+            courses.Remove(course);
+
+        StateHasChanged();
+    }
+
+    private async Task OnConfirmationResult(bool confirmed, Course course)
+    {
+        showConfirmationModal = false; // Hide the modal
+        if (confirmed)
+        {
+            await Archive(course);
+        }
+    }
+
+    private async Task ShowDeleteConfirmation(Course course)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Message", $"Are you sure you want to delete the course '{course.Name}'?");
+
+        var modal = Modal.Show<ConfirmationDialog>("Confirm Delete", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            await OnConfirmationResult(true, course);
+        }
+    }
+
 }
+

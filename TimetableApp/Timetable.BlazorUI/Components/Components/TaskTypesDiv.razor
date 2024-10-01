@@ -4,10 +4,10 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @inject Blazored.Modal.Services.IModalService Modal
-@using Blazored.Modal
-@using Blazored.Modal.Services
 @rendermode InteractiveServer
 @attribute [Authorize]
+
+
 
 @if (taskTypes != null && loggedInUser != null)
 {
@@ -25,7 +25,7 @@
                             <a href="tasktype/create/@taskType.Id" class="text-decoration-none text-white fw-bold">@taskType.Name</a>
                         </div>
                         <a class="text-decoration-none text-white fw-bold ms-auto" @onclick="() => ShowDeleteConfirmation(taskType)">
-                            <i class="bi bi-dash-circle"></i>
+                            <i class="bi bi-dash-circle h5"></i>
                         </a>
                     </li>
                 }
@@ -46,6 +46,7 @@ else
 @code {
     private List<TaskType>? taskTypes;
     private User? loggedInUser;
+    private bool showConfirmationModal = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,6 +67,28 @@ else
         }
     }
 
+    private async Task OnConfirmationResult(bool confirmed, TaskType taskType)
+    {
+        showConfirmationModal = false; // Hide the modal
+        if (confirmed)
+        {
+            await Archive(taskType);
+        }
+    }
+
+    private async Task Archive(TaskType taskType)
+    {
+
+        taskType.AuditInformation.LastModified = DateTime.Now;
+        taskType.AuditInformation.IsArchived = true;
+        await TaskTypeData.UpdateTaskTypeAsync(taskType);
+
+        if (taskTypes is not null)
+            taskTypes.Remove(taskType);
+
+        StateHasChanged();
+    }
+
     private async Task ShowDeleteConfirmation(TaskType taskType)
     {
         var parameters = new ModalParameters();
@@ -76,11 +99,13 @@ else
 
         if (!result.Cancelled)
         {
-            // Will do stuff once I get it displayed
+            await OnConfirmationResult(true, taskType);
+            //await Archive(taskType);
         }
         else
         {
             // Nothing right now
         }
     }
+
 }
