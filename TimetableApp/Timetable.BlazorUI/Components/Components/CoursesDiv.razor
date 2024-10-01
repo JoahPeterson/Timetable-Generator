@@ -8,29 +8,29 @@
 
 @if (courses != null && loggedInUser != null)
 {
- 
-var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2", "Cardcolor-3" };
+    // Use only two colors in the list
+    var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2" };
 
-<div class="bg-light p-3">
-    <div class="card scrollable-card">
-        <ul class="list-group list-group-flush">
-       @for (int i = 0; i < courses.Count; i++)
-        {
-            <li class="list-group-item px-3 @colorClasses[i % colorClasses.Count]"
-                data-toggle="tooltip" data-placement="top" title="@courses[i].Description">
-                <a href="/course/create/@courses[i].Id" class="text-white text-decoration-none fw-bold">
-                    <i class="bi bi-journal-bookmark h4"></i> @courses[i].Name
-                </a>
-            </li>
-        }
-        </ul>
+    <div class="bg-light p-3">
+        <div class="card scrollable-card">
+            <ul class="list-group list-group-flush">
+                @for (int i = 0; i < courses.Count; i++)
+                {
+                    <li class="list-group-item px-3 @colorClasses[i % colorClasses.Count]"
+                        data-toggle="tooltip" data-placement="top" title="@courses[i].Description">
+                        <a href="/course/create/@courses[i].Id" class="text-white text-decoration-none fw-bold">
+                            <i class="bi bi-journal-bookmark h4"></i> @courses[i].Name
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="mt-4 fixed">
+            <a href="course/create" class="text-black text-decoration-none CardText">
+                <i class="bi bi-plus-circle h5"></i> Add
+            </a>
+        </div>
     </div>
-    <div class="mt-4 fixed">
-        <a href="course/create" class="text-black text-decoration-none CardText"><i class="bi bi-plus-circle h5"></i> Add</a>
-    </div>
-    
-</div>
- 
 }
 else
 {
@@ -38,7 +38,6 @@ else
 }
 
 @code {
-
     private List<Course>? courses;
     private User? loggedInUser;
 
@@ -46,14 +45,14 @@ else
     {
         var authState = await authProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        
+
         // Get the user's ID claim
         var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
-        
+
         if (!string.IsNullOrEmpty(userIdClaim))
         {
             loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
-            
+
             if (loggedInUser != null)
             {
                 // Fetch courses for the logged-in user
@@ -61,5 +60,4 @@ else
             }
         }
     }
-
 }
