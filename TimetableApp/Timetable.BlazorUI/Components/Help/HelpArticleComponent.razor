@@ -1,20 +1,18 @@
-﻿<div class="helpArticle container mt-4 w-75">
-    <div class="articleTitle row justify-content-center">
-        <div class="col-12 text-center">
-            <div class="helpArticle-title mb-3">
-                @HelpArticle.Title
-            </div>
-        </div>
-    </div>
-    <div class="articlContent row">
-        <div class="col-12">
-            <div class="HelpArticleContent">
-                @((MarkupString)HelpArticle.Content)
-            </div>
+﻿@rendermode InteractiveServer
+
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#@HelpArticle.Id" aria-expanded="false" aria-controls="@HelpArticle.Id">
+            @HelpArticle.Title
+        </button>
+    </h2>
+    <div id="@HelpArticle.Id" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+            @((MarkupString)HelpArticle.Content)
         </div>
     </div>
 </div>
-
+*@
 @code {
     [Parameter]
     public HelpArticle HelpArticle { get; set; }

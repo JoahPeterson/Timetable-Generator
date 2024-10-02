@@ -7,10 +7,13 @@
 @inject AuthenticationStateProvider authProvider
 @using TinyMCE.Blazor
 
-@foreach (HelpArticle article in HelpArticles)
-{
-    <HelpArticleComponent HelpArticle="article" ></HelpArticleComponent>
-}
+
+<div class="accordion" id="accordionExample">
+    @foreach (HelpArticle helpArticle in HelpArticles)
+    {
+        <HelpArticleComponent HelpArticle="helpArticle"></HelpArticleComponent>
+    }
+</div>
 
 <div class="container mt-4 w-75">
     <div class="row justify-content-center">
