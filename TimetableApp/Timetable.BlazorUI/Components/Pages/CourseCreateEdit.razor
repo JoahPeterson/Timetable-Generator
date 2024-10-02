@@ -15,69 +15,87 @@
 @* Cascading Is Required for Modal to Work *@
 <CascadingBlazoredModal />
 
-<h3>@(isEditMode ? "Edit Course" : "Create Course")</h3>
+
 
 
 <EditForm Model="course" OnValidSubmit="@SaveCourse" FormName="CourseForm">
-    <DataAnnotationsValidator/>
-    <ValidationSummary/>
-
-    <div>
-        <label class="form-label" for="Name">Course Name:</label>
-        <InputText id="name" @bind-Value="course.Name" class="form-control" />
-        <ValidationMessage For="@(() => course.Name)" />
-    </div>
-    <div>
-        <label class="form-label" for="Description">Course Description:</label>
-        <InputText id="description" @bind-Value="course.Description" class="form-control" />
-        <ValidationMessage For="@(() => course.Description)" />
-    </div>
-    <div>
-        <label class="form-label" for="StartDate">Course Start Date:</label>
-        <input type="date" id="startDate" @bind="course.StartDate" class="form-control" />
-        <ValidationMessage For="@(() => course.StartDate)" />
-    </div>
-    <div>
-        <label class="form-label" for="EndDate">Course End Date:</label>
-        <input type="date" id="endDate" @bind="course.EndDate" class="form-control" />
-        <ValidationMessage For="@(() => course.EndDate)" />
-    </div>
-    <div>
-        <label class="form-label" for="CourseTypeId">Course Type:</label>
-        <InputSelect id="courseTypeId" @bind-Value="course.CourseTypeId" class="form-control">
-            @foreach (var type in courseTypes)
+    <DataAnnotationsValidator />
+    <div class="bg-light rounded-2 w-50 mx-auto mt-5 p-3">
+        <h3 class="text-center mb-3 fw-bold">@(isEditMode ? "Edit Course" : "Create Course")</h3>
+        <div class="d-flex flex-column align-items-center">
+            <div class="form-group row mt-2 w-75">
+                <label for="Name" class="col-4 col-form-label fw-bold">Course Name</label>
+                <div class="col-8">
+                    <InputText id="name" @bind-Value="course.Name" class="form-control" placeholder="Course Name" />
+                    <ValidationMessage For="@(() => course.Name)" />
+                </div>
+            </div>
+            <div class="form-group row mt-2 w-75">
+                <label class="col-sm-4 col-form-label fw-bold" for="Description">Course Description</label>
+                <div class="col-8">
+                     <InputTextArea id="description" @bind-Value="course.Description" class="form-control" placeholder="Course Description"/>
+                    <ValidationMessage For="@(() => course.Description)" />
+                </div>
+            </div>
+            <div class="form-group row mt-2 w-75">
+                <label class="col-sm-4 col-form-label fw-bold" for="StartDate">Course Start Date</label>
+                <div class="col-8">
+                    <input type="date" id="startDate" @bind="course.StartDate" class="form-control" />
+                    <ValidationMessage For="@(() => course.StartDate)" />
+                </div>
+            </div>
+            <div class="form-group row mt-2 w-75">
+                <label class="col-sm-4 col-form-label fw-bold" for="EndDate">Course End Date</label>
+                <div class="col-8">
+                    <input type="date" id="endDate" @bind="course.EndDate" class="form-control" />
+                    <ValidationMessage For="@(() => course.EndDate)" />
+                </div>
+            </div>
+            <div class="form-group row mt-2 w-75">
+                <label class="col-sm-4 col-form-label fw-bold" for="CourseTypeId">Course Type</label>
+                <div class="col-8">
+                    <InputSelect id="courseTypeId" @bind-Value="course.CourseTypeId" class="form-control">
+                        <option>Select Course Type</option>
+                        @foreach (var type in courseTypes)
+                        {
+                            <option value="@type.Id">@type.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => course.CourseTypeId)" />
+                </div>
+            </div>
+            <div class="form-group row mt-2 w-75">
+                <label class="col-sm-4 col-form-label fw-bold" for="TermId">Course Term</label>
+                <div class="col-8">
+                    <InputSelect id="term" @bind-Value="course.Term.Id" class="form-control">
+                        <option>Select Course Term</option>
+                        @foreach (var term in terms)
+                        {
+                            <option value="@term.Id">@term.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="form-group row mt-2 w-75">
+                <label class="col-sm-4 col-form-label fw-bold" for="TermDuration">Term Duration</label>
+                <div class="col-8">
+                    <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" class="form-control">
+                        <option>Select Term Duration</option>
+                        @foreach (var duration in termDurations)
+                        {
+                            <option value="@duration.Length">@duration.Length weeks</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => course.Term.Duration)" />
+                </div>
+            </div>
+            @if (isEditMode)
             {
-                <option value="@type.Id">@type.Name</option>
+                <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-2">Delete</button>
             }
-        </InputSelect>
-        <ValidationMessage For="@(() => course.CourseTypeId)" />
+            <button type="submit" class="btn d-block mt-4 mx-auto mstc-gold-btn text-dark fw-bold px-4"><i class="bi bi-floppy"></i> Save</button>
+        </div>
     </div>
-    <div>
-        <label class="form-label" for="TermId">Course Term:</label>
-        <InputSelect id="term" @bind-Value="course.Term.Id" class="form-control">
-            @foreach (var term in terms)
-            {
-                <option value="@term.Id">@term.Name</option>
-            }
-        </InputSelect>
-    </div>
-    <div>
-        <label class="form-label" for="TermDuration">Term Duration:</label>
-        <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" class="form-control">
-            @foreach (var duration in termDurations)
-            {
-                <option value="@duration.Length">@duration.Length weeks</option>
-            }
-        </InputSelect>
-        <ValidationMessage For="@(() => course.Term.Duration)" />
-    </div>
-    <button type="submit" class="btn btn-primary d-block mt-2">Save</button>
-
-    @if (isEditMode)
-    {
-        <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-2">Delete</button>
-        <a href="/timetable/@course.Id">Course Time Table</a>
-    }
 </EditForm>
 
 
