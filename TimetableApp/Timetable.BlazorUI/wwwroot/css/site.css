@@ -46,24 +46,19 @@
     border-radius: 10px; /* Rounded corners for the thumb */
 }
 
+
 .Cardcolor-1 {
-    background-color: #3C6C5E;
+    background-color: #821c32;
 }
-.Cardcolor-1:hover {
-    background-color: #2D4D4A; /* Darker shade for hover */
-}
+    .Cardcolor-1:hover {
+        background-color: #410e19; /* Darker shade for hover */
+    }
 .Cardcolor-2 {
-    background-color: #AABC61;
+    background-color: #b9717a;
 }
-.Cardcolor-2:hover {
-    background-color: #8FAE4B; /* Darker shade for hover */
-}
-.Cardcolor-3 {
-    background-color: #9C3542;
-}
-.Cardcolor-3:hover {
-    background-color: #7B2A34; /* Darker shade for hover */
-}
+    .Cardcolor-2:hover {
+        background-color: #480b19; /* Darker shade for hover */
+    }
 
 .CardText {
     font-weight: bold;
@@ -74,3 +69,41 @@
 }
 
 /*Card Styling End*/
+
+.dropzone {
+    padding: 30px;
+    border: 1px solid #75868a;
+    border-radius: 5px;
+    list-style: none;
+}
+
+.no-drop {
+    border: 2px dashed red;
+}
+
+.can-drop {
+    border: 2px dashed green;
+}
+
+.draggable {
+    margin-bottom: 10px;
+    padding: 10px 25px;
+    border: 1px solid #424d5c;
+    cursor: grab;
+    background: #5c6b7f;
+    color: #ffffff;
+    border-radius: 5px;
+    width: 250px;
+}
+/*Card Styling End*/
+
+/*Custom color-profile Classes Start*/
+
+.mstc-gold-btn {
+    background-color: #F8B62A;
+    color: black;
+}
+
+    .mstc-gold-btn:hover {
+        background-color: #C59125;
+    }

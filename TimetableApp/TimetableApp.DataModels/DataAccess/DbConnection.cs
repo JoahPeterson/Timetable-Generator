@@ -38,6 +38,7 @@ public class DbConnection : IDbConnection
         CourseCollection = _db.GetCollection<Course>(CourseCollectionName);
         WorkTaskCollection = _db.GetCollection<WorkTask>(WorkTaskCollectionName);
         WorkUnitCollection = _db.GetCollection<WorkUnit>(WorkUnitCollectionName);
+        WorkUnitTaskCollection = _db.GetCollection<WorkUnitTask>(WorkUnitTaskCollectionName);
     }
     public MongoClient Client { get; private set; }
     public string? DbName { get; private set; }
@@ -77,6 +78,10 @@ public class DbConnection : IDbConnection
     public string WorkUnitCollectionName { get; private set; } = "workUnits";
 
     public IMongoCollection<WorkUnit> WorkUnitCollection { get; private set; }
+
+    public string WorkUnitTaskCollectionName { get; private set; } = "workUnitTasks";
+
+    public IMongoCollection<WorkUnitTask> WorkUnitTaskCollection { get; private set; }
 
 
 }

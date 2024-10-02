@@ -1,8 +1,39 @@
 ﻿@using TimetableApp.DataModels.Models
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
+@inject IJSRuntime JS
+@inject IWorkUnitData WorkUnitData
+@inject IWorkUnitTaskData WorkUnitTaskData
+@inject IWorkTaskData WorkTaskData
+@inject IUserData UserData
+@inject AuthenticationStateProvider authProvider
 
-<div class="work-unit bg-success text-white border border-dark" draggable="true" @onclick="SelectWorkUnit" style="height: @(RowHeightPercentage)vh">
+@* <div class="work-unit bg-success text-white border border-dark" draggable="true" @onclick="SelectWorkUnit" style="height: @(RowHeightPercentage)vh">
     <p>@WorkUnit.Name</p>
     <p>Duration: @WorkUnit.Duration</p>
+</div>
+ *@
+@*   *@
+ <!-- Droppable Version for Drag n Drop-->
+ <div class="work-unit bg-success text-white border border-dark" 
+    ondragover="event.preventDefault();"
+     @onclick="SelectWorkUnit" 
+     @ondrop="(e) => HandleDrop(e, WorkUnit.Id)"
+     style="height: @(RowHeightPercentage)vh">
+    <p>@WorkUnit.Name</p>
+    <p>Duration: @WorkUnit.Duration</p>
+    <ul>
+        @foreach (var task in WorkUnit.Tasks)
+        {
+            <li class="list-group-item CardText text-dark px-3"
+                draggable="true"
+                @ondragstart="(e) => HandleDragStart(e, task.TaskId)">
+                @task.TaskId
+            </li>
+        }
+    </ul>
+   
+
 </div>
 
 @code {
@@ -15,10 +46,79 @@
     [Parameter]
     public EventCallback<WorkUnit> OnSelected { get; set; }
 
+    private List<WorkUnitTask> tasks;
+
+    private User? loggedInUser;
+
+    private string? draggedTaskId;
+
     private double RowHeightPercentage { get => SingleRowHeightPercentage * WorkUnit.Duration; }
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     var authState = await authProvider.GetAuthenticationStateAsync();
+    //     var user = authState.User;
+
+    //     // Get the user's ID claim
+    //     var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+
+    //     if (!string.IsNullOrEmpty(userIdClaim))
+    //     {
+    //         loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+
+    //         if (loggedInUser != null)
+    //         {
+    //             tasks = await WorkUnitTaskData.GetUsersWorkUnitTasksAsync(loggedInUser.Id);
+    //         }
+    //     }
+    // }
 
     private async Task SelectWorkUnit()
     {
         await OnSelected.InvokeAsync(WorkUnit);
     }
+
+    private async Task HandleDragOver(DragEventArgs e)
+    {
+        // Prevent default behavior to allow drop
+        //await JS.InvokeVoidAsync("preventDefault", e);
+    }
+
+    private async Task Drop()
+    {
+
+    }
+
+    private async Task HandleDrop(DragEventArgs e, string workUnitId)
+    {
+        //draggedTaskId = httpContextAccessor.HttpContext.Session.GetString("taskID");
+        draggedTaskId = await JS.InvokeAsync<string>("GetSession", "TaskId");
+        if (!string.IsNullOrEmpty(draggedTaskId))
+        {
+            // Get the task by ID and assign it to this work unit
+            var task = await WorkTaskData.GetByIdAsync(draggedTaskId);
+            if (task != null)
+            {
+                // Add task to this WorkUnit's task list
+                WorkUnit.Tasks.Add(new WorkUnitTask
+                {
+                    TaskId = task.Id,
+                    WorkUnitId = WorkUnit.Id
+                });
+
+                // Save the updated work unit
+                await WorkUnitData.UpdateAsync(WorkUnit);
+
+                // Refresh the UI
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task HandleDragStart(DragEventArgs e, string taskId)
+    {
+        await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
+    }
+ 
+
 }

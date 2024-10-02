@@ -102,7 +102,7 @@ public class MongoWorkUnitData : IWorkUnitData
     /// </summary>
     /// <param name="WorkUnit">Work Unit to be updated</param>
     /// <returns>Task</returns>
-    public async Task UpdateTaskTypeAsync(WorkUnit workUnit)
+    public async Task UpdateAsync(WorkUnit workUnit)
     {
         var client = _db.Client;
         using var session = await client.StartSessionAsync();

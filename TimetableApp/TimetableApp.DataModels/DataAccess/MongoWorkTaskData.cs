@@ -59,6 +59,21 @@ namespace TimetableApp.DataModels.DataAccess
         }
 
         /// <summary>
+        /// Gets a list of WorkTasks for a user, excluding archived tasks.
+        /// </summary>
+        /// <param name="createdById">The id value from the user in MongoDB</param>
+        /// <returns>List of WorkTasks</returns>
+        public async Task<List<WorkTask>> GetUsersWorkTasksAsync(string createdById)
+        {
+            // Add a filter to only include non-archived WorkTasks
+            var results = await _tasks.FindAsync(tt =>
+                tt.AuditInformation.CreatedById == createdById &&
+                tt.AuditInformation.IsArchived == false);
+
+            return results.ToList();
+        }
+
+        /// <summary>
         /// Update a WorkTask in the database.
         /// </summary>
         /// <param name="task">The updated WorkTask Object</param>

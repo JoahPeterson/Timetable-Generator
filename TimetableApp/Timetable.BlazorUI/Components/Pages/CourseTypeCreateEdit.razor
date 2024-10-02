@@ -12,7 +12,7 @@
 @* Cascading Is Required for Modal to Work *@
 <CascadingBlazoredModal />
 
-<h3>@(isEditMode ? "Edit Course Type" : "Create Course Type")</h3>
+<h3>@(isEditMode ? "Edit Course Modality" : "Create Course Modality")</h3>
 
 
 <EditForm Model="courseType" OnValidSubmit="@SaveCourseType" FormName="CourseTypeForm">
@@ -20,12 +20,12 @@
     <ValidationSummary />
 
     <div>
-        <label for="Name">Course Type Name:</label>
+        <label for="Name">Modality Name:</label>
         <InputText id="name" @bind-Value="courseType.Name" class="form-control" />
         <ValidationMessage For="@(() =>courseType.Name)" />
     </div>
     <div>
-        <label for="ToolTip">Course Type Description:</label>
+        <label for="ToolTip">Modality Description:</label>
         <InputText id="toolTip" @bind-Value="courseType.ToolTip" class="form-control" />
         <ValidationMessage For="@(() => courseType.ToolTip)" />
     </div>

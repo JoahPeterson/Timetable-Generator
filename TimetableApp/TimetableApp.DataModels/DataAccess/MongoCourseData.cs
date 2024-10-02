@@ -70,7 +70,7 @@ namespace TimetableApp.DataModels.DataAccess
         {
             try
             {
-                var results = await _courses.FindAsync(course => course.AuditInformation.CreatedById == createdById);
+                var results = await _courses.FindAsync(course => course.AuditInformation.CreatedById == createdById && course.AuditInformation.IsArchived == false);
 
                 return results.ToList();
             }
