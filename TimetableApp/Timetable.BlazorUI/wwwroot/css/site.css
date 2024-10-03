@@ -107,3 +107,8 @@
     .mstc-gold-btn:hover {
         background-color: #C59125;
     }
+
+.mstc-gold {
+    background-color: #F8B62A;
+    color: black;
+}

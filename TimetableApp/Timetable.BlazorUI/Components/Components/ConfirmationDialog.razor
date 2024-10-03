@@ -1,33 +1,29 @@
 ﻿@using Blazored.Modal
 @using Blazored.Modal.Services
-@inject NavigationManager Navigation
+@inject IModalService ModalService
 
 <div class="modal-body">
-    <h4>Course Preview</h4>
-    <p><strong>Course Name:</strong> @Course.Name</p>
-    <p><strong>Description:</strong> @Course.Description</p>
-    <p><strong>Start Date:</strong> @Course.StartDate.ToShortDateString()</p>
-    <p><strong>End Date:</strong> @Course.EndDate.ToShortDateString()</p>
-    <p><strong>Course Type:</strong> @Course.CourseTypeId</p>
-    <p><strong>Term:</strong> @Course.Term.Name</p>
-    <p><strong>Duration:</strong> @Course.Term.Duration weeks</p>
+    <p>@Message</p>
 </div>
 <div class="modal-footer">
-    <button class="btn btn-secondary" @onclick="ContinueEditing">Continue Editing</button>
-    <button class="btn btn-primary" @onclick="ProceedToTimetable">Continue to Timetable</button>
+    <button class="btn btn-secondary" @onclick="Cancel">@CancelButtonText</button>
+    <button class="btn btn-danger" @onclick="Confirm">@ConfirmButtonText</button>
 </div>
 
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-    [Parameter] public Course Course { get; set; }
 
-    private async Task ContinueEditing()
+    [Parameter] public string Message { get; set; }
+    [Parameter] public string ConfirmButtonText { get; set; } = "Confirm";
+    [Parameter] public string CancelButtonText { get; set; } = "Cancel";
+
+    private async Task Confirm()
     {
-        await BlazoredModal.CloseAsync();  // Close the modal, return to form
+        await BlazoredModal.CloseAsync(ModalResult.Ok(true));
     }
 
-    private async Task ProceedToTimetable()
+    private async Task Cancel()
     {
-        await BlazoredModal.CloseAsync(ModalResult.Ok(true));  // Proceed to timetable creation
+        await BlazoredModal.CancelAsync();
     }
 }

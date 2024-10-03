@@ -1,28 +1,45 @@
 ﻿@using Blazored.Modal
 @using Blazored.Modal.Services
-@inject IModalService ModalService
+@inject NavigationManager Navigation
+@inject ICourseTypeData CourseTypeData
 
-<div class="modal-body">
-    <h3>Preview Your Timetable</h3>
-    <p>Are you ready to generate your timetable, or would you like to continue editing?</p>
+<div class="card bg-light p-3">
+    <div class="card-body">
+        <h4 class="card-title">Course Preview</h4>
+        <p class="card-text"><strong>Course Name:</strong> @Course.Name</p>
+        <p class="card-text"><strong>Description:</strong> @Course.Description</p>
+        <p class="card-text"><strong>Start Date:</strong> @Course.StartDate.ToShortDateString()</p>
+        <p class="card-text"><strong>End Date:</strong> @Course.EndDate.ToShortDateString()</p>
+        <p class="card-text"><strong>Course Type:</strong> @CourseTypeName</p>
+        <p class="card-text"><strong>Term:</strong> @Course.Term.Name</p>
+        <p class="card-text"><strong>Duration:</strong> @Course.Term.Duration weeks</p>
+    </div>
 </div>
-<div class="modal-footer">
+<div class="modal-footer mt-2">
     <button class="btn btn-secondary" @onclick="ContinueEditing">Continue Editing</button>
-    <button class="btn btn-primary" @onclick="GenerateTimetable">Generate Timetable</button>
+    <button class="btn mstc-gold-btn mx-2" @onclick="ProceedToTimetable">Continue to Timetable</button>
 </div>
 
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public Course Course { get; set; }
+
+    private string CourseTypeName { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var courseType = await CourseTypeData.GetByIdAsync(Course.CourseTypeId);
+
+        CourseTypeName = courseType.Name;
+    }
 
     private async Task ContinueEditing()
     {
-        // Close modal and indicate the user chose to continue editing
-        await BlazoredModal.CloseAsync(ModalResult.Ok(false));
+        await BlazoredModal.CloseAsync(ModalResult.Ok(false));  // Pass false to indicate editing
     }
 
-    private async Task GenerateTimetable()
+    private async Task ProceedToTimetable()
     {
-        // Close modal and indicate the user chose to generate the timetable
-        await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+        await BlazoredModal.CloseAsync(ModalResult.Ok(true));  // Pass true to indicate timetable navigation
     }
 }
