@@ -3,6 +3,17 @@
     background-color: #811C32!important;
 }
 
+.helpArticle-title {
+    color: #811C32!important;
+    font-size: 20px;
+}
+
+.helpArticle {
+    background-color: #f8f9fa; /* Light grey, Bootstrap's default light background */
+    padding: 20px;
+    border-radius: 8px;
+}
+
 
 /*Card Styling Start*/
 

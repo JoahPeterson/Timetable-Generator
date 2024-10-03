@@ -1,0 +1,58 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject IHelpArticleData HelpArticleData
+@inject IUserData UserData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+
+@rendermode InteractiveServer
+
+
+@code {
+    [Parameter]
+    public HelpArticle? HelpArticleToEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<HelpArticle> OnSave { get; set; }
+
+    public HelpArticle? helpArticle = new();
+
+    private bool isEditMode = false;
+
+    protected override void OnParametersSet()
+    {
+        if (HelpArticleToEdit != null)
+        {
+            helpArticle = HelpArticleToEdit;
+            isEditMode = true;
+        }
+    }
+
+    private async Task SaveArticle()
+    {
+        if (isEditMode)
+        {
+            helpArticle.AuditInformation.LastModified = DateTime.Now;
+            await HelpArticleData.UpdateAsync(helpArticle);
+            isEditMode = false;
+        }
+        else
+        {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+            HelpArticle newHelpArticle = new HelpArticle()
+                {
+                    Title = helpArticle.Title,
+                    Content = helpArticle.Content
+                };
+
+            newHelpArticle.AuditInformation.CreatedById = mongoUser.Id;
+
+            await HelpArticleData.CreateAsync(newHelpArticle);
+        }
+
+        await OnSave.InvokeAsync(helpArticle);
+        helpArticle = new HelpArticle();
+        StateHasChanged();
+    }
+}
