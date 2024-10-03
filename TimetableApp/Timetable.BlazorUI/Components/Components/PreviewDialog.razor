@@ -1,0 +1,28 @@
+﻿@using Blazored.Modal
+@using Blazored.Modal.Services
+@inject IModalService ModalService
+
+<div class="modal-body">
+    <h3>Preview Your Timetable</h3>
+    <p>Are you ready to generate your timetable, or would you like to continue editing?</p>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-secondary" @onclick="ContinueEditing">Continue Editing</button>
+    <button class="btn btn-primary" @onclick="GenerateTimetable">Generate Timetable</button>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    private async Task ContinueEditing()
+    {
+        // Close modal and indicate the user chose to continue editing
+        await BlazoredModal.CloseAsync(ModalResult.Ok(false));
+    }
+
+    private async Task GenerateTimetable()
+    {
+        // Close modal and indicate the user chose to generate the timetable
+        await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    }
+}
