@@ -161,13 +161,9 @@
         {
             course.AuditInformation.LastModified = DateTime.Now;
 
-            // Fetch the term from the database
             var termFromDb = await TermData.GetByIdAsync(course.Term.Id);
-
-            // Update the term duration from the form
             termFromDb.Duration = course.Term.Duration;
-
-            course.Term = termFromDb; // Assign the updated term back to the course
+            course.Term = termFromDb;
 
             await CourseData.UpdateCourseAsync(course);
         }
@@ -189,11 +185,28 @@
             newCourse.Term.Duration = course.Term.Duration;
             newCourse.AuditInformation.CreatedById = mongoUser.Id;
 
+            // Save the course
             await CourseData.CreateCourseAsync(newCourse);
+            course = newCourse;  // Assign the newly created course to the 'course' model
         }
 
-        // Redirect to the course list or home after save
-        Navigation.NavigateTo("/dashboard");
+        // Show the modal for course preview
+        await ShowCoursePreviewModal();
+    }
+
+    private async Task ShowCoursePreviewModal()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Course", course);  // Pass the saved course to the modal
+
+        var modal = Modal.Show<PreviewDialog>("Course Preview", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            // Navigate to the timetable create page if "Continue to Timetable" is clicked
+            Navigation.NavigateTo($"/timetable/create/{course.Id}");
+        }
     }
 
     private async Task ShowDeleteConfirmation()
