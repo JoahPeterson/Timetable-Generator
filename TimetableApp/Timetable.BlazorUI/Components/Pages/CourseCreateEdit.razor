@@ -89,11 +89,17 @@
                     <ValidationMessage For="@(() => course.Term.Duration)" />
                 </div>
             </div>
-            @if (isEditMode)
-            {
-                <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-2">Delete</button>
-            }
-            <button type="submit" class="btn d-block mt-4 mx-auto mstc-gold-btn text-dark fw-bold px-4"><i class="bi bi-floppy"></i> Save</button>
+            <div class="d-flex justify-content-between mt-4">
+                @if (isEditMode)
+                {
+                    <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger fw-bold">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                }
+                <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
+                    <i class="bi bi-floppy"></i> Save
+                </button>
+            </div>
         </div>
     </div>
 </EditForm>
@@ -161,13 +167,9 @@
         {
             course.AuditInformation.LastModified = DateTime.Now;
 
-            // Fetch the term from the database
             var termFromDb = await TermData.GetByIdAsync(course.Term.Id);
-
-            // Update the term duration from the form
             termFromDb.Duration = course.Term.Duration;
-
-            course.Term = termFromDb; // Assign the updated term back to the course
+            course.Term = termFromDb;
 
             await CourseData.UpdateCourseAsync(course);
         }
@@ -189,11 +191,36 @@
             newCourse.Term.Duration = course.Term.Duration;
             newCourse.AuditInformation.CreatedById = mongoUser.Id;
 
+            // Save the course
             await CourseData.CreateCourseAsync(newCourse);
+            course = newCourse;  // Assign the newly created course to the 'course' model
         }
 
-        // Redirect to the course list or home after save
-        Navigation.NavigateTo("/dashboard");
+        // Show the modal for course preview
+        await ShowCoursePreviewModal();
+    }
+
+    private async Task ShowCoursePreviewModal()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Course", course);  // Pass the saved course to the modal
+
+        var modal = Modal.Show<PreviewDialog>("Preview", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            if ((bool)result.Data)  // This indicates "Continue to Timetable" was clicked
+            {
+                // Navigate to the timetable creation page
+                Navigation.NavigateTo($"/timetable/{course.Id}");
+            }
+            else
+            {
+                // Navigate to the edit course page
+                Navigation.NavigateTo($"/course/create/{course.Id}");
+            }
+        }
     }
 
     private async Task ShowDeleteConfirmation()
