@@ -1,20 +1,39 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@inject ICourseData CourseData
+@using Timetable.BlazorUI.Components.Components
 @using Blazored.Modal
 <link rel="stylesheet" href="css/site.css">
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
-
+   
     <main>
-        <div class="top-row bg-red">
-            <a class="text-white" href="#" target="_blank">About</a>
-            <a class="text-white">|</a>
-            <a class="text-white" href="/help" target="_blank">Help</a>
+        <div class="top-row bg-red d-flex justify-content-between align-items-center">
+            <div class="text-white mx-auto text-center">
+                @{
+                    if (Navigation.Uri.Contains("timetable"))
+                    {
+                        <TimetableHeader />
+                    }
+                }
+            </div>
+           <div class="d-flex ml-auto justify-content-end">
+                @if (Navigation.Uri.Contains("timetable"))
+                {
+                    <CourseEditHref />
+                    <a class="text-white">|</a>
+                }
+                <a class="text-white" href="#" target="_blank">About</a>
+                <a class="text-white">|</a>
+                <a class="text-white" href="/help" target="_blank">Help</a>
+
+           </div>
         </div>
+       
 
         <BlazoredModal />
-
 
         <article class="content px-4">
             
@@ -29,3 +48,4 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+

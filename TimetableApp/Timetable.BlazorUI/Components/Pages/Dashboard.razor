@@ -9,17 +9,19 @@
 @rendermode InteractiveServer
 
 <CascadingBlazoredModal />
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-sm-12 mb-sm-3 mb-2 col-md-12">
 
-<div class="row justify-content-center">
-    <div class="col-5">
-        <h2 class="text-center">My Courses</h2>
-        <CoursesDiv />
-    </div>
-    <div class="col-4">
-        <h2 class="text-center">My Task Types</h2>
-        <TaskTypesDiv />
+            <CoursesDiv />
+        </div>
+        <div class="col-lg-5 col-sm-12 col-md-12">
+
+            <TaskTypesDiv />
+        </div>
     </div>
 </div>
+
 
 <div class="row mt-5 justify-content-center">
      <AuthorizeView Roles="Admin">

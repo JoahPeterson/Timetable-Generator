@@ -11,19 +11,21 @@
 {
     var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2" };
 
-    <div class="bg-light p-3">
+    <div class="darkdiv p-3 rounded-3 shadow">
+        <h2 class="text-center"><i class="bi bi-table"></i> My Timetables</h2>
+        <hr />
         <div class="card scrollable-card">
             <ul class="list-group list-group-flush">
                 @foreach (var (course, index) in courses.Select((value, i) => (value, i)))
                 {
                     var colorClass = colorClasses.ElementAtOrDefault(index % colorClasses.Count) ?? "Cardcolor-1";  // Ensure safe access
-                    <li class="list-group-item CardText text-white px-3 d-flex justify-content-between @colorClass"
+                    <li class="list-group-item CardText text-black px-3 d-flex justify-content-between @colorClass"
                         data-toggle="tooltip" data-placement="top" title="@course.Description">
                         <div>
                             <i class="bi bi-journal-bookmark h4"></i>
-                            <a href="/course/create/@course.Id" class="text-white text-decoration-none fw-bold">@course.Name</a>
+                            <a href="/timetable/@course.Id" class="text-black text-decoration-none fw-bold">@course.Name</a>
                         </div>
-                        <a class="text-white text-decoration-none fw-bold ms-auto" @onclick="() => ShowDeleteConfirmation(course)">
+                        <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="() => ShowDeleteConfirmation(course)">
                             <i class="bi bi-dash-circle h5"></i>
                         </a>
                     </li>
