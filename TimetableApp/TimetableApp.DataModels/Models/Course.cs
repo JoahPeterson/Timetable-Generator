@@ -2,7 +2,7 @@
 
 namespace TimetableApp.DataModels.Models;
 
-public class Course
+public class Course : IValidatableObject
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
@@ -29,5 +29,25 @@ public class Course
 
     public Term Term { get; set; } = new Term();
     public List<WorkUnit> WorkUnits { get; set; } = new();
+
+    // Custom validation logic 
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        // If StartDate is greater than EndDate, kick it back
+        if (StartDate > EndDate)
+        {
+            yield return new ValidationResult(
+                "Start Date cannot be later than End Date.",
+                new[] { nameof(StartDate), nameof(EndDate) });
+        }
+
+        // If End Date is less than StartDate, kick it back
+        if (EndDate < StartDate)
+        {
+            yield return new ValidationResult(
+                "End Date cannot be earlier than Start Date.",
+                new[] { nameof(StartDate), nameof(EndDate) });
+        }
+    }
 
 }
