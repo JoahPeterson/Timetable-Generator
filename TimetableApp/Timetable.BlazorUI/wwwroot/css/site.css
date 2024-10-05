@@ -19,7 +19,7 @@
 
 .scrollable-card
 {
-    height: 167px;
+    height: 188px;
     overflow-y: scroll;
 }
 
@@ -48,16 +48,16 @@
 
 
 .Cardcolor-1 {
-    background-color: #821c32;
+    background-color: #F9C545;
 }
     .Cardcolor-1:hover {
-        background-color: #410e19; /* Darker shade for hover */
+        background-color: #C59125; /* Darker shade for hover */
     }
 .Cardcolor-2 {
-    background-color: #b9717a;
+    background-color: #FDDA8B;
 }
     .Cardcolor-2:hover {
-        background-color: #480b19; /* Darker shade for hover */
+        background-color: #caad6f; /* Darker shade for hover */
     }
 
 .CardText {
@@ -111,4 +111,12 @@
 .mstc-gold {
     background-color: #F8B62A;
     color: black;
+}
+
+.darkdiv {
+    background-color: #bababa;
+}
+
+body {
+    background-color: #f8f9fb;
 }

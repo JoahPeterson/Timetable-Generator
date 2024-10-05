@@ -1,0 +1,21 @@
+﻿@inject NavigationManager Navigation
+@inject ICourseData CourseData
+
+<a class="text-decoration-none text-white">@courseName</a>
+ 
+@code {
+
+    private string courseName;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Uri uri = new Uri(Navigation.Uri);
+
+        string courseId = uri.Segments.LastOrDefault();
+
+        var foundCourse = await CourseData.GetCourseAsync(courseId);
+
+        courseName = foundCourse.Name;
+    }
+
+}
