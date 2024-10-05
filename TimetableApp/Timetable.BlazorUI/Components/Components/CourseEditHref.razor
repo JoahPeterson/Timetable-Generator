@@ -1,0 +1,17 @@
+﻿@inject NavigationManager Navigation
+
+<a class="text-white" href="course/create/@courseId"><i class="bi bi-pencil-square"></i> Edit Course</a>
+
+@code {
+    private string courseId; 
+
+    protected async override Task OnInitializedAsync()
+    {
+        Uri uri = new Uri(Navigation.Uri);
+
+        courseId = uri.Segments.LastOrDefault();
+        
+    }
+
+}
+
