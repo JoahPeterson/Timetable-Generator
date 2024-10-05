@@ -1,10 +1,13 @@
 ﻿@using Microsoft.AspNetCore.Authorization
+@inject IJSRuntime JS
 @inject ICourseData CourseData
 @inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
-@inject Blazored.Modal.Services.IModalService Modal
+@inject IModalService Modal;
 @rendermode InteractiveServer
+@* @inject Blazored.Modal.Services.IModalService Modal *@
+
 @attribute [Authorize]
 
 @if (courses != null && loggedInUser != null)
@@ -23,7 +26,10 @@
                             <i class="bi bi-journal-bookmark h4"></i>
                             <a href="/course/create/@course.Id" class="text-white text-decoration-none fw-bold">@course.Name</a>
                         </div>
-                        <a class="text-white text-decoration-none fw-bold ms-auto" @onclick="() => ShowDeleteConfirmation(course)">
+@*                         <a class="text-white text-decoration-none fw-bold ms-auto" @onclick="() => ShowDeleteConfirmation(course)">
+                            <i class="bi bi-dash-circle h5"></i>
+                        </a> *@
+                        <a class="text-white text-decoration-none fw-bold ms-auto" @onclick="() => ShowModal(course)">
                             <i class="bi bi-dash-circle h5"></i>
                         </a>
                     </li>
@@ -46,6 +52,7 @@ else
     private List<Course>? courses;
     private User? loggedInUser;
     private bool showConfirmationModal = false;
+    Course selectedCourse = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,44 +70,60 @@ else
                 courses = await CourseData.GetUsersCoursesAsync(loggedInUser.Id);
             }
         }
+
+        //await ShowDeleteConfirmation(courses[0]);
     }
 
-    private async Task Archive(Course course)
+    public async Task Archive()
     {
         showConfirmationModal = false;
 
-        course.AuditInformation.LastModified = DateTime.Now;
-        course.AuditInformation.IsArchived = true;
-        await CourseData.UpdateCourseAsync(course);
+        if (selectedCourse == null)
+            return;
+
+        selectedCourse.AuditInformation.LastModified = DateTime.Now;
+        selectedCourse.AuditInformation.IsArchived = true;
+        await CourseData.UpdateCourseAsync(selectedCourse);
 
         if (courses is not null)
-            courses.Remove(course);
+            courses.Remove(selectedCourse);
 
         StateHasChanged();
     }
 
-    private async Task OnConfirmationResult(bool confirmed, Course course)
+    private async Task ShowModal(Course course)
     {
-        showConfirmationModal = false; // Hide the modal
-        if (confirmed)
-        {
-            await Archive(course);
-        }
+        selectedCourse = course;
+        await JS.InvokeVoidAsync("modalInterop.showModal", "modal-1");
     }
 
-    private async Task ShowDeleteConfirmation(Course course)
+    private async Task HideModal()
     {
-        var parameters = new ModalParameters();
-        parameters.Add("Message", $"Are you sure you want to delete the course '{course.Name}'?");
-
-        var modal = Modal.Show<ConfirmationDialog>("Confirm Delete", parameters);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            await OnConfirmationResult(true, course);
-        }
+        await JS.InvokeVoidAsync("modalInterop.hideModal", "modal-1");
     }
+
+    // private async Task OnConfirmationResult(bool confirmed, Course course)
+    // {
+    //     showConfirmationModal = false; // Hide the modal
+    //     if (confirmed)
+    //     {
+    //         await Archive(course);
+    //     }
+    // }
+
+    // private async Task ShowDeleteConfirmation(Course course)
+    // {
+    //     var parameters = new ModalParameters();
+    //     parameters.Add("Message", $"Are you sure you want to delete the course '{course.Name}'?");
+
+    //     var modal = Modal.Show<ConfirmationDialog>("Confirm Delete", parameters);
+    //     var result = await modal.Result;
+
+    //     if (!result.Cancelled)
+    //     {
+    //         await OnConfirmationResult(true, course);
+    //     }
+    // }
 
 }
 

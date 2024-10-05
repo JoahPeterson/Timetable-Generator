@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Timetable.BlazorUI.Components.Account;
 using Timetable.BlazorUI.Data;
-using TimetableApp.DataModels.DataAccess;
-using Timetable.BlazorUI.SetupServices;
 
 namespace Timetable.BlazorUI;
 

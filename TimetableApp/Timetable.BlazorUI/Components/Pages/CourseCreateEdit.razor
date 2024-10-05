@@ -12,8 +12,8 @@
 @using TimetableApp.DataModels.Models
 @attribute [Authorize]
 
-@* Cascading Is Required for Modal to Work *@
-<CascadingBlazoredModal />
+
+<CascadingBlazoredModal/>
 
 
 
@@ -90,12 +90,12 @@
                 </div>
             </div>
             <div class="d-flex justify-content-between mt-4">
-                @if (isEditMode)
+@*                 @if (isEditMode)
                 {
                     <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger fw-bold">
                         <i class="bi bi-trash"></i> Delete
                     </button>
-                }
+                }*@
                 <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
                     <i class="bi bi-floppy"></i> Save
                 </button>
@@ -113,13 +113,14 @@
     private List<Term> terms = new List<Term>();
     private List<TermDuration> termDurations = new List<TermDuration>();
     private bool isEditMode = false;
-    private bool showConfirmationModal = false;
+
+// TODO: This can be removed:
+    // private bool showConfirmationModal = false;
 
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(courseId))
         {
-
             isEditMode = true;
             course = await CourseData.GetCourseAsync(courseId);
         }
@@ -141,25 +142,27 @@
         termDurations = await TermDurationData.GetAsync();
     }
 
-    private async Task Archive()
-    {
-        if (isEditMode && !string.IsNullOrEmpty(courseId))
-        {
-            course.AuditInformation.LastModified = DateTime.Now;
-            course.AuditInformation.IsArchived = true;
-            await CourseData.UpdateCourseAsync(course);
-            Navigation.NavigateTo("/");
-        }
-    }
+// TODO: This can be removed:
+    // private async Task Archive()
+    // {
+    //     if (isEditMode && !string.IsNullOrEmpty(courseId))
+    //     {
+    //         course.AuditInformation.LastModified = DateTime.Now;
+    //         course.AuditInformation.IsArchived = true;
+    //         await CourseData.UpdateCourseAsync(course);
+    //         Navigation.NavigateTo("/");
+    //     }
+    // }
 
-    private async Task OnConfirmationResult(bool confirmed)
-    {
-        showConfirmationModal = false; // Hide the modal
-        if (confirmed)
-        {
-            await Archive();
-        }
-    }
+// TODO: This can be removed:
+    // private async Task OnConfirmationResult(bool confirmed)
+    // {
+    //     showConfirmationModal = false; // Hide the modal
+    //     if (confirmed)
+    //     {
+    //         await Archive();
+    //     }
+    // }
 
     private async Task SaveCourse()
     {
@@ -223,21 +226,22 @@
         }
     }
 
-    private async Task ShowDeleteConfirmation()
-    {
-        var parameters = new ModalParameters();
-        parameters.Add("Message", "Are you sure you want to delete this course?");
+// TODO: This can be removed:
+    // private async Task ShowDeleteConfirmation()
+    // {
+    //     var parameters = new ModalParameters();
+    //     parameters.Add("Message", "Are you sure you want to delete this course?");
 
-        var modal = Modal.Show<ConfirmationDialog>("Confirm Deletion", parameters);
-        var result = await modal.Result;
+    //     var modal = Modal.Show<ConfirmationDialog>("Confirm Deletion", parameters);
+    //     var result = await modal.Result;
 
-        if (!result.Cancelled)
-        {
-            await Archive();
-        }
-        else
-        {
-            Console.WriteLine("Deletion canceled by the user.");
-        }
-    }
+    //     if (!result.Cancelled)
+    //     {
+    //         await Archive();
+    //     }
+    //     else
+    //     {
+    //         Console.WriteLine("Deletion canceled by the user.");
+    //     }
+    // }
 }
