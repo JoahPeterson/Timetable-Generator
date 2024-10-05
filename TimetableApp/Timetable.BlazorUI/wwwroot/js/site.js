@@ -10,12 +10,26 @@ window.preventDefault = function (event) {
 
 // modalInterop.js
 
-document.addEventListener('DOMContentLoaded', function () {
-    MicroModal.init(); // Initialize MicroModal
-});
+//document.addEventListener('DOMContentLoaded', function () {
+//    MicroModal.init(); // Initialize MicroModal
+//});
 
 window.initializeModal = () => {
+    MicroModal.init();
+
     const closeModalButton = document.getElementById('closeModalButton');
+
+    window.modalInterop = {
+        // Show the modal by its ID
+        showModal: function (modalId) {
+            MicroModal.show(modalId); // Show the modal
+        },
+
+        // Hide the modal by its ID
+        hideModal: function (modalId) {
+            MicroModal.close(modalId); // Hide the modal
+        }
+    };
 
     if (closeModalButton) {
         closeModalButton.addEventListener('click', function () {
@@ -26,17 +40,17 @@ window.initializeModal = () => {
     }
 };
 
-window.modalInterop = {
-    // Show the modal by its ID
-    showModal: function (modalId) {
-        MicroModal.show(modalId); // Show the modal
-    },
+//window.modalInterop = {
+//    // Show the modal by its ID
+//    showModal: function (modalId) {
+//        MicroModal.show(modalId); // Show the modal
+//    },
 
-    // Hide the modal by its ID
-    hideModal: function (modalId) {
-        MicroModal.hide(modalId); // Hide the modal
-    }
-};
+//    // Hide the modal by its ID
+//    hideModal: function (modalId) {
+//        MicroModal.close(modalId); // Hide the modal
+//    }
+//};
 
 
 function SetSession(name, taskId) {

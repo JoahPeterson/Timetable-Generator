@@ -4,9 +4,7 @@
 @inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
-@inject IModalService Modal;
 @rendermode InteractiveServer
-@* @inject Blazored.Modal.Services.IModalService Modal *@
 
 @attribute [Authorize]
 
@@ -82,7 +80,7 @@ else
 
         selectedCourse.AuditInformation.LastModified = DateTime.Now;
         selectedCourse.AuditInformation.IsArchived = true;
-        await CourseData.UpdateCourseAsync(selectedCourse);
+        //await CourseData.UpdateCourseAsync(selectedCourse);
 
         if (courses is not null)
             courses.Remove(selectedCourse);
