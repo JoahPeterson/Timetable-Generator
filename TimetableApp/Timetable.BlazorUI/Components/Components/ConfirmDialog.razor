@@ -5,30 +5,31 @@
         <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-1-title">
             <header class="modal__header">
                 <h2 class="modal__title" id="modal-1-title">
-                    Micromodal
+                    Confirm
                 </h2>
                 <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
             </header>
             <main class="modal__content" id="modal-1-content">
                 <p>
-                    Try hitting the <code>tab</code> key and notice how the focus stays within the modal itself. Also, <code>esc</code> to close modal.
+                    Are you sure that you want to delete this item?
                 </p>
             </main>
-            <footer class="modal__footer">
-                <button class="modal__btn modal__btn-primary" @onclick="@OnCloseButtonClick" id="closeModalButton">Continue</button>
-                <button class="modal__btn" data-micromodal-close aria-label="Close this dialog window">Close</button>
+            <footer class="modal-footer mt-2">
+                <button class="btn btn-secondary py-1" data-micromodal-close aria-label="Close this dialog window"><i class="bi bi-x"></i> Close</button>
+                <button class="btn mstc-gold-btn py-1 mx-2" @onclick="@OnCloseButtonClick" name="modal-1" id="closeModalButton"><i class="bi bi-trash"></i> Continue</button>
             </footer>
         </div>
     </div>
 </div>
 
 @code {
+
     [Parameter]
     public EventCallback OnClose { get; set; }
 
     private async Task OnCloseButtonClick()
     {
-        OnClose.InvokeAsync(null);
-        // await JS.InvokeVoidAsync("modalInterop.closeModal", "modal-1");
+        await OnClose.InvokeAsync(null);
     }
 }
+

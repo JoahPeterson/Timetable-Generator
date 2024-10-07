@@ -46,10 +46,18 @@ else
 }
 
 @code {
+    [Parameter]
+    public EventCallback<Course> OnConfirm { get; set; }
+
+    [Parameter]
+    public EventCallback<Course> OnShow { get; set; }
+
     private List<Course>? courses;
     private User? loggedInUser;
     private bool showConfirmationModal = false;
     Course selectedCourse = null;
+
+    
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,8 +76,9 @@ else
             }
         }
 
-        //await ShowDeleteConfirmation(courses[0]);
     }
+
+
 
     public async Task Archive()
     {
@@ -80,47 +89,20 @@ else
 
         selectedCourse.AuditInformation.LastModified = DateTime.Now;
         selectedCourse.AuditInformation.IsArchived = true;
-        //await CourseData.UpdateCourseAsync(selectedCourse);
+        await CourseData.UpdateCourseAsync(selectedCourse);
 
         if (courses is not null)
             courses.Remove(selectedCourse);
 
         StateHasChanged();
+
     }
 
     private async Task ShowModal(Course course)
     {
         selectedCourse = course;
-        await JS.InvokeVoidAsync("modalInterop.showModal", "modal-1");
+        await OnShow.InvokeAsync(course);
     }
-
-    private async Task HideModal()
-    {
-        await JS.InvokeVoidAsync("modalInterop.hideModal", "modal-1");
-    }
-
-    // private async Task OnConfirmationResult(bool confirmed, Course course)
-    // {
-    //     showConfirmationModal = false; // Hide the modal
-    //     if (confirmed)
-    //     {
-    //         await Archive(course);
-    //     }
-    // }
-
-    // private async Task ShowDeleteConfirmation(Course course)
-    // {
-    //     var parameters = new ModalParameters();
-    //     parameters.Add("Message", $"Are you sure you want to delete the course '{course.Name}'?");
-
-    //     var modal = Modal.Show<ConfirmationDialog>("Confirm Delete", parameters);
-    //     var result = await modal.Result;
-
-    //     if (!result.Cancelled)
-    //     {
-    //         await OnConfirmationResult(true, course);
-    //     }
-    // }
 
 }
 

@@ -3,17 +3,18 @@
 @inject ICourseData CourseData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
-@* @inject Blazored.Modal.Services.IModalService Modal *@
+@inject Blazored.Modal.Services.IModalService Modal
 @inject ICourseTypeData CourseTypeData
 @inject ITermData TermData
 @inject ITermDurationData TermDurationData
 @inject IUserData UserData
+@inject IJSRuntime JS
 @rendermode InteractiveServer
 @using TimetableApp.DataModels.Models
+@using Timetable.BlazorUI.Components.Components
 @attribute [Authorize]
 
-@* Cascading Is Required for Modal to Work *@
-@* <CascadingBlazoredModal /> *@
+<PreviewDialog Course="course" CourseType="@courseTypeName" OnClose="UpdateToEdit"/>
 
 <EditForm Model="course" OnValidSubmit="@SaveCourse" FormName="CourseForm">
     <DataAnnotationsValidator />
@@ -90,12 +91,6 @@
                             </div>
                         </div>
                         <div class="d-flex justify-content-center mt-4">
-@*                             @if (isEditMode)
-                            {
-                                <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger fw-bold">
-                                    <i class="bi bi-trash"></i> Delete
-                                </button>
-                            } *@
                             <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
                                 <i class="bi bi-floppy"></i> Save
                             </button>
@@ -116,9 +111,7 @@
     private List<Term> terms = new List<Term>();
     private List<TermDuration> termDurations = new List<TermDuration>();
     private bool isEditMode = false;
-
-// TODO: This can be removed:
-    // private bool showConfirmationModal = false;
+    private string courseTypeName = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -144,28 +137,6 @@
         // Fetch term durations from the database
         termDurations = await TermDurationData.GetAsync();
     }
-
-// TODO: This can be removed:
-    // private async Task Archive()
-    // {
-    //     if (isEditMode && !string.IsNullOrEmpty(courseId))
-    //     {
-    //         course.AuditInformation.LastModified = DateTime.Now;
-    //         course.AuditInformation.IsArchived = true;
-    //         await CourseData.UpdateCourseAsync(course);
-    //         Navigation.NavigateTo("/");
-    //     }
-    // }
-
-// TODO: This can be removed:
-    // private async Task OnConfirmationResult(bool confirmed)
-    // {
-    //     showConfirmationModal = false; // Hide the modal
-    //     if (confirmed)
-    //     {
-    //         await Archive();
-    //     }
-    // }
 
     private async Task SaveCourse()
     {
@@ -200,51 +171,28 @@
             // Save the course
             await CourseData.CreateCourseAsync(newCourse);
             course = newCourse;  // Assign the newly created course to the 'course' model
+            courseTypeName = courseTypes.FirstOrDefault(ct => ct.Id == newCourse.CourseTypeId)!.Name!;
         }
 
         // // Show the modal for course preview
-        // await ShowCoursePreviewModal();
+        await ShowModal();
     }
 
-    // private async Task ShowCoursePreviewModal()
-    // {
-    //     var parameters = new ModalParameters();
-    //     parameters.Add("Course", course);  // Pass the saved course to the modal
+    private async Task ShowModal()
+    {
+        await JS.InvokeVoidAsync("modalInterop.showModal", "preview-modal");
+    }
 
-    //     var modal = Modal.Show<PreviewDialog>("Preview", parameters);
-    //     var result = await modal.Result;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initializeModal");
+        }
+    }
 
-    //     if (!result.Cancelled)
-    //     {
-    //         if ((bool)result.Data)  // This indicates "Continue to Timetable" was clicked
-    //         {
-    //             // Navigate to the timetable creation page
-    //             Navigation.NavigateTo($"/timetable/{course.Id}");
-    //         }
-    //         else
-    //         {
-    //             // Navigate to the edit course page
-    //             Navigation.NavigateTo($"/course/create/{course.Id}");
-    //         }
-    //     }
-    // }
-
-// TODO: This can be removed:
-    // private async Task ShowDeleteConfirmation()
-    // {
-    //     var parameters = new ModalParameters();
-    //     parameters.Add("Message", "Are you sure you want to delete this course?");
-
-    //     var modal = Modal.Show<ConfirmationDialog>("Confirm Deletion", parameters);
-    //     var result = await modal.Result;
-
-    //     if (!result.Cancelled)
-    //     {
-    //         await Archive();
-    //     }
-    //     else
-    //     {
-    //         Console.WriteLine("Deletion canceled by the user.");
-    //     }
-    // }
+    private async Task UpdateToEdit()
+    {
+        isEditMode = true;
+    }
 }

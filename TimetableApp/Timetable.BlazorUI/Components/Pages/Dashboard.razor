@@ -4,17 +4,16 @@
 @using Microsoft.AspNetCore.Components.Web
 @inject IJSRuntime JS
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
-@* @rendermode InteractiveServer *@
 
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-6 col-sm-12 mb-sm-3 mb-2 col-md-12">
 
-            <CoursesDiv @ref="CourseDivObject" />
+            <CoursesDiv @ref="CourseDivObject" OnShow="ShowModal" />
         </div>
         <div class="col-lg-5 col-sm-12 col-md-12">
 
-            <TaskTypesDiv />
+            <TaskTypesDiv @ref="TaskTypeDivObject" OnShow="ShowModal"/>
         </div>
     </div>
 </div>
@@ -60,40 +59,33 @@
     </div>
     </AuthorizeView>
     <div class="col-5">
-        @* <h2>My Timetables</h2> *@
     </div>
 </div>
 
 <ConfirmDialog OnClose="OnClose" />
 
-@* <div class="modal micromodal-slide" id="modal-1" aria-hidden="true">
-    <div class="modal__overlay" tabindex="-1" data-micromodal-close>
-        <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-1-title">
-            <header class="modal__header">
-                <h2 class="modal__title" id="modal-1-title">
-                    Micromodal
-                </h2>
-                <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
-            </header>
-            <main class="modal__content" id="modal-1-content">
-                <p>
-                    Try hitting the <code>tab</code> key and notice how the focus stays within the modal itself. Also, <code>esc</code> to close modal.
-                </p>
-            </main>
-            <footer class="modal__footer">
-                <button class="modal__btn modal__btn-primary" @onclick="@OnCloseButtonClick" id="closeModalButton">Continue</button>
-                <button class="modal__btn"  data-micromodal-close aria-label="Close this dialog window">Close</button>
-            </footer>
-        </div>
-    </div>
-</div> *@
-
 @code{
+    private object? selectedItem; 
     private CoursesDiv CourseDivObject;
+    private TaskTypesDiv TaskTypeDivObject;
 
     private async Task OnClose()
     {
-        CourseDivObject.Archive();
+        if (selectedItem is Course course)
+        {
+            await CourseDivObject.Archive(); 
+        }
+        else if (selectedItem is TaskType taskType)
+        {
+            await TaskTypeDivObject.Archive(taskType);
+        }
+
+    }
+
+    private async Task ShowModal(object item)
+    {
+        selectedItem = item;
+        await JS.InvokeVoidAsync("modalInterop.showModal", "modal-1");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -104,9 +96,5 @@
         }
     }
 
-    private async Task OnCloseButtonClick()
-    {
-        CourseDivObject.Archive();
-    }
 }
 
