@@ -1,45 +1,59 @@
-﻿@using Blazored.Modal
-@using Blazored.Modal.Services
+﻿@inject IJSRuntime JS
 @inject NavigationManager Navigation
 @inject ICourseTypeData CourseTypeData
 
-<div class="card bg-light p-3">
-    <div class="card-body">
-        <h4 class="card-title">Course Preview</h4>
-        <p class="card-text"><strong>Course Name:</strong> @Course.Name</p>
-        <p class="card-text"><strong>Description:</strong> @Course.Description</p>
-        <p class="card-text"><strong>Start Date:</strong> @Course.StartDate.ToShortDateString()</p>
-        <p class="card-text"><strong>End Date:</strong> @Course.EndDate.ToShortDateString()</p>
-        <p class="card-text"><strong>Course Type:</strong> @CourseTypeName</p>
-        <p class="card-text"><strong>Term:</strong> @Course.Term.Name</p>
-        <p class="card-text"><strong>Duration:</strong> @Course.Term.Duration weeks</p>
+<div class="modal micromodal-slide" id="preview-modal" aria-hidden="true">
+    <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+        <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title">
+            <header class="modal__header">
+                <h2 class="modal__title" id="preview-modal-title">
+                    Confirm
+                </h2>
+                <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
+            </header>
+            <main class="modal__content" id="preview-modal-content">
+                <div class="card bg-light p-3">
+                    <div class="card-body">
+                        <h4 class="card-title">Course Preview</h4>
+                        <p class="card-text"><strong>Course Name:</strong> @Course.Name</p>
+                        <p class="card-text"><strong>Description:</strong> @Course.Description</p>
+                        <p class="card-text"><strong>Start Date:</strong> @Course.StartDate.ToShortDateString()</p>
+                        <p class="card-text"><strong>End Date:</strong> @Course.EndDate.ToShortDateString()</p>
+                        <p class="card-text"><strong>Course Type:</strong> @CourseType </p>
+                        <p class="card-text"><strong>Term:</strong> @Course.Term.Name</p>
+                        <p class="card-text"><strong>Duration:</strong> @Course.Term.Duration weeks</p>
+                    </div>
+                </div>
+
+            </main>
+            <footer class="modal-footer mt-2">
+                <button class="btn btn-secondary py-1" @onclick="@ContinueEditing" name="preview-modal" id="closeModalButton"><i class="bi bi-pencil"></i> Continue editing</button>
+                <button class="btn mstc-gold-btn py-1 mx-2" @onclick="@ContinueToTimetable" name="preview-modal" id="closeModalButton"><i class="bi bi-trash"></i> Continue</button>
+            </footer>
+        </div>
     </div>
-</div>
-<div class="modal-footer mt-2">
-    <button class="btn btn-secondary" @onclick="ContinueEditing">Continue Editing</button>
-    <button class="btn mstc-gold-btn mx-2" @onclick="ProceedToTimetable">Continue to Timetable</button>
 </div>
 
 @code {
-    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-    [Parameter] public Course Course { get; set; }
 
-    private string CourseTypeName { get; set; }
+    [Parameter]
+    public EventCallback OnClose { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    [Parameter] 
+    public Course Course { get; set; }
+
+    [Parameter]
+    public string CourseType { get; set; }
+
+
+    private async Task ContinueToTimetable()
     {
-        var courseType = await CourseTypeData.GetByIdAsync(Course.CourseTypeId);
-
-        CourseTypeName = courseType.Name;
+        Navigation.NavigateTo($"timetable/{Course.Id}");
     }
 
     private async Task ContinueEditing()
     {
-        await BlazoredModal.CloseAsync(ModalResult.Ok(false));  // Pass false to indicate editing
+        await OnClose.InvokeAsync(null);
     }
 
-    private async Task ProceedToTimetable()
-    {
-        await BlazoredModal.CloseAsync(ModalResult.Ok(true));  // Pass true to indicate timetable navigation
-    }
 }

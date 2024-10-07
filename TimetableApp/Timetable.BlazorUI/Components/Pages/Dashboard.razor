@@ -2,22 +2,18 @@
 @using Timetable.BlazorUI.Components.Components
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
-@inject Blazored.Modal.Services.IModalService Modal
 @inject IJSRuntime JS
-@using Blazored.Modal
-@using Blazored.Modal.Services
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
-<CascadingBlazoredModal />
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-6 col-sm-12 mb-sm-3 mb-2 col-md-12">
 
-            <CoursesDiv />
+            <CoursesDiv @ref="CourseDivObject" OnShow="ShowModal" />
         </div>
         <div class="col-lg-5 col-sm-12 col-md-12">
 
-            <TaskTypesDiv />
+            <TaskTypesDiv @ref="TaskTypeDivObject" OnShow="ShowModal"/>
         </div>
     </div>
 </div>
@@ -63,7 +59,42 @@
     </div>
     </AuthorizeView>
     <div class="col-5">
-        @* <h2>My Timetables</h2> *@
     </div>
 </div>
+
+<ConfirmDialog OnClose="OnClose" />
+
+@code{
+    private object? selectedItem; 
+    private CoursesDiv CourseDivObject;
+    private TaskTypesDiv TaskTypeDivObject;
+
+    private async Task OnClose()
+    {
+        if (selectedItem is Course course)
+        {
+            await CourseDivObject.Archive(); 
+        }
+        else if (selectedItem is TaskType taskType)
+        {
+            await TaskTypeDivObject.Archive(taskType);
+        }
+
+    }
+
+    private async Task ShowModal(object item)
+    {
+        selectedItem = item;
+        await JS.InvokeVoidAsync("modalInterop.showModal", "modal-1");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initializeModal");
+        }
+    }
+
+}
 

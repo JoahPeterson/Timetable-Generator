@@ -26,7 +26,7 @@
                             <i class="bi bi-clipboard h4"></i>
                             <a href="tasktype/create/@taskType.Id" class="text-decoration-none text-black fw-bold">@taskType.Name</a>
                         </div>
-                        <a class="text-decoration-none text-black fw-bold ms-auto" @onclick="() => ShowDeleteConfirmation(taskType)">
+                        <a class="text-decoration-none text-black fw-bold ms-auto" @onclick="() => ShowModal(taskType)">
                             <i class="bi bi-dash-circle h5"></i>
                         </a>
                     </li>
@@ -46,9 +46,13 @@ else
 }
 
 @code {
+    [Parameter]
+    public EventCallback<TaskType> OnShow { get; set; }
+
     private List<TaskType>? taskTypes;
     private User? loggedInUser;
     private bool showConfirmationModal = false;
+    TaskType selectedTaskType = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -69,16 +73,13 @@ else
         }
     }
 
-    private async Task OnConfirmationResult(bool confirmed, TaskType taskType)
+    private async Task ShowModal(TaskType taskType)
     {
-        showConfirmationModal = false; // Hide the modal
-        if (confirmed)
-        {
-            await Archive(taskType);
-        }
+        selectedTaskType = taskType;
+        await OnShow.InvokeAsync(taskType);
     }
 
-    private async Task Archive(TaskType taskType)
+    public async Task Archive(TaskType taskType)
     {
 
         taskType.AuditInformation.LastModified = DateTime.Now;
@@ -91,23 +92,5 @@ else
         StateHasChanged();
     }
 
-    private async Task ShowDeleteConfirmation(TaskType taskType)
-    {
-        var parameters = new ModalParameters();
-        parameters.Add("Message", $"Are you sure you want to delete the task type '{taskType.Name}'?");
-
-        var modal = Modal.Show<ConfirmationDialog>("Confirm Delete", parameters);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            await OnConfirmationResult(true, taskType);
-            //await Archive(taskType);
-        }
-        else
-        {
-            // Nothing right now
-        }
-    }
 
 }
