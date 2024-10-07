@@ -38,15 +38,15 @@ public class Course : IValidatableObject
         {
             yield return new ValidationResult(
                 "Start Date cannot be later than End Date.",
-                new[] { nameof(StartDate), nameof(EndDate) });
+                new[] { nameof(StartDate) });
         }
 
-        // If End Date is less than StartDate, kick it back
+        //If End Date is less than StartDate, kick it back
         if (EndDate < StartDate)
         {
             yield return new ValidationResult(
                 "End Date cannot be earlier than Start Date.",
-                new[] { nameof(StartDate), nameof(EndDate) });
+                new[] {nameof(EndDate) });
         }
     }
 
