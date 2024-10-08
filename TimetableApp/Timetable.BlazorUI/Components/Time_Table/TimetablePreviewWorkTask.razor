@@ -1,0 +1,35 @@
+﻿@inject IWorkTaskData WorkTaskData
+@inject ITaskTypeData TaskTypeData
+
+@if(BaseWorkTask != null && TaskType != null)
+{
+    <div class="row workUnitTask-description">
+        @BaseWorkTask.Description
+    </div>
+
+    <div class="row workUnitTask-details">
+        <div class="col-md-4">
+            @TaskType.Name
+        </div>
+        <div class="col-md-4">
+            Minutes: @WorkUnitTask.Duration
+        </div>
+        <div class="col-md-4">
+            Due Date: Bummy Data
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public required WorkUnitTask WorkUnitTask { get; set; }
+
+    public WorkTask? BaseWorkTask { get; set; }
+
+    public TaskType TaskType { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        BaseWorkTask = await WorkTaskData.GetByIdAsync(WorkUnitTask.TaskId);
+        TaskType = await TaskTypeData.GetTaskTypeAsync(BaseWorkTask.TypeId);
+    }
+}

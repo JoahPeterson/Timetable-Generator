@@ -1,0 +1,30 @@
+﻿<div>
+    <div class="row">
+        <div class="workUnit-header col-2">
+            <div>Week #@WeekNumber</div>
+            <div>Dummy Data</div>
+            <div>Duration Dummy</div>
+        </div>
+        @if (WorkUnit.Tasks != null && WorkUnit.Tasks.Any())
+        {
+            <div class="col-10">
+                <div class="row col-12">
+                    @WorkUnit.Name
+                </div>
+
+                @foreach(WorkUnitTask workTask in WorkUnit.Tasks)
+                {
+                    <TimetablePreviewWorkTask WorkUnitTask="workTask"/>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public required WorkUnit WorkUnit { get; set; }
+
+    [Parameter]
+    public required int WeekNumber { get; set; }
+}
