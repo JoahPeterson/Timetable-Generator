@@ -10,12 +10,12 @@
 @attribute [Authorize]
 
 <!-- Toggle Button for the collapsible form -->
-<button class="btn mstc-gold-btn shadow mb-3" id="toggleBtn" type="button" data-bs-toggle="collapse" data-bs-target="#workUnitCollapse" aria-expanded="false" aria-controls="workUnitCollapse">
+<button class="btn mstc-gold-btn shadow mb-2" id="toggleBtn" type="button" data-bs-toggle="collapse" data-bs-target="#workUnitCollapse" aria-expanded="false" aria-controls="workUnitCollapse">
    <i class="bi bi-eye"></i> Work Unit Form
 </button>
 
 <!-- Collapsible form -->
-<div class="collapse" id="workUnitCollapse">
+<div class="collapse mb-2" id="workUnitCollapse">
     <div class="card card-body bg-light shadow">
         <EditForm FormName="WorkUnitForm" Model="workUnit" OnValidSubmit="@SaveWorkUnit" class="form-inline">
             <DataAnnotationsValidator />
