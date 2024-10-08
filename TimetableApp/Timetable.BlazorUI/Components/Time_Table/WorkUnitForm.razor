@@ -10,37 +10,41 @@
 @attribute [Authorize]
 
 <!-- Toggle Button for the collapsible form -->
-<button class="btn btn-info mb-3" id="toggleBtn" type="button" data-bs-toggle="collapse" data-bs-target="#workUnitCollapse" aria-expanded="false" aria-controls="workUnitCollapse">
+<button class="btn mstc-gold-btn shadow mb-3" id="toggleBtn" type="button" data-bs-toggle="collapse" data-bs-target="#workUnitCollapse" aria-expanded="false" aria-controls="workUnitCollapse">
    <i class="bi bi-eye"></i> Work Unit Form
 </button>
 
 <!-- Collapsible form -->
 <div class="collapse" id="workUnitCollapse">
-    <div class="card card-body">
-        <EditForm FormName="WorkUnitForm" Model="workUnit" OnValidSubmit="@SaveWorkUnit">
+    <div class="card card-body bg-light shadow">
+        <EditForm FormName="WorkUnitForm" Model="workUnit" OnValidSubmit="@SaveWorkUnit" class="form-inline">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <div class="w-75">
-                <label class="form-label" for="Name">Work Unit Name:</label>
-                <InputText id="name" @bind-Value="workUnit.Name" class="form-control" />
+            <!-- Inline Form Fields -->
+            <div class="form-group mx-sm-3 mb-2">
+                <label class="fw-bold" for="Name">Work Unit Name</label>
+                <InputText id="name" @bind-Value="workUnit.Name" class="form-control" placeholder="Work Unit Name" />
                 <ValidationMessage For="@(() => workUnit.Name)" />
             </div>
-            <div class="w-75">
-                <label class="form-label" for="duration">Duration:</label>
+
+            <div class="form-group mx-sm-3 mb-2">
+                <label class="fw-bold" for="duration">Duration</label>
                 <InputSelect id="duration" @bind-Value="workUnit.Duration" class="form-control">
                     @for (int i = 1; i <= 4; i++)
                     {
-                        <option value="@i">@i</option>
+                        <option value="@i">@i weeks</option>
                     }
                 </InputSelect>
+                <ValidationMessage For="@(() => workUnit.Duration)" />
             </div>
-            <div class="d-flex flex-row mt-3 justify-content-end w-75">
+
+            <div class="d-flex flex-row mt-3 justify-content-start w-75 mx-3">
                 <div class="d-block m-1">
-                    <button type="reset" class="btn btn-secondary d-block mt-1">Reset</button>
+                    <button type="reset" class="btn btn-secondary d-block mt-1"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
                 </div>
                 <div class="d-block m-1">
-                    <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
+                    <button type="submit" class="btn mstc-gold-btn d-block mt-1"><i class="bi bi-floppy"></i> Save</button>
                 </div>
             </div>
         </EditForm>
