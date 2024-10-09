@@ -31,7 +31,6 @@
             </div>
         }
     </div>
-
     
     <div class="w-25 d-flex flex-column m-5">
         <!-- WorkUnit Form -->
@@ -40,10 +39,6 @@
         <!-- WorkTask Form -->
         <WorkTaskForm @ref="WorkTaskForm" OnWorkTaskFormSubmit="UpdateWorkTasks" />
     </div>
-
-
-    
-
 </div>
 
 
@@ -61,7 +56,7 @@
     private WorkUnitForm WorkUnitForm;
     private WorkTaskForm WorkTaskForm;
 
-   
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,7 +73,6 @@
 
             // Load existing work tasks (if any)
             workTasks = await WorkTaskData.GetAsync();
-            
         }
     }
 

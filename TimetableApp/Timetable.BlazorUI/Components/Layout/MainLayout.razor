@@ -5,13 +5,12 @@
 @using Blazored.Modal
 <link rel="stylesheet" href="css/site.css">
 <div class="page">
-    <div class="sidebar">
+    <div class="sidebar d-print-none">
         <NavMenu />
     </div>
    
     <main>
-        
-        <div class="top-row bg-red d-flex justify-content-between align-items-center">
+        <div class="top-row bg-red d-flex justify-content-between align-items-center d-print-none">
             <div class="text-white mx-auto text-center">
                 @{
                     if (Navigation.Uri.Contains("timetable"))
@@ -23,6 +22,12 @@
            <div class="d-flex ml-auto justify-content-end">
                 @if (Navigation.Uri.Contains("timetable"))
                 {
+                    if (Navigation.Uri.Contains("preview")== false)
+                    {
+                        <TimetablePreviewHref/>
+                        <a class="text-white">|</a>
+                    }
+
                     <CourseEditHref />
                     <a class="text-white">|</a>
                 }
@@ -44,7 +49,7 @@
     </main>
 </div>
 
-<div id="blazor-error-ui">
+<div id="blazor-error-ui d-print-none noprint">
     An unhandled error has occurred.
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>

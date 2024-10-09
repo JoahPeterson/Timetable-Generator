@@ -1,0 +1,18 @@
+﻿::deep .previewWorkUnit-Row:nth-child(odd) {
+    background-color: #F9C545;
+}
+
+::deep .previewWorkUnit-Row:nth-child(even) {
+    background-color: #FDDA8B;
+}
+
+::deep .preview-emphasis {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+::deep .preview-course-name {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: white;
+}
