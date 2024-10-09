@@ -6,6 +6,9 @@
 
 <div class="timetable-main">
     <TimetablePreviewHeader />
+    <div class="preview-course-name bg-red  row d-flex justify-content-center align-items-center flex-column">
+        @course.Name
+    </div>
     @for (int i = 0; i < course.WorkUnits.Count; i++)
     {
         <TimetablePreviewWorkUnit WorkUnit="course.WorkUnits[i]" WeekNumber="i + 1" />

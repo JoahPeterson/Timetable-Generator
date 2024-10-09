@@ -120,3 +120,65 @@
 body {
     background-color: #f8f9fb;
 }
+
+
+.previewWorkUnit-Row:nth-child(odd) {
+    background-color: #F9C545;
+}
+
+.previewWorkUnit-Row:nth-child(even) {
+    background-color: #FDDA8B;
+}
+
+.preview-emphasis {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.preview-course-name {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: white;
+}
+
+
+@media print {
+    /*.preview-week-number {
+        font-size: 1.5em;*/ /* Larger font size for printing */
+        /*font-weight: bold;*/ /* Ensure bold text when printing */
+    /*}*/
+
+    /* Additional print-specific styles */
+    .no-print {
+        display:none; /* Hide elements that shouldn't appear in print */
+    }
+
+    .previewWorkUnit-Row:nth-child(odd) {
+        background-color: #F9C545;
+    }
+
+    .previewWorkUnit-Row:nth-child(even) {
+        background-color: #FDDA8B;
+    }
+
+    .preview-emphasis {
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    .preview-course-name {
+        font-size: 1.4em;
+        font-weight: bold;
+        color: white;
+    }
+
+    /*body {
+        color: black;*/ /* Ensure that all text is printed in black */
+        /*background-color: white;*/ /* Remove background color for better printing */
+    /*}*/
+
+    /* You can also adjust page margins, etc. */
+    @page {
+        margin: 1in;
+    }
+}

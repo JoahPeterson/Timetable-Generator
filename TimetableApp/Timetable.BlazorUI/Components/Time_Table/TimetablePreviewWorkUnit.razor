@@ -1,25 +1,26 @@
-﻿<div>
-    <div class="row">
-        <div class="workUnit-header col-2">
-            <div>Week #@WeekNumber</div>
-            <div>Dummy Data</div>
-            <div>Duration Dummy</div>
-        </div>
-        @if (WorkUnit.Tasks != null && WorkUnit.Tasks.Any())
-        {
-            <div class="col-10">
-                <div class="row col-12">
-                    @WorkUnit.Name
-                </div>
-
-                @foreach(WorkUnitTask workTask in WorkUnit.Tasks)
-                {
-                    <TimetablePreviewWorkTask WorkUnitTask="workTask"/>
-                }
-            </div>
-        }
+﻿
+<div class="row previewWorkUnit-Row">
+    <div class="workUnit-header col-2 border border-black d-flex justify-content-center align-items-center flex-column">
+        <div class="preview-week-number preview-emphasis">Week #@WeekNumber</div>
+        <div class="preview-due-date ">Date Data</div>
+        <div>Duration Hrs: @(WorkUnit.Tasks.Sum(Task => string.IsNullOrEmpty(Task.Duration) ? 0 : Convert.ToInt32(Task.Duration))/60.0)</div>
     </div>
+    @if (WorkUnit.Tasks != null && WorkUnit.Tasks.Any())
+    {
+        <div class="col-10">
+            <div class="row border border-black d-flex justify-content-center align-items-center flex-column preview-emphasis">
+                @WorkUnit.Name
+
+            </div>
+
+            @foreach(WorkUnitTask workTask in WorkUnit.Tasks)
+            {
+                <TimetablePreviewWorkTask WorkUnitTask="workTask"/>
+            }
+        </div>
+    }
 </div>
+
 
 @code {
     [Parameter]

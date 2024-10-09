@@ -3,19 +3,21 @@
 
 @if(BaseWorkTask != null && TaskType != null)
 {
-    <div class="row workUnitTask-description">
-        @BaseWorkTask.Description
-    </div>
+    <div class="row border border-black">
+        <div class="row workUnitTask-description d-flex justify-content-center align-items-center flex-column preview-emphasis">
+            @BaseWorkTask.Description
+        </div>
 
-    <div class="row workUnitTask-details">
-        <div class="col-md-4">
-            @TaskType.Name
-        </div>
-        <div class="col-md-4">
-            Minutes: @WorkUnitTask.Duration
-        </div>
-        <div class="col-md-4">
-            Due Date: Bummy Data
+        <div class="row workUnitTask-details">
+            <div class="col-md-4">
+                @TaskType.Name
+            </div>
+            <div class="col-md-4">
+                Minutes: @WorkUnitTask.Duration
+            </div>
+            <div class="col-md-4">
+                Due Date: Bummy Data
+            </div>
         </div>
     </div>
 }
