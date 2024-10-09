@@ -38,8 +38,6 @@
 
         <!-- WorkTask Form -->
         <WorkTaskForm @ref="WorkTaskForm" OnWorkTaskFormSubmit="UpdateWorkTasks" />
-
-        <button class="btn btn-primary" @onclick="() => PreviewButtonClick()">Add Work Unit</button>
     </div>
 </div>
 
@@ -75,13 +73,7 @@
 
             // Load existing work tasks (if any)
             workTasks = await WorkTaskData.GetAsync();
-
         }
-    }
-
-    private async Task PreviewButtonClick()
-    {
-        Navigation.NavigateTo($"/timetable/preview/{course.Id}");
     }
 
     private double SingleRowHeightPercentage()

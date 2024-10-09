@@ -121,64 +121,40 @@ body {
     background-color: #f8f9fb;
 }
 
-
-.previewWorkUnit-Row:nth-child(odd) {
-    background-color: #F9C545;
-}
-
-.previewWorkUnit-Row:nth-child(even) {
-    background-color: #FDDA8B;
-}
-
-.preview-emphasis {
-    font-size: 1.2em;
-    font-weight: bold;
-}
-
-.preview-course-name {
-    font-size: 1.4em;
-    font-weight: bold;
-    color: white;
-}
-
-
 @media print {
-    /*.preview-week-number {
-        font-size: 1.5em;*/ /* Larger font size for printing */
-        /*font-weight: bold;*/ /* Ensure bold text when printing */
-    /*}*/
-
-    /* Additional print-specific styles */
-    .no-print {
-        display:none; /* Hide elements that shouldn't appear in print */
+    body {
+        background: none !important;
     }
 
-    .previewWorkUnit-Row:nth-child(odd) {
-        background-color: #F9C545;
+    .noprint {
+        display: none !important;
     }
 
-    .previewWorkUnit-Row:nth-child(even) {
-        background-color: #FDDA8B;
+    .timetable-duration {
+        white-space: nowrap !important;
+    }
+
+    .timetable-logo {
+        height: 50px;
+    }
+
+    .preview-finetext {
+        font-size: 0.7em;
+        font-weight: 100;
     }
 
     .preview-emphasis {
-        font-size: 1.2em;
+        font-size: .9em;
         font-weight: bold;
     }
 
     .preview-course-name {
-        font-size: 1.4em;
+        font-size: 1.1em;
         font-weight: bold;
-        color: white;
+        color: black;
     }
 
-    /*body {
-        color: black;*/ /* Ensure that all text is printed in black */
-        /*background-color: white;*/ /* Remove background color for better printing */
-    /*}*/
-
-    /* You can also adjust page margins, etc. */
     @page {
-        margin: 1in;
+        margin: 0.5in;
     }
 }

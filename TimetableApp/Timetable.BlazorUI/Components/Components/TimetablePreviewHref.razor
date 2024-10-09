@@ -1,0 +1,16 @@
+﻿@inject NavigationManager Navigation
+
+<a class="text-white" href="timetable/preview/@courseId"><i class="bi bi-eyeglasses"></i> Preview Timetable</a>
+
+@code {
+    private string courseId;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Uri uri = new Uri(Navigation.Uri);
+
+        courseId = uri.Segments.LastOrDefault();
+
+    }
+
+}
