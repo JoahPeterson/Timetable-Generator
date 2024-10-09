@@ -2,46 +2,61 @@
 @using Timetable.BlazorUI.Components.Pages
 @inject IWorkUnitData WorkUnitData
 @inject IUserData UserData
+@inject IJSRuntime JS
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @inject Blazored.Modal.Services.IModalService Modal
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-<EditForm FormName="WorkUnitForm" Model="workUnit" OnValidSubmit="@SaveWorkUnit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<!-- Toggle Button for the collapsible form -->
+<button class="btn mstc-gold-btn shadow mb-2" id="toggleBtn" type="button" data-bs-toggle="collapse" data-bs-target="#workUnitCollapse" aria-expanded="false" aria-controls="workUnitCollapse">
+   <i class="bi bi-eye"></i> Work Unit Form
+</button>
 
-    <div class="w-75">
-        <label class="form-label" for="Name">Work Unit Name:</label>
-        <InputText id="name" @bind-Value="workUnit.Name" class="form-control" />
-        <ValidationMessage For="@(() => workUnit.Name)" />
+<!-- Collapsible form -->
+<div class="collapse mb-2" id="workUnitCollapse">
+    <div class="card card-body bg-light shadow">
+        <EditForm FormName="WorkUnitForm" Model="workUnit" OnValidSubmit="@SaveWorkUnit" class="form-inline">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <!-- Inline Form Fields -->
+            <div class="form-group mx-sm-3 mb-2">
+                <label class="fw-bold" for="Name">Work Unit Name</label>
+                <InputText id="name" @bind-Value="workUnit.Name" class="form-control" placeholder="Work Unit Name" />
+                <ValidationMessage For="@(() => workUnit.Name)" />
+            </div>
+
+            <div class="form-group mx-sm-3 mb-2">
+                <label class="fw-bold" for="duration">Duration</label>
+                <InputSelect id="duration" @bind-Value="workUnit.Duration" class="form-control">
+                    @for (int i = 1; i <= 4; i++)
+                    {
+                        <option value="@i">@i weeks</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => workUnit.Duration)" />
+            </div>
+
+            <div class="d-flex flex-row mt-3 justify-content-start w-75 mx-3">
+                <div class="d-block m-1">
+                    <button type="reset" class="btn btn-secondary d-block mt-1"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                </div>
+                <div class="d-block m-1">
+                    <button type="submit" class="btn mstc-gold-btn d-block mt-1"><i class="bi bi-floppy"></i> Save</button>
+                </div>
+            </div>
+        </EditForm>
     </div>
-    <div class="w-75">
-        <label class="form-label" for="duration">Duration:</label>
-        <InputSelect id="duration" @bind-Value="workUnit.Duration" class="form-control" >
-            @for (int i = 1; i <= 4; i++)
-            {
-                <option value="@i">@i</option>
-            }
-        </InputSelect>
-    </div>
-    <div class="d-flex flex-row mt-3 justify-content-end w-75">
-        <div class="d-block m-1">
-            <button type="reset" class="btn btn-secondary d-block mt-1">Reset</button>
-        </div>
-        <div class="d-block m-1">
-            <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
-        </div>
-    </div>
-</EditForm>
+</div>
 
 @code {
     [Parameter]
     public Course Course { get; set; }
 
     [Parameter]
-    public WorkUnit? WorkUnitToEdit{ get; set; }
+    public WorkUnit? WorkUnitToEdit { get; set; }
 
     [Parameter]
     public EventCallback<WorkUnit> OnWorkUnitFormSubmit { get; set; }
@@ -59,6 +74,7 @@
         {
             workUnit = WorkUnitToEdit;
             isEditMode = true;
+            JS.InvokeVoidAsync("showCollapse", "workUnitCollapse");
             return;
         }
         workUnit = new WorkUnit();
@@ -104,6 +120,12 @@
     private async Task HandleReset()
     {
         workUnit = new WorkUnit();
+        isEditMode = false;
+
+        // Update the button label based on the mode
+        await JS.InvokeVoidAsync("updateButtonText", "toggleBtn", isEditMode);
+
+        StateHasChanged();
     }
 
     private Task HandleWorkUnitChange(WorkUnit updatedWorkUnit)
