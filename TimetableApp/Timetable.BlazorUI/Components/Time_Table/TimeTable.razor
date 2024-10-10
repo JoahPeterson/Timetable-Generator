@@ -14,11 +14,14 @@
 
 <div class="d-flex">
     <!-- Week Column -->
-    <div class="week-column d-flex flex-column w-25">
+    <div class="week-column d-flex flex-column">
         @for (int i = 1; i <= course.Term.Duration; i++)
         {
-            <div class="week-label d-flex align-items-center justify-content-center" style="height: @(SingleRowHeightPercentage())vh; background-color: @(i % 2 == 0 ? "#f8f9fa" : "#e9ecef")">
-                Week # @i
+            <div class="workUnit-Row d-flex align-items-center justify-content-center"
+                 style="height: @(SingleRowHeightPercentage())vh;">
+                <div class="vertical-text">
+                    Week @i
+                </div>
             </div>
         }
     </div>
@@ -26,8 +29,8 @@
     <div class="flex-grow-1 d-flex flex-column">
         @foreach (WorkUnit workUnit in workUnits)
         {
-            <div class="work-unit-container">
-                <WorkUnitComponent WorkUnit="workUnit" SingleRowHeightPercentage="@SingleRowHeightPercentage()" OnSelected="HandleWorkUnitSelected" />
+            <div class="work-unit-container workUnit-Row">
+                <WorkUnitComponent WorkUnit="workUnit" WorkTasks="workTasks" SingleRowHeightPercentage="@SingleRowHeightPercentage()" OnSelected="HandleWorkUnitSelected" />
             </div>
         }
     </div>
@@ -52,7 +55,7 @@
     private WorkUnit? selectedWorkUnit;
     private Course course = new Course();
 
-    private int tableVhPercentage { get; } = 100;
+    private int tableVhPercentage { get; } = 125;
     private WorkUnitForm WorkUnitForm;
     private WorkTaskForm WorkTaskForm;
 

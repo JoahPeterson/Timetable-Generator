@@ -8,37 +8,39 @@
 @inject IUserData UserData
 @inject AuthenticationStateProvider authProvider
 
-@* <div class="work-unit bg-success text-white border border-dark" draggable="true" @onclick="SelectWorkUnit" style="height: @(RowHeightPercentage)vh">
-    <p>@WorkUnit.Name</p>
-    <p>Duration: @WorkUnit.Duration</p>
-</div>
- *@
-@*   *@
  <!-- Droppable Version for Drag n Drop-->
  <div class="work-unit bg-success text-white border border-dark" 
     ondragover="event.preventDefault();"
      @onclick="SelectWorkUnit" 
      @ondrop="(e) => HandleDrop(e, WorkUnit.Id)"
      style="height: @(RowHeightPercentage)vh">
-    <p>@WorkUnit.Name</p>
-    <p>Duration: @WorkUnit.Duration</p>
-    <ul>
-        @foreach (var task in WorkUnit.Tasks)
-        {
-            <li class="list-group-item CardText text-dark px-3"
-                draggable="true"
-                @ondragstart="(e) => HandleDragStart(e, task.TaskId)">
-                @task.TaskId
-            </li>
-        }
-    </ul>
+    <div class="row">
+            <TimetableWorkUnitHeader WorkUnit="@WorkUnit"/>
+        <ul>
+            @foreach (var task in WorkUnit.Tasks)
+            {
+                var workTask = WorkTasks.FirstOrDefault(t => t.Id == task.TaskId);
+
+                <li class="list-group-item CardText text-dark px-3"
+                    draggable="true"
+                    @ondragstart="(e) => HandleDragStart(e, task.TaskId)">
+                    @workTask.Name;
+                </li>
+            }
+        </ul>
+    </div>
+
    
 
 </div>
 
 @code {
     [Parameter]
-    public WorkUnit WorkUnit { get; set; }
+    public required WorkUnit WorkUnit { get; set; }
+
+
+    [Parameter]
+    public required List<WorkTask> WorkTasks { get; set; }
 
     [Parameter]
     public double SingleRowHeightPercentage { get; set; }
@@ -46,7 +48,7 @@
     [Parameter]
     public EventCallback<WorkUnit> OnSelected { get; set; }
 
-    private List<WorkUnitTask> tasks;
+    private List<WorkUnitTask>? tasks;
 
     private User? loggedInUser;
 
@@ -54,24 +56,26 @@
 
     private double RowHeightPercentage { get => SingleRowHeightPercentage * WorkUnit.Duration; }
 
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     var authState = await authProvider.GetAuthenticationStateAsync();
-    //     var user = authState.User;
+    protected override async Task OnInitializedAsync()
+    {
 
-    //     // Get the user's ID claim
-    //     var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
 
-    //     if (!string.IsNullOrEmpty(userIdClaim))
-    //     {
-    //         loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+        // Get the user's ID claim
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
 
-    //         if (loggedInUser != null)
-    //         {
-    //             tasks = await WorkUnitTaskData.GetUsersWorkUnitTasksAsync(loggedInUser.Id);
-    //         }
-    //     }
-    // }
+        if (!string.IsNullOrEmpty(userIdClaim))
+        {
+            loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+
+            if (loggedInUser != null)
+            {
+                //workTasks = await WorkTaskData.GetUsersWorkTasksAsync(loggedInUser.Id);
+                // tasks = await WorkUnitTaskData.GetUsersWorkUnitTasksAsync(loggedInUser.Id);
+            }
+        }
+    }
 
     private async Task SelectWorkUnit()
     {
