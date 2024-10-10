@@ -14,20 +14,25 @@
      @onclick="SelectWorkUnit" 
      @ondrop="(e) => HandleDrop(e, WorkUnit.Id)"
      style="height: @(RowHeightPercentage)vh">
-    <div class="row">
-            <TimetableWorkUnitHeader WorkUnit="@WorkUnit"/>
-        <ul>
-            @foreach (var task in WorkUnit.Tasks)
-            {
-                var workTask = WorkTasks.FirstOrDefault(t => t.Id == task.TaskId);
+    <div class="d-flex justify-content-between align-items-start">
+        <div class="TimeTableHeader">
+            <TimetableWorkUnitHeader WorkUnit="@WorkUnit" />
+        </div>
+        <div class="cards-container flex-grow-1">
+            <ul class="d-flex flex-wrap">
+                @foreach (var task in WorkUnit.Tasks)
+                {
+                    var workTask = WorkTasks.FirstOrDefault(t => t.Id == task.TaskId);
 
-                <li class="list-group-item CardText text-dark px-3"
-                    draggable="true"
-                    @ondragstart="(e) => HandleDragStart(e, task.TaskId, task.TaskId)">
-                    @workTask.Name;
-                </li>
-            }
-        </ul>
+                    <li class="list-group-item CardText text-dark m-2"
+                        draggable="true"
+                        @ondragstart="(e) => HandleDragStart(e, task.Id, task.TaskId)">
+                        @workTask.Name
+                        @task.SequenceNumber
+                    </li>
+                }
+            </ul>
+        </div>
     </div>
 
    
@@ -37,7 +42,6 @@
 @code {
     [Parameter]
     public required WorkUnit WorkUnit { get; set; }
-
 
     [Parameter]
     public required List<WorkTask> WorkTasks { get; set; }
@@ -90,11 +94,6 @@
         //await JS.InvokeVoidAsync("preventDefault", e);
     }
 
-    private async Task Drop()
-    {
-
-    }
-
     private async Task HandleDrop(DragEventArgs e, string workUnitId)
     {
         //draggedTaskId = httpContextAccessor.HttpContext.Session.GetString("taskID");
@@ -119,8 +118,6 @@
             }
             if (task != null)
             {
-
-
                 WorkUnit.Tasks.Add(new WorkUnitTask
                     {
                         Id = Guid.NewGuid().ToString(),

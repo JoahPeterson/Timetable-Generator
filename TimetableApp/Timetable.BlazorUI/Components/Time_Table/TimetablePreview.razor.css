@@ -16,3 +16,23 @@
     font-weight: bold;
     color: white;
 }
+
+::deep .cards-container {
+    padding: 1rem;
+}
+
+::deep .TimeTableHeader {
+    padding-left: 1rem;
+    max-width: 300px;
+}
+
+::deep .list-group-item {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
