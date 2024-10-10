@@ -2,6 +2,7 @@
 @inject ICourseData CourseData
 
 @using Microsoft.AspNetCore.Authorization
+@using Timetable.BlazorUI.Components.Components
 
 @inject ITaskTypeData TaskTypeData
 @inject IUserData UserData
@@ -44,6 +45,7 @@
     </div>
 </div>
 
+<ConfirmDialog OnClose="OnClose" />
 
 @code {
     [Parameter]
@@ -134,6 +136,12 @@
     private void HandleWorkUnitSelected(WorkUnit workUnit)
     {
         selectedWorkUnit = workUnit;
+    }
+
+    private async Task OnClose()
+    {
+      
+
     }
 }
 
