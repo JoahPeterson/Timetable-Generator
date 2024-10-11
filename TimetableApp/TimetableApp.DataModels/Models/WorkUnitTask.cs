@@ -8,6 +8,8 @@ public class WorkUnitTask
 
     public string? Duration { get; set; }
 
+    public DateTime? DueDate { get; set; }
+
     public string TaskId { get; set; }
 
     public int? SequenceNumber { get; set; }

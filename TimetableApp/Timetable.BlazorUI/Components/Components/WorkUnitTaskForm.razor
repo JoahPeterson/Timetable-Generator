@@ -7,7 +7,7 @@
         <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="form-modal-title">
             <header class="modal__header">
                 <h2 class="modal__title" id="form-modal-title">
-                    @(isEditMode ? "Edit Task" : "Create Task")
+                    Task Information
                 </h2>
                 <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
             </header>
@@ -15,19 +15,18 @@
                 <div class="card bg-light p-3">
                     <div class="card-body">
                         <EditForm Model="workUnitTask" OnValidSubmit="@SaveWorkUnitTask">
-                            <DataAnnotationsValidator />
                             <div class="form-group row mt-2">
-                                <label class="col-sm-4 col-form-label fw-bold" for="TaskId">Task ID</label>
-                                <div class="col-8">
-                                    <InputText id="taskId" @bind-Value="workUnitTask.TaskId" class="form-control" placeholder="Task ID" />
-                                    <ValidationMessage For="@(() => workUnitTask.TaskId)" />
-                                </div>
-                            </div>
-                            <div class="form-group row mt-2">
-                                <label class="col-sm-4 col-form-label fw-bold" for="Duration">Duration</label>
+                                <label class="col-sm-4 col-form-label fw-bold" for="Duration">Duration (In Minutes)</label>
                                 <div class="col-8">
                                     <InputText id="duration" @bind-Value="workUnitTask.Duration" class="form-control" placeholder="Duration" />
                                     <ValidationMessage For="@(() => workUnitTask.Duration)" />
+                                </div>
+                            </div>
+                            <div class="form-group row mt-2">
+                                <label class="col-sm-4 col-form-label fw-bold" for="Duration">Due Date</label>
+                                <div class="col-8">
+                                    <InputDate id="dueDate" @bind-Value="workUnitTask.DueDate" class="form-control"/>
+                                    <ValidationMessage For="@(() => workUnitTask.DueDate)" />
                                 </div>
                             </div>
                             <div class="form-group row mt-2">
@@ -37,15 +36,8 @@
                                     <ValidationMessage For="@(() => workUnitTask.SequenceNumber)" />
                                 </div>
                             </div>
-                            <div class="form-group row mt-2">
-                                <label class="col-sm-4 col-form-label fw-bold" for="WorkUnitId">Work Unit ID</label>
-                                <div class="col-8">
-                                    <InputText id="workUnitId" @bind-Value="workUnitTask.WorkUnitId" class="form-control" placeholder="Work Unit ID" disabled />
-                                    <ValidationMessage For="@(() => workUnitTask.WorkUnitId)" />
-                                </div>
-                            </div>
                             <div class="d-flex justify-content-center mt-4">
-                                <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
+                                <button type="submit" @onclick="OnCloseButtonClick" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
                                     <i class="bi bi-floppy"></i> Save
                                 </button>
                             </div>
@@ -61,57 +53,61 @@
 </div>
 
 @code {
-    [Parameter] public string? taskId { get; set; }
-    [Parameter] public string workUnitId { get; set; }  <!-- WorkUnit ID to know which work unit to update -->
+    public WorkUnitTask? workUnitTaskToUpdate;
 
-    private WorkUnitTask workUnitTask = new WorkUnitTask();
-    private WorkUnit workUnit = new WorkUnit();  <!-- The parent work unit containing the task list -->
-    private bool isEditMode = false;
+    [Parameter]
+    public EventCallback OnClose { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    [Parameter] public WorkUnit currentWorkUnit { get; set; }  
+
+    public WorkUnitTask workUnitTask = new();
+
+    private WorkUnit workUnit;
+
+    public WorkTask? workTask;
+
+
+    public string? workUnitTaskId;
+
+
+    protected override void OnParametersSet()
     {
-        // Fetch the WorkUnit that contains the task
-        workUnit = await WorkUnitData.GetByIdAsync(workUnitId);
+        workUnit = currentWorkUnit;
 
-        if (!string.IsNullOrEmpty(taskId))
+        if (workUnitTaskToUpdate == null)
         {
-            isEditMode = true;
-            workUnitTask = workUnit.Tasks.FirstOrDefault(t => t.Id == taskId) ?? new WorkUnitTask();
+            workUnitTask = new();
         }
         else
         {
-            isEditMode = false;
-            workUnitTask = new WorkUnitTask { WorkUnitId = workUnitId };
+            workUnitTask = workUnitTaskToUpdate;
         }
-    }
 
+    }
     private async Task SaveWorkUnitTask()
     {
-        if (isEditMode)
+        WorkUnitTask tempWorkUnitTask = workUnitTaskToUpdate;
+        if(tempWorkUnitTask == null)
         {
-            // Update the task in the work unit's task list
-            var existingTask = workUnit.Tasks.FirstOrDefault(t => t.Id == taskId);
-            if (existingTask != null)
-            {
-                existingTask.TaskId = workUnitTask.TaskId;
-                existingTask.Duration = workUnitTask.Duration;
-                existingTask.SequenceNumber = workUnitTask.SequenceNumber;
-                // Other properties as needed
-            }
+            tempWorkUnitTask = new WorkUnitTask
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    TaskId = workTask.Id,
+                    WorkUnitId = workUnit.Id
+                };
+            workUnit.Tasks.Add(tempWorkUnitTask);
         }
-        else
-        {
-            // Add a new task to the work unit's task list
-            workUnitTask.Id = Guid.NewGuid().ToString();  // Assign a new ID for the task
-            workUnit.Tasks.Add(workUnitTask);
-        }
+        workUnitTaskToUpdate = workUnit.Tasks.Where(task => task.Id == tempWorkUnitTask.Id).First();
+        workUnitTaskToUpdate.Duration = workUnitTask.Duration;
+        workUnitTaskToUpdate.DueDate = workUnitTask.DueDate;
+        workUnitTaskToUpdate.SequenceNumber = workUnitTask.SequenceNumber;
 
-        // Save changes to the work unit
+
         await WorkUnitData.UpdateAsync(workUnit);
 
-        // After save, close modal and navigate back or trigger other actions
-        await JS.InvokeVoidAsync("modalInterop.hideModal", "form-modal");
-        Navigation.NavigateTo($"/workunits/{workUnitId}");  // Redirect back to the work unit's page
+        workUnitTaskToUpdate = null;
+
+        StateHasChanged();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -120,5 +116,13 @@
         {
             await JS.InvokeVoidAsync("initializeModal");
         }
+        
+    } 
+
+    private async Task OnCloseButtonClick()
+    {
+        await OnClose.InvokeAsync(null);
     }
+
+
 }

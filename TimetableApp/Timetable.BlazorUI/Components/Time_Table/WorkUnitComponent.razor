@@ -1,5 +1,6 @@
 ﻿@using TimetableApp.DataModels.Models
 @using Microsoft.AspNetCore.Http
+@using Timetable.BlazorUI.Components.Components
 @inject IHttpContextAccessor httpContextAccessor
 @inject IJSRuntime JS
 @inject IWorkUnitData WorkUnitData
@@ -23,18 +24,21 @@
     <p>@WorkUnit.Name</p>
     <p>Duration: @WorkUnit.Duration</p>
     <ul>
-        @foreach (var task in WorkUnit.Tasks)
+        @foreach (var workUnitTask in WorkUnit.Tasks)
         {
             <li class="list-group-item CardText text-dark px-3"
                 draggable="true"
-                @ondragstart="(e) => HandleDragStart(e, task.Id, task.TaskId)">
-                @task.TaskId
+                @ondragstart="(e) => HandleDragStart(e, workUnitTask.Id, workUnitTask.TaskId)">
+                @workUnitTask.TaskId
+                <i @onclick="() => SelectWorkUnitTask(workUnitTask)" class="bi bi-pencil"></i>
             </li>
         }
     </ul>
    
 
 </div>
+
+<WorkUnitTaskForm OnClose="OnClose" @ref="workUnitTaskForm" currentWorkUnit="WorkUnit" />
 
 @code {
     [Parameter]
@@ -54,41 +58,20 @@
 
     private string? workTaskId;
 
+    private WorkUnitTaskForm workUnitTaskForm;
+
     private double RowHeightPercentage { get => SingleRowHeightPercentage * WorkUnit.Duration; }
-
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     var authState = await authProvider.GetAuthenticationStateAsync();
-    //     var user = authState.User;
-
-    //     // Get the user's ID claim
-    //     var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
-
-    //     if (!string.IsNullOrEmpty(userIdClaim))
-    //     {
-    //         loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
-
-    //         if (loggedInUser != null)
-    //         {
-    //             tasks = await WorkUnitTaskData.GetUsersWorkUnitTasksAsync(loggedInUser.Id);
-    //         }
-    //     }
-    // }
 
     private async Task SelectWorkUnit()
     {
         await OnSelected.InvokeAsync(WorkUnit);
     }
 
-    private async Task HandleDragOver(DragEventArgs e)
+    private async Task SelectWorkUnitTask(WorkUnitTask workUnitTask)
     {
-        // Prevent default behavior to allow drop
-        //await JS.InvokeVoidAsync("preventDefault", e);
-    }
-
-    private async Task Drop()
-    {
-
+        workUnitTaskForm.workUnitTaskToUpdate = workUnitTask;
+        workUnitTaskForm.currentWorkUnit = WorkUnit;
+        await JS.InvokeVoidAsync("modalInterop.showModal", "form-modal");
     }
 
     private async Task HandleDrop(DragEventArgs e, string workUnitId)
@@ -115,21 +98,28 @@
             }
             if (task != null)
             {
+                // var newWorkUnitTask = new WorkUnitTask
+                //     {
+                //         Id = Guid.NewGuid().ToString(),
+                //         TaskId = task.Id,
+                //         WorkUnitId = WorkUnit.Id
+                //     };
 
+                // WorkUnit.Tasks.Add(newWorkUnitTask);
 
-                WorkUnit.Tasks.Add(new WorkUnitTask
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        TaskId = task.Id,
-                        WorkUnitId = WorkUnit.Id
-                    });
                 // Save the updated work unit
-                await WorkUnitData.UpdateAsync(WorkUnit);
+                // await WorkUnitData.UpdateAsync(WorkUnit);
 
-                //await JS.InvokeVoidAsync("modalInterop.showModal", "modal-1");
+                // workUnitTaskForm.workUnitTaskId = newWorkUnitTask.Id;
+                // workUnitTaskForm.currentWorkUnit = WorkUnit;
+
+                workUnitTaskForm.workTask = task;
+                workUnitTaskForm.currentWorkUnit = WorkUnit;
+
+                await JS.InvokeVoidAsync("modalInterop.showModal", "form-modal");
 
                 // Refresh the UI
-                StateHasChanged();
+                // StateHasChanged();
             }
         }
     }
@@ -141,11 +131,9 @@
         WorkUnit.Tasks.Remove(WorkUnit.Tasks.Where(t => t.Id == taskId).First());
     }
  
-    // protected override async Task OnAfterRenderAsync(bool firstRender)
-    // {
-    //     if (firstRender)
-    //     {
-    //         await JS.InvokeVoidAsync("initializeModal");
-    //     }
-    // }
+    private async Task OnClose()
+    {
+        await JS.InvokeVoidAsync("modalInterop.hideModal", "form-modal");
+
+    }
 }
