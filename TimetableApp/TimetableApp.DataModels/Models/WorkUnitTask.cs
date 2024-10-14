@@ -14,4 +14,6 @@ public class WorkUnitTask
 
     public string WorkUnitId { get; set; }
 
+    public DateTime? DueDate { get; set; }
+
 }

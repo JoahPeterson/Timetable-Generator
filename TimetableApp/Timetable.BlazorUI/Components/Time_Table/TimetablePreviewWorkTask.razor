@@ -1,17 +1,17 @@
 ﻿@inject IWorkTaskData WorkTaskData
 @inject ITaskTypeData TaskTypeData
 
-@if(BaseWorkTask != null && TaskType != null)
+@if(BaseWorkTask != null )
 {
-    <div class="row border border-black">
+    <div class="row border border-1 border-black">
         <div class="row workUnitTask-description d-flex justify-content-center align-items-center flex-column preview-emphasis">
             @BaseWorkTask.Description
         </div>
 
         <div class="row workUnitTask-details">
-            <div class="col-4 preview-finetext">
+@*             <div class="col-4 preview-finetext">
                 @TaskType.Name
-            </div>
+            </div> *@
             <div class="col-4 text-nowrap preview-finetext">
                 Minutes: @WorkUnitTask.Duration
             </div>
