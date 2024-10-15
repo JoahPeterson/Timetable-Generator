@@ -2,6 +2,7 @@
 @inject ICourseData CourseData
 
 @using Microsoft.AspNetCore.Authorization
+@using Timetable.BlazorUI.Components.Components
 
 @inject ITaskTypeData TaskTypeData
 @inject IUserData UserData
@@ -31,7 +32,6 @@
             </div>
         }
     </div>
-
     
     <div class="w-25 d-flex flex-column m-5">
         <!-- WorkUnit Form -->
@@ -40,12 +40,9 @@
         <!-- WorkTask Form -->
         <WorkTaskForm @ref="WorkTaskForm" OnWorkTaskFormSubmit="UpdateWorkTasks" />
     </div>
-
-
-    
-
 </div>
 
+<ConfirmDialog OnClose="OnClose" />
 
 @code {
     [Parameter]
@@ -61,7 +58,7 @@
     private WorkUnitForm WorkUnitForm;
     private WorkTaskForm WorkTaskForm;
 
-   
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,7 +75,6 @@
 
             // Load existing work tasks (if any)
             workTasks = await WorkTaskData.GetAsync();
-            
         }
     }
 
@@ -137,6 +133,12 @@
     private void HandleWorkUnitSelected(WorkUnit workUnit)
     {
         selectedWorkUnit = workUnit;
+    }
+
+    private async Task OnClose()
+    {
+      
+
     }
 }
 

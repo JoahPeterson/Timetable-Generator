@@ -48,4 +48,18 @@ function GetSession(name)
 }
 
 
+window.toggleCollapse = (elementId) => {
+    var element = document.getElementById(elementId);
+    if (element) {
+        var bsCollapse = new bootstrap.Collapse(element);
+        bsCollapse.toggle();
+    }
+}
 
+window.showCollapse = (elementId) => {
+    var element = document.getElementById(elementId);
+    if (element && !element.classList.contains('show')) {
+        var bsCollapse = new bootstrap.Collapse(element);
+        bsCollapse.show(); // Only uncollapse (expand) if it's collapsed
+    }
+}

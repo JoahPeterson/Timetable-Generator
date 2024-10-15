@@ -1,0 +1,31 @@
+﻿
+<div class="row previewWorkUnit-Row">
+    <div class="workUnit-header col-2 border border-black d-flex justify-content-center align-items-center flex-column">
+        <div class="preview-week-number preview-emphasis">Week #@WeekNumber</div>
+        <div class="preview-due-date preview-finetext ">Date Data</div>
+        <div class="timetable-duration preview-finetext">Duration Hrs: @(WorkUnit.Tasks.Sum(Task => string.IsNullOrEmpty(Task.Duration) ? 0 : Convert.ToInt32(Task.Duration)) / 60.0)</div>
+    </div>
+    @if (WorkUnit.Tasks != null && WorkUnit.Tasks.Any())
+    {
+        <div class="col-10">
+            <div class="row border border-black d-flex justify-content-center align-items-center flex-column preview-emphasis">
+                @WorkUnit.Name
+
+            </div>
+
+            @foreach(WorkUnitTask workTask in WorkUnit.Tasks)
+            {
+                <TimetablePreviewWorkTask WorkUnitTask="workTask"/>
+            }
+        </div>
+    }
+</div>
+
+
+@code {
+    [Parameter]
+    public required WorkUnit WorkUnit { get; set; }
+
+    [Parameter]
+    public required int WeekNumber { get; set; }
+}
