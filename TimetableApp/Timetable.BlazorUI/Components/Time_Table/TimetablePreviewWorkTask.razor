@@ -9,9 +9,12 @@
         </div>
 
         <div class="row workUnitTask-details">
-@*             <div class="col-4 preview-finetext">
-                @TaskType.Name
-            </div> *@
+            @if (TaskType != null)
+            {
+                <div class="col-4 preview-finetext">
+                    @TaskType.Name
+                </div>  
+            }
             <div class="col-4 text-nowrap preview-finetext">
                 Minutes: @WorkUnitTask.Duration
             </div>

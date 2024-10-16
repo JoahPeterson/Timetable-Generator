@@ -101,6 +101,7 @@
 
     private async Task HandleDrop(DragEventArgs e, string workUnitId)
     {
+
         //draggedTaskId = httpContextAccessor.HttpContext.Session.GetString("taskID");
         draggedTaskId = await JS.InvokeAsync<string>("GetSession", "TaskId");
         workTaskId = await JS.InvokeAsync<string>("GetSession", "WorkTaskId");
@@ -142,6 +143,14 @@
 
     private async Task HandleDragStart(DragEventArgs e, string taskId, string workTaskId)
     {
+        try
+        {
+            e.DataTransfer.Items.SetValue(taskId, 0);
+        }
+        catch (Exception ex)
+        {
+            
+        }
         await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
         await JS.InvokeVoidAsync("SetSession", "WorkTaskId", workTaskId);
         WorkUnit.Tasks.Remove(WorkUnit.Tasks.Where(t => t.Id == taskId).First());
