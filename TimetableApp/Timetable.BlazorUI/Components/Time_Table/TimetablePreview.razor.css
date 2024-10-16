@@ -16,3 +16,41 @@
     font-weight: bold;
     color: white;
 }
+
+@media print {
+    ::deep body {
+        background: none !important;
+    }
+
+    ::deep .noprint {
+        display: none !important;
+    }
+
+    ::deep .timetable-duration {
+        white-space: nowrap !important;
+    }
+
+    ::deep .timetable-logo {
+        height: 50px;
+    }
+
+    ::deep .preview-finetext {
+        font-size: 0.7em;
+        font-weight: 100;
+    }
+
+    ::deep .preview-emphasis {
+        font-size: 0.8em !important;
+        font-weight: 500;
+    }
+
+    ::deep .preview-course-name {
+        font-size: 1.1em;
+        font-weight: bold;
+        color: black;
+    }
+
+    @page {
+        margin: 0.5in;
+    }
+}
