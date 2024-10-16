@@ -9,10 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Components\Components\CourseTypesDiv.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
 	<PackageReference Include="Blazored.Modal" Version="7.3.1" />
 	<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.8" />
 	<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.0.8" />
@@ -29,18 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TimetableApp.DataModels\TimetableApp.DataModels.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Components\Components\CourseTypesDiv.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Components\Components\CourseTypesDiv.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Components\Components\CourseTypesDiv.razor" />
   </ItemGroup>
 
 </Project>
