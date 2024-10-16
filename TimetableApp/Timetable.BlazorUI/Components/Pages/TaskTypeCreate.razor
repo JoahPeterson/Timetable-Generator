@@ -10,73 +10,39 @@
 @attribute [Authorize]
 
 
-@* Cascading Is Required for Modal to Work *@
-@* <CascadingBlazoredModal /> *@
-
-<h3>@(isEditMode ? "Edit Task Type" : "Create Task Type")</h3>
-
-
 <EditForm Model="taskType" OnValidSubmit="@SaveTaskType" FormName="TasktypeForm">
     <DataAnnotationsValidator/>
-    <ValidationSummary/>
-
-    <div>
-        <label for="Name">Task Type Name:</label>
-        <InputText id="name" @bind-Value="taskType.Name" class="form-control" />
-        <ValidationMessage For="@(() => taskType.Name)" />
-    </div>
-    <div>
-        <label for="Description">Task Type Description:</label>
-        <InputText id="description" @bind-Value="taskType.Description" class="form-control" />
-        <ValidationMessage For="@(() => taskType.Description)" />
-    </div>
-    <div class="d-flex flex-row mt-3 justify-content-end">
-        <div class="d-flex d-block m-1">
-            <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
-        </div>
-
-        @if (isEditMode)
-            {
-                <div class="d-block m-1">
-                    <button type="button" @onclick="ShowDeleteConfirmation"   class="btn btn-danger d-block mt-1">Delete</button>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="bg-light rounded-2 mt-5 p-3">
+                    <h3 class="text-center mb-3 mt-5 fw-bold">@(isEditMode ? "Edit Task Type" : "Create Task Type")</h3>
+                    <div class="d-flex flex-column">
+                        <div class="form-group row mt-2">
+                            <label for="Name" class="col-4 col-form-label fw-bold">Task Type Name</label>
+                            <div class="col-8">
+                                <InputText id="name" @bind-Value="taskType.Name" class="form-control" placeholder="Task Type Name" />
+                                <ValidationMessage For="@(() => taskType.Name)" />
+                            </div>
+                        </div>
+                        <div class="form-group row mt-2">
+                            <label class="col-sm-4 col-form-label fw-bold" for="ToolTip">Task Type Description</label>
+                            <div class="col-8">
+                                <InputTextArea id="description" @bind-Value="taskType.Description" class="form-control" placeholder="Task Type Description" />
+                                <ValidationMessage For="@(() => taskType.Description)" />
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center mt-4">
+                            <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
+                                <i class="bi bi-floppy"></i> Save
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            }
-
+            </div>
+        </div>
     </div>
 </EditForm>
-
-
-@* @if (taskTypes == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var taskType in taskTypes)
-            {
-                <tr>
-                    <td>@taskType.Name</td>
-                    <td>@taskType.Description</td>
-                    <td>
-                        <button class="btn btn-primary" @onclick="() => EditTaskType(taskType)">Edit</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
- *@
-@* <TaskTypeTable> </TaskTypeTable> *@
-
 
 @code {
     [Parameter] public string? taskTypeId { get; set; }
