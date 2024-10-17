@@ -41,15 +41,27 @@
                         <div class="form-group row mt-2">
                             <label class="col-sm-4 col-form-label fw-bold" for="StartDate">Course Start Date</label>
                             <div class="col-8">
-                                <input type="date" id="startDate" @bind="course.StartDate" class="form-control" />
+                                <input type="date" id="startDate" @bind="course.StartDate"  class="form-control" />
                                 <ValidationMessage For="@(() => course.StartDate)" />
+                            </div>
+                        </div>
+                        <div class="form-group row mt-2">
+                            <label class="col-sm-4 col-form-label fw-bold" for="TermDuration">Term Duration</label>
+                            <div class="col-8">
+                                <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" onselect="@CalculateEndDate()" class="form-control">
+                                    <option>Select Term Duration</option>
+                                    @foreach (var duration in termDurations)
+                                    {
+                                        <option value="@duration.Length">@duration.Length weeks</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => course.Term.Duration)" />
                             </div>
                         </div>
                         <div class="form-group row mt-2">
                             <label class="col-sm-4 col-form-label fw-bold" for="EndDate">Course End Date</label>
                             <div class="col-8">
-                                <input type="date" id="endDate" @bind="course.EndDate" class="form-control" />
-                                <ValidationMessage For="@(() => course.EndDate)" />
+                                <input type="text" id="endDate" @bind="calculatedEndDate" class="form-control" disabled="true" />
                             </div>
                         </div>
                         <div class="form-group row mt-2">
@@ -77,19 +89,6 @@
                                 </InputSelect>
                             </div>
                         </div>
-                        <div class="form-group row mt-2">
-                            <label class="col-sm-4 col-form-label fw-bold" for="TermDuration">Term Duration</label>
-                            <div class="col-8">
-                                <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" class="form-control">
-                                    <option>Select Term Duration</option>
-                                    @foreach (var duration in termDurations)
-                                    {
-                                        <option value="@duration.Length">@duration.Length weeks</option>
-                                    }
-                                </InputSelect>
-                                <ValidationMessage For="@(() => course.Term.Duration)" />
-                            </div>
-                        </div>
                         <div class="d-flex justify-content-center mt-4">
                             <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
                                 <i class="bi bi-floppy"></i> Save
@@ -108,10 +107,22 @@
 
     private Course course = new Course();
     private List<CourseType> courseTypes = new List<CourseType>();
+    private string courseTypeName = null!;
+    private bool isEditMode = false;
     private List<Term> terms = new List<Term>();
     private List<TermDuration> termDurations = new List<TermDuration>();
-    private bool isEditMode = false;
-    private string courseTypeName = null!;
+    private string calculatedEndDate = null!;
+
+    private DateTime StartDate
+    {
+        get => course.StartDate;
+        set
+        {
+            course.StartDate = value;
+            CalculateEndDate();
+        }
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -128,6 +139,8 @@
             course.EndDate = DateTime.Now;
         }
 
+        calculatedEndDate = course.EndDate.ToString("MM-dd-yyyy");
+
         // Fetch course types from the database
         courseTypes = await CourseTypeData.GetAsync();
 
@@ -136,6 +149,18 @@
 
         // Fetch term durations from the database
         termDurations = await TermDurationData.GetAsync();
+    }
+
+    private async Task CalculateEndDate()
+    {
+        if (course.Term.Duration == null )
+        {
+            course.EndDate = course.StartDate;
+            return;
+        }
+
+        course.EndDate = course.StartDate.AddDays(course.Term.Duration * 7);
+        calculatedEndDate = course.EndDate.ToString("MM-dd-yyyy");
     }
 
     private async Task SaveCourse()
