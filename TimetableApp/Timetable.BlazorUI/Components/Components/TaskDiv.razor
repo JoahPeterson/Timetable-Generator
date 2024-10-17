@@ -1,0 +1,96 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject IWorkTaskData TaskData
+@inject IUserData UserData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@inject Blazored.Modal.Services.IModalService Modal
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+
+
+@if (workTasks != null && loggedInUser != null)
+{
+    var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2" };
+    <div class="darkdiv rounded-3 p-3 shadow">
+        <h2 class="text-center"><i class="bi bi-list-task"></i> My Tasks</h2>
+        <hr />
+        <div class="card scrollable-card">
+            <ul class="list-group list-group-flush">
+                @foreach (var (workTask, index) in workTasks.Select((value, i) => (value, i)))
+                {
+                    var colorClass = colorClasses.ElementAtOrDefault(index % colorClasses.Count) ?? "Cardcolor-1";  // Ensure safe access
+                    <li class="list-group-item CardText text-black px-3 d-flex justify-content-between @colorClass"
+                        data-toggle="tooltip" data-placement="top" title="@workTask.Description">
+                        <div>
+                            <i class="bi bi-clipboard h4"></i>
+                            <a href="worktask/create/@workTask.Id" class="text-decoration-none text-black fw-bold">@workTask.Name</a>
+                        </div>
+                        <a class="text-decoration-none text-black fw-bold ms-auto" @onclick="() => ShowModal(workTask)">
+                            <i class="bi bi-dash-circle h5"></i>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="mt-4 fixed">
+            <a href="worktask/create" class="text-black text-decoration-none CardText">
+                <i class="bi bi-plus-circle h5"></i> Add
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <p>Loading task types...</p>
+}
+
+@code {
+    [Parameter]
+    public EventCallback<WorkTask> OnShow { get; set; }
+
+    private List<WorkTask>? workTasks;
+    private User? loggedInUser;
+    private bool showConfirmationModal = false;
+    WorkTask selectedTask = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        // Get the user's ID claim
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim))
+        {
+            loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+            if (loggedInUser != null)
+            {
+                // Fetch task types for the logged-in user
+                workTasks = await TaskData.GetUsersWorkTasksAsync(loggedInUser.Id);
+            }
+        }
+    }
+
+    private async Task ShowModal(WorkTask workTask)
+    {
+        selectedTask = workTask;
+        await OnShow.InvokeAsync(workTask);
+    }
+
+    public async Task Archive(WorkTask workTask)
+    {
+
+        workTask.AuditInformation.LastModified = DateTime.Now;
+        workTask.AuditInformation.IsArchived = true;
+        await TaskData.UpdateAsync(workTask);
+
+        if (workTasks is not null)
+            workTasks.Remove(workTask);
+
+        StateHasChanged();
+    }
+
+
+}
