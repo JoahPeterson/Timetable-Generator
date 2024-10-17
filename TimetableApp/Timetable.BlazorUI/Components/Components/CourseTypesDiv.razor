@@ -1,0 +1,136 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject IJSRuntime JS
+@inject ICourseTypeData CourseTypeData
+@inject IUserData UserData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+@if (courseTypes != null && loggedInUser != null)
+{
+    var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2" };
+
+    <div class="darkdiv p-3 rounded-3 shadow">
+        <h2 class="text-center"><i class="bi bi-list-columns-reverse"></i> Course Modalities</h2>
+        <hr />
+        <div class="card scrollable-card">
+            <ul class="list-group list-group-flush">
+                @foreach (var (courseType, index) in courseTypes.Select((value, i) => (value, i)))
+                {
+                    var colorClass = colorClasses.ElementAtOrDefault(index % colorClasses.Count) ?? "Cardcolor-1";  // Ensure safe access
+                    <li class="list-group-item CardText text-black px-3 d-flex justify-content-between @colorClass"
+                        data-toggle="tooltip" data-placement="top" title="@courseType.ToolTip">
+                        <div>
+                            <i class="bi bi-book h4"></i>
+                            <a href="/CourseType/Create/@courseType.Id" class="text-black text-decoration-none fw-bold">
+                                @courseType.Name  
+                                @if (courseType.AuditInformation.IsArchived == true)
+                                {
+                                     <i class="bi bi-archive-fill px-2 h5"></i> 
+                                }
+                                    
+                            </a>
+
+                        </div>
+                        @if (courseType.AuditInformation.IsArchived == false)
+                        {
+                            <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="() => ShowModal(courseType)">
+                                <i class="bi bi-dash-circle h5"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="() => Restore(courseType)">
+                                <i class="bi bi-plus-circle-dotted h5"></i>
+                            </a>
+                        }
+
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="mt-4 fixed">
+            <a href="courseType/create" class="text-black text-decoration-none CardText">
+                <i class="bi bi-plus-circle h5"></i> Add
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <p>Loading courses...</p>
+}
+
+@code {
+    [Parameter]
+    public EventCallback<CourseType> OnConfirm { get; set; }
+
+    [Parameter]
+    public EventCallback<CourseType> OnShow { get; set; }
+
+    private List<CourseType>? courseTypes;
+    private User? loggedInUser;
+    private bool showConfirmationModal = false;
+    CourseType selectedCourseType = null;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim))
+        {
+            loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+
+            if (loggedInUser != null)
+            {
+                courseTypes = await CourseTypeData.GetAsync();
+            }
+        }
+
+    }
+
+
+
+    public async Task Archive()
+    {
+        showConfirmationModal = false;
+
+        if (selectedCourseType == null)
+            return;
+
+        selectedCourseType.AuditInformation.LastModified = DateTime.Now;
+        selectedCourseType.AuditInformation.IsArchived = true;
+        await CourseTypeData.UpdateAsync(selectedCourseType);
+
+        // if (courseTypes is not null)
+        //     courseTypes.Remove(selectedCourseType);
+
+        StateHasChanged();
+
+    }
+
+    public async Task Restore(CourseType courseType)
+    {
+
+        courseType.AuditInformation.LastModified = DateTime.Now;
+        courseType.AuditInformation.IsArchived = false;
+        await CourseTypeData.UpdateAsync(courseType);
+
+
+        StateHasChanged();
+    }
+
+    private async Task ShowModal(CourseType courseType)
+    {
+        selectedCourseType = courseType;
+        await OnShow.InvokeAsync(courseType);
+    }
+
+}

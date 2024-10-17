@@ -8,34 +8,38 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-
-@* Cascading Is Required for Modal to Work *@
-<CascadingBlazoredModal />
-
-<h3>@(isEditMode ? "Edit Course Modality" : "Create Course Modality")</h3>
-
-
 <EditForm Model="courseType" OnValidSubmit="@SaveCourseType" FormName="CourseTypeForm">
     <DataAnnotationsValidator />
-    <ValidationSummary />
-
-    <div>
-        <label for="Name">Modality Name:</label>
-        <InputText id="name" @bind-Value="courseType.Name" class="form-control" />
-        <ValidationMessage For="@(() =>courseType.Name)" />
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="bg-light rounded-2 mt-5 p-3">
+                    <h3 class="text-center mb-3 mt-5 fw-bold">@(isEditMode ? "Edit Modality" : "Create Modality")</h3>
+                    <div class="d-flex flex-column">
+                        <div class="form-group row mt-2">
+                            <label for="Name" class="col-4 col-form-label fw-bold">Modality Name</label>
+                            <div class="col-8">
+                                <InputText id="name" @bind-Value="courseType.Name" class="form-control" placeholder="Modality Name" />
+                                <ValidationMessage For="@(() =>courseType.Name)" />
+                            </div>
+                        </div>
+                        <div class="form-group row mt-2">
+                            <label class="col-sm-4 col-form-label fw-bold" for="ToolTip">Modality Description</label>
+                            <div class="col-8">
+                                <InputTextArea id="toolTip" @bind-Value="courseType.ToolTip" class="form-control" placeholder="Modality Description" />
+                                <ValidationMessage For="@(() => courseType.ToolTip)" />
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center mt-4">
+                            <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
+                                <i class="bi bi-floppy"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <label for="ToolTip">Modality Description:</label>
-        <InputText id="toolTip" @bind-Value="courseType.ToolTip" class="form-control" />
-        <ValidationMessage For="@(() => courseType.ToolTip)" />
-    </div>
-
-    <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
-
-    @if (isEditMode)
-    {
-        <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-1">Delete</button>
-    }
 </EditForm>
 
 
@@ -105,7 +109,7 @@
         }
 
         // Redirect to the course type list or home after save
-        Navigation.NavigateTo("/");
+        Navigation.NavigateTo("/dashboard");
     }
 
     private async Task ShowDeleteConfirmation()

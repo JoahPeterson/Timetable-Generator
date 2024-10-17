@@ -11,56 +11,28 @@
 
             <CoursesDiv @ref="CourseDivObject" OnShow="ShowModal" />
         </div>
-        <div class="col-lg-5 col-sm-12 col-md-12">
+        <div class="col-lg-5 col-sm-12 col-md-12 mb-2">
 
             <TaskTypesDiv @ref="TaskTypeDivObject" OnShow="ShowModal"/>
         </div>
     </div>
 </div>
 
-
-<div class="row mt-5 justify-content-center">
-     <AuthorizeView Roles="Admin">
-    <div class="col-4">
-        <h2 class="text-center">Admin Tools</h2>
-        <div class="bg-light row">
-            <div class="col-4">
-                <a href="admin/users" class="text-decoration-none">
-                    <div class="card text-white Cardcolor-1 mb-3" style="max-width: 18rem;">
-                        <div class="card-body text-center">
-                            <i class="bi bi-people-fill h1"></i>
-                            <h5 class="card-title text-center">Users</h5>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-4">
-                <a href="coursetype/create" class="text-decoration-none">
-                    <div class="card text-white Cardcolor-2 mb-3" style="max-width: 18rem;">
-                        <div class="card-body text-center">
-                            <i class="bi bi-book h1"></i>
-                            <h5 class="card-title text-center">Modalities</h5>
-                        </div>
-                    </div>
-                </a> 
-            </div>
-            <div class="col-4">
-                <a href="admin/term" class="text-decoration-none">
-                    <div class="card text-white Cardcolor-1 mb-3" style="max-width: 18rem;">
-                        <div class="card-body text-center">
-                            <i class="bi bi-list-stars h1"></i>
-                            <h5 class="card-title text-center">Terms</h5>
-                        </div>
-                    </div>
-                </a>
-                
-            </div>
+<AuthorizeView Roles="Admin">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-4 col-sm-12 mb-sm-3 mb-2 col-md-12">
+            <CourseTypesDiv @ref="CourseTypeDivObject" OnShow="ShowModal"/>
+        </div>
+        <div class="col-lg-4 col-sm-12 mb-sm-3 mb-2 col-md-12">
+            <!--Users Div-->
+        </div>
+        <div class="col-lg-4 col-sm-12 mb-sm-3 mb-2 col-md-12">
+            <!--Terms Div-->
         </div>
     </div>
-    </AuthorizeView>
-    <div class="col-5">
-    </div>
 </div>
+</AuthorizeView>
 
 <ConfirmDialog OnClose="OnClose" />
 
@@ -68,6 +40,7 @@
     private object? selectedItem; 
     private CoursesDiv CourseDivObject;
     private TaskTypesDiv TaskTypeDivObject;
+    private CourseTypesDiv CourseTypeDivObject;
 
     private async Task OnClose()
     {
@@ -78,6 +51,10 @@
         else if (selectedItem is TaskType taskType)
         {
             await TaskTypeDivObject.Archive(taskType);
+        }
+        else if (selectedItem is CourseType courseType)
+        {
+            await CourseTypeDivObject.Archive();
         }
 
     }
