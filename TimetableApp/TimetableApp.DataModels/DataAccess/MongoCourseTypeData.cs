@@ -1,4 +1,5 @@
-﻿using TimetableApp.DataModels.Models;
+﻿using MongoDB.Driver.Linq;
+using TimetableApp.DataModels.Models;
 
 namespace TimetableApp.DataModels.DataAccess;
 
@@ -58,11 +59,21 @@ public class MongoCourseTypeData : ICourseTypeData
     /// Retrieve all Course Types in the database.
     /// </summary>
     /// <returns>List of Course Type Objects</returns>
-    public async Task<List<CourseType>> GetAsync()
+    public async Task<List<CourseType>> GetAsync(bool IncludeArchived = false)
     {
-        var results = await _courseTypes.FindAsync(_ => true);
+        List<CourseType> results;
+        if (IncludeArchived == true)
+        {
+            var cursor = await _courseTypes.FindAsync(t => true);
+            results = await cursor.ToListAsync();
+        }
+        else
+        {
+            var cursor = await _courseTypes.FindAsync(t => t.AuditInformation.IsArchived == false);
+            results = await cursor.ToListAsync();
+        }
 
-        return results.ToList();
+        return results;
     }
 
     /// <summary>
