@@ -88,7 +88,11 @@ else
         {
             loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
 
-            if (loggedInUser != null)
+            if (user.IsInRole("Admin"))
+            {
+                courseTypes = await CourseTypeData.GetAsync(IncludeArchived: true);
+            }
+            else
             {
                 courseTypes = await CourseTypeData.GetAsync();
             }
