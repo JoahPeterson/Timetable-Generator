@@ -35,6 +35,7 @@
                             <label class="col-sm-4 col-form-label fw-bold" for="type">Type</label>
                             <div class="col-8">
                                 <InputSelect id="type" @bind-Value="workTask.TypeId" class="form-control">
+                                    <option>Select Task Type</option>
                                     @foreach (var type in taskTypes)
                                     {
                                         if (type.AuditInformation.IsArchived == false)
