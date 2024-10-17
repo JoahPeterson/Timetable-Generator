@@ -7,13 +7,17 @@
 
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-lg-6 col-sm-12 mb-sm-3 mb-2 col-md-12">
+        <div class="col-lg-4 col-sm-12 mb-sm-3 mb-2 col-md-12">
 
             <CoursesDiv @ref="CourseDivObject" OnShow="ShowModal" />
         </div>
-        <div class="col-lg-5 col-sm-12 col-md-12 mb-2">
+        <div class="col-lg-4 col-sm-12 col-md-12 mb-2">
 
             <TaskTypesDiv @ref="TaskTypeDivObject" OnShow="ShowModal"/>
+        </div>
+        <div class="col-lg-4 col-sm-12 col-md-12 mb-2">
+
+            <TaskDiv @ref="TaskDivObject" OnShow="ShowModal" />
         </div>
     </div>
 </div>
@@ -39,8 +43,9 @@
 @code{
     private object? selectedItem; 
     private CoursesDiv CourseDivObject;
-    private TaskTypesDiv TaskTypeDivObject;
     private CourseTypesDiv CourseTypeDivObject;
+    private TaskDiv TaskDivObject;
+    private TaskTypesDiv TaskTypeDivObject;
 
     private async Task OnClose()
     {
@@ -55,6 +60,10 @@
         else if (selectedItem is CourseType courseType)
         {
             await CourseTypeDivObject.Archive();
+        }
+        else if (selectedItem is WorkTask workTask)
+        {
+            await TaskDivObject.Archive(workTask);
         }
 
     }
