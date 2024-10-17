@@ -118,7 +118,6 @@
         {
             draggedTaskId = taskId;
             await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
-            //httpContextAccessor.HttpContext.Session.SetString("taskID", taskId);
         }
         catch(Exception ex)
         {

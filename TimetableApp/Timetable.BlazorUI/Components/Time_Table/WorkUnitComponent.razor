@@ -24,7 +24,7 @@
             <li class="list-group-item CardText text-dark px-3"
                 draggable="true"
                 @ondragstart="(e) => HandleDragStart(e, workUnitTask.Id, workUnitTask.TaskId, WorkUnit.Id)">
-                @workUnitTask.TaskId
+                @workUnitTask.TaskId + @workUnitTask.SequenceNumber
                 <i @onclick="() => SelectWorkUnitTask(workUnitTask)" class="bi bi-pencil"></i>
             </li>
         }
@@ -59,6 +59,8 @@
 
     private bool ShowModal;
 
+    private bool isModalVisible = false; // Controls modal visibility
+
     private double RowHeightPercentage { get => SingleRowHeightPercentage * WorkUnit.Duration; }
 
     private async Task SelectWorkUnit()
@@ -68,20 +70,20 @@
 
     private async Task SelectWorkUnitTask(WorkUnitTask workUnitTask)
     {
-        // workUnitTaskForm.workUnitTaskToUpdate = workUnitTask;
-        // workUnitTaskForm.currentWorkUnit = WorkUnit;
-        // await JS.InvokeVoidAsync("modalInterop.showModal", "form-modal");
-
-        // ShowModal = true;
         selectedWorkUnitTask = workUnitTask;
-        // StateHasChanged();
-        await JS.InvokeVoidAsync("modalInterop.showModal", "form-modal");
-        //StateHasChanged();
+
+        if (selectedWorkUnitTask != null)
+        {
+
+            await OnShow();
+
+        }
+
+
     }
 
     private async Task HandleDrop(DragEventArgs e, string workUnitId)
     {
-        //draggedTaskId = httpContextAccessor.HttpContext.Session.GetString("taskID");
         draggedTaskId = await JS.InvokeAsync<string>("GetSession", "TaskId");
         workTaskId = await JS.InvokeAsync<string>("GetSession", "WorkTaskId");
 
@@ -102,6 +104,7 @@
                 workUnitTaskForm.workTask = task;
                 workUnitTaskForm.currentWorkUnit = WorkUnit;
 
+                await JS.InvokeVoidAsync("SetSession", "WorkUnitId", workUnitId);
                 await JS.InvokeVoidAsync("modalInterop.showModal", "form-modal");
 
                 return;
@@ -122,40 +125,87 @@
                     WorkUnit workUnitToDropInto = await WorkUnitData.GetByIdAsync(workUnitId);
                     workUnitToDropInto.Tasks.Add(previousWorkUnitTask);
                     await WorkUnitData.UpdateAsync(workUnitToDropInto);
-                    StateHasChanged();
                 }
+
             }
-
-            // If null, coming from a workunit
-            // if (task == null)
-            // {
-            //     task = await WorkTaskData.GetByIdAsync(workTaskId);
-            // }
-            // if (task != null)
-            // {
-
-            //     workUnitTaskForm.workTask = task;
-            //     workUnitTaskForm.currentWorkUnit = WorkUnit;
-
-            //     await JS.InvokeVoidAsync("modalInterop.showModal", "form-modal");
-
-            // }
         }
     }
-   
+
     private async Task HandleDragStart(DragEventArgs e, string taskId, string workTaskId, string workUnitId)
     {
         await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
         await JS.InvokeVoidAsync("SetSession", "WorkTaskId", workTaskId);
         await JS.InvokeVoidAsync("SetSession", "WorkUnitId", workUnitId);
-        // WorkUnit.Tasks.Remove(WorkUnit.Tasks.Where(t => t.Id == taskId).First());
     }
- 
+
     private async Task OnClose()
     {
         await JS.InvokeVoidAsync("modalInterop.hideModal", "form-modal");
 
     }
+
+    private async Task OnShow()
+    {
+        await JS.InvokeVoidAsync("modalInterop.showModal", "form-modal");
+
+    }
+
+    private async Task Save()
+    {
+        // Check if the selected work unit task is null or has no Id, indicating a new task creation
+        if (selectedWorkUnitTask == null || string.IsNullOrEmpty(selectedWorkUnitTask.Id))
+        {
+            string workUnitDesitinationId = await JS.InvokeAsync<string>("GetSession", "WorkUnitId");
+            // Create a new WorkUnitTask
+            selectedWorkUnitTask = new WorkUnitTask
+                {
+                    Id = Guid.NewGuid().ToString(), 
+                    TaskId = draggedTaskId,          
+                    WorkUnitId = workUnitDesitinationId,
+                    SequenceNumber = selectedWorkUnitTask.SequenceNumber,
+                    Duration = selectedWorkUnitTask.Duration,
+                    DueDate = selectedWorkUnitTask.DueDate,
+                };
+
+
+
+            // Optionally, save the updated work unit to the database
+            WorkUnit workUnitDesitination = await WorkUnitData.GetByIdAsync(workUnitDesitinationId);
+
+            // Add the new task to the work unit
+            workUnitDesitination.Tasks.Add(selectedWorkUnitTask);
+
+            await WorkUnitData.UpdateAsync(workUnitDesitination);
+
+            StateHasChanged();
+        }
+        else
+        {
+
+            // Update existing WorkUnitTask
+            var existingTask = WorkUnit.Tasks.FirstOrDefault(t => t.Id == selectedWorkUnitTask.Id);
+            if (existingTask != null)
+            {
+                existingTask.Duration = selectedWorkUnitTask.Duration;
+                existingTask.DueDate = selectedWorkUnitTask.DueDate;
+                existingTask.SequenceNumber = selectedWorkUnitTask.SequenceNumber;
+
+                // Optionally, save the updated work unit to the database
+                await WorkUnitData.UpdateAsync(WorkUnit);
+            }
+            StateHasChanged();
+        }
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initializeModal");
+        }
+    }
+
 }
 
     <div class="modal micromodal-slide" id="form-modal" aria-hidden="true">
@@ -170,7 +220,7 @@
                 <main class="modal__content" id="form-modal-content">
                     <div class="card bg-light p-3">
                         <div class="card-body">
-                        <EditForm Model="selectedWorkUnitTask" >
+                        <EditForm Model="selectedWorkUnitTask" OnValidSubmit="Save">
                             <div class="form-group row mt-2">
                                 <label class="col-sm-4 col-form-label fw-bold" for="Duration">Duration (In Minutes)</label>
                                 <div class="col-8">
@@ -193,7 +243,7 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-center mt-4">
-                                <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
+                                <button type="submit" @onclick="OnClose" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
                                     <i class="bi bi-floppy"></i> Save
                                 </button>
                             </div>
@@ -207,4 +257,5 @@
             </div>
         </div>
     </div>
+
 
