@@ -8,12 +8,12 @@
 @inject ITermDurationData TermDurationData
 @inject IUserData UserData
 @inject IJSRuntime JS
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @rendermode InteractiveServer
 @using TimetableApp.DataModels.Models
-@using Timetable.BlazorUI.Components.Components
+@using MudBlazor
 @attribute [Authorize]
-
-<PreviewDialog Course="course" CourseType="@courseTypeName" OnClose="UpdateToEdit"/>
 
 <EditForm Model="course" OnValidSubmit="@SaveCourse" FormName="CourseForm">
     <DataAnnotationsValidator />
@@ -40,14 +40,14 @@
                         <div class="form-group row mt-2">
                             <label class="col-sm-4 col-form-label fw-bold" for="StartDate">Course Start Date</label>
                             <div class="col-8">
-                                <input type="date" id="startDate" @bind="course.StartDate"  class="form-control" />
+                                <input type="date" id="startDate" @bind="course.StartDate" class="form-control" />
                                 <ValidationMessage For="@(() => course.StartDate)" />
                             </div>
                         </div>
                         <div class="form-group row mt-2">
                             <label class="col-sm-4 col-form-label fw-bold" for="TermDuration">Term Duration</label>
                             <div class="col-8">
-                                <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" onselect="@CalculateEndDate()" class="form-control">
+                                <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" class="form-control" @onchange="@CalculateEndDate">
                                     <option>Select Term Duration</option>
                                     @foreach (var duration in termDurations)
                                     {
@@ -141,7 +141,7 @@
 
     private async Task CalculateEndDate()
     {
-        if (course.Term.Duration == null )
+        if (course.Term.Duration == null)
         {
             course.EndDate = course.StartDate;
             return;
@@ -186,35 +186,37 @@
             course = newCourse;  // Assign the newly created course to the 'course' model
             courseTypeName = courseTypes.FirstOrDefault(ct => ct.Id == newCourse.CourseTypeId)!.Name!;
         }
-        await ShowModal();
+        await ShowPreviewDialog(); // Display the MudBlazor dialog after saving
     }
 
-    private async Task ShowModal()
+    private async Task ShowPreviewDialog()
     {
-        //TODO: Refactor to use MudBlazor Dialog
-        await JS.InvokeVoidAsync("modalInterop.showModal", "preview-modal");
-    }
+        var parameters = new DialogParameters
+            {
+                ["Course"] = course,
+                ["CourseType"] = courseTypeName
+            };
 
-    private DateTime StartDate
-    {
-        get => course.StartDate;
-        set
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+
+        var dialog = DialogService.Show<Preview_Dialog>("Course Preview", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
         {
-            course.StartDate = value;
-            CalculateEndDate();
+            bool continueToTimetable = (bool)result.Data;
+            if (continueToTimetable)
+            {
+                Navigation.NavigateTo($"timetable/{course.Id}");
+            }
+            else
+            {
+                UpdateToEdit();
+            }
         }
     }
 
-    //TODO: This will be removed when MudBlazor Dialog is implemented.
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JS.InvokeVoidAsync("initializeModal");
-        }
-    }
-
-    private async Task UpdateToEdit()
+    private void UpdateToEdit()
     {
         isEditMode = true;
     }

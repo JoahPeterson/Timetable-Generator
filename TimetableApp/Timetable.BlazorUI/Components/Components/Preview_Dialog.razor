@@ -1,0 +1,45 @@
+﻿@inject NavigationManager Navigation
+
+<MudDialog>
+    <DialogContent>
+        <MudPaper Class="pa-3">
+            <MudText Typo="Typo.h4">Course Preview</MudText>
+            <MudText><strong>Course Name:</strong> @Course.Name</MudText>
+            <MudText><strong>Description:</strong> @Course.Description</MudText>
+            <MudText><strong>Start Date:</strong> @Course.StartDate.ToShortDateString()</MudText>
+            <MudText><strong>End Date:</strong> @Course.EndDate.ToShortDateString()</MudText>
+            <MudText><strong>Course Type:</strong> @CourseType</MudText>
+            <MudText><strong>Term:</strong> @Course.Term.Name</MudText>
+            <MudText><strong>Duration:</strong> @Course.Term.Duration weeks</MudText>
+        </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Class="bg-secondary text-white" OnClick="@ContinueEditing">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" /> Continue Editing
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Class="mstc-gold-btn" OnClick="@ContinueToTimetable">
+            <MudIcon Icon="@Icons.Material.Filled.ArrowForward" /> Continue
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Course Course { get; set; }
+
+    [Parameter]
+    public string CourseType { get; set; }
+
+    private void ContinueToTimetable()
+    {
+        Navigation.NavigateTo($"timetable/{Course.Id}");
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void ContinueEditing()
+    {
+        MudDialog.Close(DialogResult.Ok(false));
+    }
+}
