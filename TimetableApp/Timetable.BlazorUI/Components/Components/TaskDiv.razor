@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @inject IWorkTaskData TaskData
 @inject IUserData UserData
 @inject NavigationManager Navigation
@@ -46,12 +47,13 @@ else
 }
 
 @code {
-    [Parameter]
-    public EventCallback<WorkTask> OnShow { get; set; }
+    //TODO: Remnants of old
+    // [Parameter]
+    // public EventCallback<WorkTask> OnShow { get; set; }
+    // private bool showConfirmationModal = false;
 
     private List<WorkTask>? workTasks;
     private User? loggedInUser;
-    private bool showConfirmationModal = false;
     WorkTask selectedTask = null!;
 
     protected override async Task OnInitializedAsync()
@@ -73,6 +75,16 @@ else
         }
     }
 
+    private async Task Archive(WorkTask workTask)
+    {
+        workTask.AuditInformation.LastModified = DateTime.Now;
+        workTask.AuditInformation.IsArchived = true;
+        await TaskData.UpdateAsync(workTask);
+
+        if (workTasks is not null)
+            workTasks.Remove(workTask);
+    }
+
     private async Task ShowModal(WorkTask workTask)
     {
         var parameters = new DialogParameters<Confimation_Dialog>
@@ -91,21 +103,7 @@ else
         if (!result.Canceled)
         {
             await Archive(workTask);
+            Snackbar.Add("Task Deleted", Severity.Success);
         }
-
-        //TODO: Remove remenants of JS MODAL
-        // selectedTask = workTask;
-        // await OnShow.InvokeAsync(workTask);
-    }
-
-    public async Task Archive(WorkTask workTask)
-    {
-
-        workTask.AuditInformation.LastModified = DateTime.Now;
-        workTask.AuditInformation.IsArchived = true;
-        await TaskData.UpdateAsync(workTask);
-
-        if (workTasks is not null)
-            workTasks.Remove(workTask);
     }
 }

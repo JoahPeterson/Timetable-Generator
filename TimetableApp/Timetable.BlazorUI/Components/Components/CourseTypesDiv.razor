@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @inject IJSRuntime JS
 @inject ICourseTypeData CourseTypeData
 @inject IUserData UserData
@@ -65,18 +66,17 @@ else
 }
 
 @code {
-    [Parameter]
-    public EventCallback<CourseType> OnConfirm { get; set; }
+    // TODO: Remove Remenants of Old JS
+    // [Parameter]
+    // public EventCallback<CourseType> OnConfirm { get; set; }
 
-    [Parameter]
-    public EventCallback<CourseType> OnShow { get; set; }
+    // [Parameter]
+    // public EventCallback<CourseType> OnShow { get; set; }
+    //private bool showConfirmationModal = false;
 
     private List<CourseType>? courseTypes;
     private User? loggedInUser;
-    private bool showConfirmationModal = false;
     CourseType selectedCourseType = null;
-
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,19 +100,17 @@ else
         }
     }
 
-
-
     public async Task Archive(CourseType courseType)
     {
+        courseType.AuditInformation.LastModified = DateTime.Now;
+        courseType.AuditInformation.IsArchived = true;
+        await CourseTypeData.UpdateAsync(courseType);
         //TODO: Remove Remenants of Old JS
         // showConfirmationModal = false;
 
         // if (selectedCourseType == null)
         //     return;
 
-        courseType.AuditInformation.LastModified = DateTime.Now;
-        courseType.AuditInformation.IsArchived = true;
-        await CourseTypeData.UpdateAsync(courseType);
 
         // if (courseTypes is not null)
         //     courseTypes.Remove(selectedCourseType);
@@ -120,7 +118,7 @@ else
         //StateHasChanged();
     }
 
-    public async Task Restore(CourseType courseType)
+    private async Task Restore(CourseType courseType)
     {
         courseType.AuditInformation.LastModified = DateTime.Now;
         courseType.AuditInformation.IsArchived = false;
@@ -147,10 +145,7 @@ else
         if (!result.Canceled)
         {
             await Archive(courseType);
+            Snackbar.Add("Modality Archived", Severity.Success);
         }
-
-        //TODO: Remove Remenants of Old JS
-        // selectedCourseType = courseType;
-        // await OnShow.InvokeAsync(courseType);
     }
 }

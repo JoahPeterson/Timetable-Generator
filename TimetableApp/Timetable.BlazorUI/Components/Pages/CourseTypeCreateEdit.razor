@@ -113,17 +113,18 @@
         Navigation.NavigateTo("/dashboard");
     }
 
-    private async Task ShowDeleteConfirmation()
-    {
-        var parameters = new DialogParameters<Confimation_Dialog>
-        {
-            { x => x.ContentText, "Do you really want to delete these records? This process cannot be undone." },
-            { x => x.ButtonText, "Delete" },
-            { x => x.Color, Color.Error }
-        };
+    //TODO: This is an old remenant can be removed.
+    // private async Task ShowModal()
+    // {
+    //     var parameters = new DialogParameters<Confimation_Dialog>
+    //     {
+    //         { x => x.ContentText, "Do you really want to delete these records? This process cannot be undone." },
+    //         { x => x.ButtonText, "Delete" },
+    //         { x => x.Color, Color.Error }
+    //     };
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+    //     var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
 
-        var result = DialogService.ShowAsync<Confimation_Dialog>("Delete", parameters, options).Result;
-    }
+    //     var result = DialogService.ShowAsync<Confimation_Dialog>("Delete", parameters, options).Result;
+    // }
 }

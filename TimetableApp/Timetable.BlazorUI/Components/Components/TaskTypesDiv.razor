@@ -8,8 +8,6 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-
-
 @if (taskTypes != null && loggedInUser != null)
 {
     var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2" };
@@ -49,10 +47,10 @@ else
 @code {
     // [Parameter]
     // public EventCallback<TaskType> OnShow { get; set; }
+    //private bool showConfirmationModal = false;
 
     private List<TaskType>? taskTypes;
     private User? loggedInUser;
-    private bool showConfirmationModal = false;
     TaskType selectedTaskType = null!;
 
     protected override async Task OnInitializedAsync()
@@ -72,6 +70,16 @@ else
                 taskTypes = await TaskTypeData.GetUsersTaskTypesAsync(loggedInUser.Id);
             }
         }
+    }
+
+    private async Task Archive(TaskType taskType)
+    {
+        taskType.AuditInformation.LastModified = DateTime.Now;
+        taskType.AuditInformation.IsArchived = true;
+        await TaskTypeData.UpdateTaskTypeAsync(taskType);
+
+        if (taskTypes is not null)
+            taskTypes.Remove(taskType);
     }
 
     private async Task ShowModal(TaskType taskType)
@@ -94,18 +102,5 @@ else
             await Archive(taskType);
             Snackbar.Add("Task Type Deleted", Severity.Success);
         }
-    }
-
-    private async Task Archive(TaskType taskType)
-    {
-
-        taskType.AuditInformation.LastModified = DateTime.Now;
-        taskType.AuditInformation.IsArchived = true;
-        await TaskTypeData.UpdateTaskTypeAsync(taskType);
-
-        if (taskTypes is not null)
-            taskTypes.Remove(taskType);
-
-        StateHasChanged();
     }
 }
