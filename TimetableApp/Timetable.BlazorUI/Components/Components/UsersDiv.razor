@@ -1,0 +1,143 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+@inject ICourseTypeData CourseTypeData
+@inject IUserData UserData
+@inject UserService UserService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+@if (users != null && loggedInUser != null)
+{
+    var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2" };
+
+    <div class="darkdiv p-3 rounded-3 shadow">
+        <h2 class="text-center"><i class="bi bi-people"></i> Users</h2>
+        <hr />
+        <div class="card scrollable-card">
+            <ul class="list-group list-group-flush">
+                @foreach (var (user, index) in users.Select((value, i) => (value, i)))
+                {
+                    string role = usersWithRoles.Where(u => u.Email == user.EmailAddress).Select(u => u.Role).FirstOrDefault()!;
+                    var colorClass = colorClasses.ElementAtOrDefault(index % colorClasses.Count) ?? "Cardcolor-1";  // Ensure safe access
+                    <li class="list-group-item CardText text-black px-3 d-flex justify-content-between @colorClass"
+                        data-toggle="tooltip" data-placement="top" title="@user.DisplayName">
+                        <div>
+                            <i class="bi bi-person-square h4"></i>
+                            <a href="" class="text-black text-decoration-none fw-bold">
+                                @user.EmailAddress (@role)
+                                @if (user.AuditInformation.IsArchived == true)
+                                {
+                                    <i class="bi bi-archive-fill px-2 h5"></i>
+                                }
+
+                            </a>
+
+                        </div>
+                        @if (user.AuditInformation.IsArchived == false)
+                        {
+                            <div class="justify-content-between">
+                                <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="() => Promote(user)">
+                                    <i class="bi bi-person-up h5"></i>
+                                </a>
+                                <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="() => ShowModal(user)">
+                                    <i class="bi bi-dash-circle h5"></i>
+                                </a>
+                            </div>
+                            
+                        }
+                        else
+                        {
+                            <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="() => Restore(user)">
+                                <i class="bi bi-plus-circle-dotted h5"></i>
+                            </a>
+                        }
+
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="mt-4">
+            <a href="/Account/Register" class="text-black text-decoration-none CardText">
+                <i class="bi bi-plus-circle h5"></i> Add
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <p>Loading courses...</p>
+}
+
+@code {
+    private List<User> users;
+    private List<UserModel> usersWithRoles;
+    private User? loggedInUser;
+    CourseType selectedCourseType = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim))
+        {
+            loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+
+            if (user.IsInRole("Admin"))
+            {
+                users = await UserData.GetUsersAsync();
+                usersWithRoles = await UserService.GetAllUsersAsync();
+            }
+        }
+    }
+
+    public async Task Archive(User user)
+    {
+        user.AuditInformation.LastModified = DateTime.Now;
+        user.AuditInformation.IsArchived = true;
+        await UserData.UpdateAsync(user);
+    }
+
+    private async Task Restore(User user)
+    {
+        user.AuditInformation.LastModified = DateTime.Now;
+        user.AuditInformation.IsArchived = false;
+        await UserData.UpdateAsync(user);
+
+        StateHasChanged();
+    }
+
+    private async Task Promote(User user)
+    {
+        await UserService.AssignRole(user.EmailAddress, "Admin");
+    }
+
+    private async Task ShowModal(User user)
+    {
+        var parameters = new DialogParameters<Confimation_Dialog>
+        {
+            { x => x.ContentText, "Do you really want to delete these records? This process cannot be undone." },
+            { x => x.ButtonText, "Delete" },
+            { x => x.Color, Color.Error }
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialogResult = DialogService.Show<Confimation_Dialog>("Delete", parameters, options);
+
+        var result = await dialogResult.Result;
+
+        if (!result.Canceled)
+        {
+            await Archive(user);
+            Snackbar.Add("User Archived", Severity.Success);
+        }
+    }
+}
