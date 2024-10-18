@@ -9,12 +9,6 @@
 @inject IUserData UserData
 @inject AuthenticationStateProvider authProvider
 
-@* <div class="work-unit bg-success text-white border border-dark" draggable="true" @onclick="SelectWorkUnit" style="height: @(RowHeightPercentage)vh">
-    <p>@WorkUnit.Name</p>
-    <p>Duration: @WorkUnit.Duration</p>
-</div>
- *@
-@*   *@
  <!-- Droppable Version for Drag n Drop-->
  <div class="work-unit bg-success text-white border border-dark" 
     ondragover="event.preventDefault();"
@@ -81,20 +75,8 @@
         await OnSelected.InvokeAsync(WorkUnit);
     }
 
-    private async Task HandleDragOver(DragEventArgs e)
-    {
-        // Prevent default behavior to allow drop
-        //await JS.InvokeVoidAsync("preventDefault", e);
-    }
-
-    private async Task Drop()
-    {
-
-    }
-
     private async Task HandleDrop(DragEventArgs e, string workUnitId)
     {
-        //draggedTaskId = httpContextAccessor.HttpContext.Session.GetString("taskID");
         draggedTaskId = await JS.InvokeAsync<string>("GetSession", "TaskId");
         workTaskId = await JS.InvokeAsync<string>("GetSession", "WorkTaskId");
 
@@ -139,8 +121,6 @@
                 // Save the updated work unit
                 await WorkUnitData.UpdateAsync(WorkUnit);
 
-                //await JS.InvokeVoidAsync("modalInterop.showModal", "modal-1");
-
                 // Refresh the UI
                 StateHasChanged();
             }
@@ -155,11 +135,4 @@
         await WorkUnitData.UpdateAsync(WorkUnit);
     }
  
-    // protected override async Task OnAfterRenderAsync(bool firstRender)
-    // {
-    //     if (firstRender)
-    //     {
-    //         await JS.InvokeVoidAsync("initializeModal");
-    //     }
-    // }
 }

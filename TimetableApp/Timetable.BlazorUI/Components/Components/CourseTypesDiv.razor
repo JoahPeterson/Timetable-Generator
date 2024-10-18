@@ -66,14 +66,6 @@ else
 }
 
 @code {
-    // TODO: Remove Remenants of Old JS
-    // [Parameter]
-    // public EventCallback<CourseType> OnConfirm { get; set; }
-
-    // [Parameter]
-    // public EventCallback<CourseType> OnShow { get; set; }
-    //private bool showConfirmationModal = false;
-
     private List<CourseType>? courseTypes;
     private User? loggedInUser;
     CourseType selectedCourseType = null;
@@ -105,17 +97,6 @@ else
         courseType.AuditInformation.LastModified = DateTime.Now;
         courseType.AuditInformation.IsArchived = true;
         await CourseTypeData.UpdateAsync(courseType);
-        //TODO: Remove Remenants of Old JS
-        // showConfirmationModal = false;
-
-        // if (selectedCourseType == null)
-        //     return;
-
-
-        // if (courseTypes is not null)
-        //     courseTypes.Remove(selectedCourseType);
-
-        //StateHasChanged();
     }
 
     private async Task Restore(CourseType courseType)
