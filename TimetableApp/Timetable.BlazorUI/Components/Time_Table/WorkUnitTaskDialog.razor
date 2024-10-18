@@ -12,13 +12,11 @@
                 <MudCardContent>
                     <DataAnnotationsValidator />
 
-                    <!-- Numeric Field for Duration -->
                     <MudNumericField @bind-Value="workUnitTask.Duration" Label="Time Requirement (MIN)"
                                      Placeholder="Enter duration in minutes"
                                      Required="true" For="@(() => workUnitTask.Duration)" />
                     <ValidationMessage For="@(() => workUnitTask.Duration)" />
 
-                    <!-- Date Picker for Due Date -->
                     <MudDatePicker @bind-Date="workUnitTask.DueDate" Label="Due Date"
                                    Required="true" />
                     <ValidationMessage For="@(() => workUnitTask.DueDate)" />

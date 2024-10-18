@@ -9,15 +9,15 @@
     <div class="row justify-content-center">
         <div class="col-lg-4 col-sm-12 mb-sm-3 mb-2 col-md-12">
 
-            <CoursesDiv @ref="CourseDivObject"/>
+            <CoursesDiv/>
         </div>
         <div class="col-lg-4 col-sm-12 col-md-12 mb-2">
 
-            <TaskTypesDiv @ref="TaskTypeDivObject"/>
+            <TaskTypesDiv/>
         </div>
         <div class="col-lg-4 col-sm-12 col-md-12 mb-2">
 
-            <TaskDiv @ref="TaskDivObject"/>
+            <TaskDiv/>
         </div>
     </div>
 </div>
@@ -26,7 +26,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-4 col-sm-12 mb-sm-3 mb-2 col-md-12">
-            <CourseTypesDiv @ref="CourseTypeDivObject"/>
+            <CourseTypesDiv/>
         </div>
         <div class="col-lg-4 col-sm-12 mb-sm-3 mb-2 col-md-12">
             <!--Users Div-->
@@ -42,10 +42,12 @@
 
 @code{
     private object? selectedItem; 
-    private CoursesDiv CourseDivObject;
-    private CourseTypesDiv CourseTypeDivObject;
-    private TaskDiv TaskDivObject;
-    private TaskTypesDiv TaskTypeDivObject;
+
+    //TODO: This was to remove the item from if statement below.
+    // private CoursesDiv CourseDivObject;
+    // private CourseTypesDiv CourseTypeDivObject;
+    // private TaskDiv TaskDivObject;
+    // private TaskTypesDiv TaskTypeDivObject;
 
 //TODO: Remove Remenants of JS Modal
     // private async Task OnClose()

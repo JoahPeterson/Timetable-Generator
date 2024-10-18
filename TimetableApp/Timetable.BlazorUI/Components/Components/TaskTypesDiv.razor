@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @inject ITaskTypeData TaskTypeData
 @inject IUserData UserData
 @inject NavigationManager Navigation
@@ -46,8 +47,8 @@ else
 }
 
 @code {
-    [Parameter]
-    public EventCallback<TaskType> OnShow { get; set; }
+    // [Parameter]
+    // public EventCallback<TaskType> OnShow { get; set; }
 
     private List<TaskType>? taskTypes;
     private User? loggedInUser;
@@ -91,10 +92,11 @@ else
         if (!result.Canceled)
         {
             await Archive(taskType);
+            Snackbar.Add("Task Type Deleted", Severity.Success);
         }
     }
 
-    public async Task Archive(TaskType taskType)
+    private async Task Archive(TaskType taskType)
     {
 
         taskType.AuditInformation.LastModified = DateTime.Now;
