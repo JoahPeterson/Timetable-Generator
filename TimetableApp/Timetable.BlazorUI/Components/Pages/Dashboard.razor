@@ -8,16 +8,13 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-4 col-sm-12 mb-sm-3 mb-2 col-md-12">
-
-            <CoursesDiv @ref="CourseDivObject" OnShow="ShowModal" />
+            <CoursesDiv/>
         </div>
         <div class="col-lg-4 col-sm-12 col-md-12 mb-2">
-
-            <TaskTypesDiv @ref="TaskTypeDivObject" OnShow="ShowModal"/>
+            <TaskTypesDiv/>
         </div>
         <div class="col-lg-4 col-sm-12 col-md-12 mb-2">
-
-            <TaskDiv @ref="TaskDivObject" OnShow="ShowModal" />
+            <TaskDiv/>
         </div>
     </div>
 </div>
@@ -26,7 +23,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-4 col-sm-12 mb-sm-3 mb-2 col-md-12">
-            <CourseTypesDiv @ref="CourseTypeDivObject" OnShow="ShowModal"/>
+            <CourseTypesDiv/>
         </div>
         <div class="col-lg-4 col-sm-12 mb-sm-3 mb-2 col-md-12">
             <!--Users Div-->
@@ -38,49 +35,51 @@
 </div>
 </AuthorizeView>
 
-<ConfirmDialog OnClose="OnClose" />
+@* <ConfirmDialog OnClose="OnClose" /> *@
 
 @code{
-    private object? selectedItem; 
-    private CoursesDiv CourseDivObject;
-    private CourseTypesDiv CourseTypeDivObject;
-    private TaskDiv TaskDivObject;
-    private TaskTypesDiv TaskTypeDivObject;
+    //TODO: This was to remove the item from if statement below.
+    //private object? selectedItem; 
+    // private CoursesDiv CourseDivObject;
+    // private CourseTypesDiv CourseTypeDivObject;
+    // private TaskDiv TaskDivObject;
+    // private TaskTypesDiv TaskTypeDivObject;
 
-    private async Task OnClose()
-    {
-        if (selectedItem is Course course)
-        {
-            await CourseDivObject.Archive(); 
-        }
-        else if (selectedItem is TaskType taskType)
-        {
-            await TaskTypeDivObject.Archive(taskType);
-        }
-        else if (selectedItem is CourseType courseType)
-        {
-            await CourseTypeDivObject.Archive();
-        }
-        else if (selectedItem is WorkTask workTask)
-        {
-            await TaskDivObject.Archive(workTask);
-        }
+//TODO: Remove Remenants of JS Modal
+    // private async Task OnClose()
+    // {
+    //     if (selectedItem is Course course)
+    //     {
+    //         await CourseDivObject.Archive(); 
+    //     }
+    //     else if (selectedItem is TaskType taskType)
+    //     {
+    //         await TaskTypeDivObject.Archive(taskType);
+    //     }
+    //     // else if (selectedItem is CourseType courseType)
+    //     // {
+    //     //     await CourseTypeDivObject.Archive(courseType);
+    //     // }
+    //     else if (selectedItem is WorkTask workTask)
+    //     {
+    //         await TaskDivObject.Archive(workTask);
+    //     }
 
-    }
+    // }
 
-    private async Task ShowModal(object item)
-    {
-        selectedItem = item;
-        await JS.InvokeVoidAsync("modalInterop.showModal", "modal-1");
-    }
+    // private async Task ShowModal(object item)
+    // {
+    //     selectedItem = item;
+    //     await JS.InvokeVoidAsync("modalInterop.showModal", "modal-1");
+    // }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JS.InvokeVoidAsync("initializeModal");
-        }
-    }
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         await JS.InvokeVoidAsync("initializeModal");
+    //     }
+    // }
 
 }
 

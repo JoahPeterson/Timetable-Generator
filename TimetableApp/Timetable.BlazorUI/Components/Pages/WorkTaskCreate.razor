@@ -63,10 +63,11 @@
     [Parameter] public string? TaskId { get; set; }
     private bool isEditMode = false;
     private User loggedInUser;
-    private bool showConfirmationModal = false;
     private List<TaskType> taskTypes = new ();
     private WorkTask workTask = new WorkTask();
 
+    //TODO: Remove Remenants of JS Modal
+    //private bool showConfirmationModal = false;
     protected override async Task OnInitializedAsync()
     {
         var authState = await authProvider.GetAuthenticationStateAsync();

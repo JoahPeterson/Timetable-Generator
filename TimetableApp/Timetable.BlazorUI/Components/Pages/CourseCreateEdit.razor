@@ -3,7 +3,6 @@
 @inject ICourseData CourseData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
-@inject Blazored.Modal.Services.IModalService Modal
 @inject ICourseTypeData CourseTypeData
 @inject ITermData TermData
 @inject ITermDurationData TermDurationData
@@ -113,18 +112,6 @@
     private List<Term> terms = new List<Term>();
     private List<TermDuration> termDurations = new List<TermDuration>();
 
-
-    private DateTime StartDate
-    {
-        get => course.StartDate;
-        set
-        {
-            course.StartDate = value;
-            CalculateEndDate();
-        }
-    }
-
-
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(courseId))
@@ -199,16 +186,26 @@
             course = newCourse;  // Assign the newly created course to the 'course' model
             courseTypeName = courseTypes.FirstOrDefault(ct => ct.Id == newCourse.CourseTypeId)!.Name!;
         }
-
-        // // Show the modal for course preview
         await ShowModal();
     }
 
     private async Task ShowModal()
     {
+        //TODO: Refactor to use MudBlazor Dialog
         await JS.InvokeVoidAsync("modalInterop.showModal", "preview-modal");
     }
 
+    private DateTime StartDate
+    {
+        get => course.StartDate;
+        set
+        {
+            course.StartDate = value;
+            CalculateEndDate();
+        }
+    }
+
+    //TODO: This will be removed when MudBlazor Dialog is implemented.
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

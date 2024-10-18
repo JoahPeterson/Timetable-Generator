@@ -7,12 +7,8 @@
 @inject ITermDurationData TermDurationData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
-@inject Blazored.Modal.Services.IModalService Modal
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
-
-@* Cascading Is Required for Modal to Work *@
-<CascadingBlazoredModal />
 
 <div class="container">
     <div class="row">

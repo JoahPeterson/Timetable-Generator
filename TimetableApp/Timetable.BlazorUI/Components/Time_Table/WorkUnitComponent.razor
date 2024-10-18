@@ -1,5 +1,6 @@
 ﻿@using TimetableApp.DataModels.Models
 @using Microsoft.AspNetCore.Http
+@inject IDialogService DialogService
 @inject IHttpContextAccessor httpContextAccessor
 @inject IJSRuntime JS
 @inject IWorkUnitData WorkUnitData
@@ -56,24 +57,24 @@
 
     private double RowHeightPercentage { get => SingleRowHeightPercentage * WorkUnit.Duration; }
 
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     var authState = await authProvider.GetAuthenticationStateAsync();
-    //     var user = authState.User;
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
 
-    //     // Get the user's ID claim
-    //     var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+        // Get the user's ID claim
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
 
-    //     if (!string.IsNullOrEmpty(userIdClaim))
-    //     {
-    //         loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+        if (!string.IsNullOrEmpty(userIdClaim))
+        {
+            loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
 
-    //         if (loggedInUser != null)
-    //         {
-    //             tasks = await WorkUnitTaskData.GetUsersWorkUnitTasksAsync(loggedInUser.Id);
-    //         }
-    //     }
-    // }
+            if (loggedInUser != null)
+            {
+                tasks = await WorkUnitTaskData.GetUsersWorkUnitTasksAsync(loggedInUser.Id);
+            }
+        }
+    }
 
     private async Task SelectWorkUnit()
     {
@@ -115,14 +116,26 @@
             }
             if (task != null)
             {
+                WorkUnitTask workUnitTask = new WorkUnitTask
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    TaskId = task.Id,
+                    WorkUnitId = WorkUnit.Id
+                };
 
+                DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Small, FullWidth = true };
+                var parameters = new DialogParameters<WorkUnitTaskDialog> { { x => x.workUnitTask, workUnitTask } };
 
-                WorkUnit.Tasks.Add(new WorkUnitTask
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        TaskId = task.Id,
-                        WorkUnitId = WorkUnit.Id
-                    });
+                var dialog = await DialogService.ShowAsync<WorkUnitTaskDialog>("Delete Server", parameters, _maxWidth);
+                var result = await dialog.Result;
+
+                if (result.Canceled)
+                    return;
+
+                if (result.Data == null)
+                    return;
+
+                WorkUnit.Tasks.Add((WorkUnitTask)result.Data);
                 // Save the updated work unit
                 await WorkUnitData.UpdateAsync(WorkUnit);
 
@@ -139,6 +152,7 @@
         await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
         await JS.InvokeVoidAsync("SetSession", "WorkTaskId", workTaskId);
         WorkUnit.Tasks.Remove(WorkUnit.Tasks.Where(t => t.Id == taskId).First());
+        await WorkUnitData.UpdateAsync(WorkUnit);
     }
  
     // protected override async Task OnAfterRenderAsync(bool firstRender)

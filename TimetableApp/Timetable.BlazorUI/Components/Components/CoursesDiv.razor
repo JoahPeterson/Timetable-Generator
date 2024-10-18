@@ -1,4 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Authorization
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @inject IJSRuntime JS
 @inject ICourseData CourseData
 @inject IUserData UserData
@@ -46,18 +48,17 @@ else
 }
 
 @code {
-    [Parameter]
-    public EventCallback<Course> OnConfirm { get; set; }
+    //TODO: This was to remove the item from if statement below.
+    // [Parameter]
+    // public EventCallback<Course> OnConfirm { get; set; }
 
-    [Parameter]
-    public EventCallback<Course> OnShow { get; set; }
+    // [Parameter]
+    // public EventCallback<Course> OnShow { get; set; }
+    // private bool showConfirmationModal = false;
 
     private List<Course>? courses;
     private User? loggedInUser;
-    private bool showConfirmationModal = false;
     Course selectedCourse = null;
-
-    
 
     protected override async Task OnInitializedAsync()
     {
@@ -75,33 +76,38 @@ else
                 courses = await CourseData.GetUsersCoursesAsync(loggedInUser.Id);
             }
         }
-
     }
 
-
-
-    public async Task Archive()
+    private async Task Archive(Course course)
     {
-        showConfirmationModal = false;
-
-        if (selectedCourse == null)
-            return;
-
-        selectedCourse.AuditInformation.LastModified = DateTime.Now;
-        selectedCourse.AuditInformation.IsArchived = true;
-        await CourseData.UpdateCourseAsync(selectedCourse);
+        course.AuditInformation.LastModified = DateTime.Now;
+        course.AuditInformation.IsArchived = true;
+        await CourseData.UpdateCourseAsync(course);
 
         if (courses is not null)
-            courses.Remove(selectedCourse);
-
-        StateHasChanged();
-
+            courses.Remove(course);
     }
 
     private async Task ShowModal(Course course)
     {
-        selectedCourse = course;
-        await OnShow.InvokeAsync(course);
+        var parameters = new DialogParameters<Confimation_Dialog>
+        {
+            { x => x.ContentText, "Do you really want to delete these records? This process cannot be undone." },
+            { x => x.ButtonText, "Delete" },
+            { x => x.Color, Color.Error }
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialogResult = DialogService.Show<Confimation_Dialog>("Delete", parameters, options);
+
+        var result = await dialogResult.Result;
+
+        if (!result.Canceled)
+        {
+            await Archive(course);
+            Snackbar.Add("Timetable Deleted", Severity.Success);
+        }
     }
 
 }

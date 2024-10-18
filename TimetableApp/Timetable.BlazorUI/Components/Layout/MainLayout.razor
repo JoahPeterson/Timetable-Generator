@@ -2,7 +2,21 @@
 @inject NavigationManager Navigation
 @inject ICourseData CourseData
 @using Timetable.BlazorUI.Components.Components
-@using Blazored.Modal
+@* @using Blazored.Modal *@
+
+@* Required *@
+<MudThemeProvider />
+<MudPopoverProvider />
+
+@* Needed for dialogs *@
+<MudDialogProvider />
+
+<Confimation_Dialog/>
+<WorkUnitTaskDialog/>
+
+@* Needed for snackbars *@
+<MudSnackbarProvider />
+
 <link rel="stylesheet" href="css/site.css">
 <div class="page">
     <div class="sidebar d-print-none">
