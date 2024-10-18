@@ -1,0 +1,64 @@
+﻿<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1" />
+            Add Work Task Data
+        </MudText>
+    </TitleContent>
+
+    <DialogContent>
+        <EditForm Model="@workUnitTask" OnValidSubmit="SaveWorkUnitTask">
+            <MudCard>
+                <MudCardContent>
+                    <DataAnnotationsValidator />
+
+                    <!-- Numeric Field for Duration -->
+                    <MudNumericField @bind-Value="workUnitTask.Duration" Label="Time Requirement (MIN)"
+                                     Placeholder="Enter duration in minutes"
+                                     Required="true" For="@(() => workUnitTask.Duration)" />
+                    <ValidationMessage For="@(() => workUnitTask.Duration)" />
+
+                    <!-- Date Picker for Due Date -->
+                    <MudDatePicker @bind-Date="workUnitTask.DueDate" Label="Due Date"
+                                   Required="true" />
+                    <ValidationMessage For="@(() => workUnitTask.DueDate)" />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Register</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
+    </DialogContent>
+
+
+@*     <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Success" OnClick="SaveWorkUnitTask">Update Task</MudButton>
+    </DialogActions> *@
+</MudDialog>
+
+@code {
+    [CascadingParameter] 
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] 
+    public WorkUnitTask workUnitTask { get; set; }
+
+    private void OnValidSubmit(EditContext context)
+    {
+        
+        StateHasChanged();
+    }
+
+    private void SaveWorkUnitTask()
+    {
+        // Logic to save the task
+        MudDialog.Close(DialogResult.Ok(workUnitTask)); // Close dialog after save
+    }
+
+    private void Cancel()
+    {
+        // Logic for close button click
+        MudDialog.Close();
+    }
+}

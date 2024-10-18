@@ -1,11 +1,11 @@
 ﻿@page "/tasktype/create/{taskTypeId?}"
 @using Microsoft.AspNetCore.Authorization
 @using Timetable.BlazorUI.Components.Pages
+@inject IDialogService DialogService
 @inject ITaskTypeData TaskTypeData
 @inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
-@inject Blazored.Modal.Services.IModalService Modal
 @rendermode InteractiveServer
 @attribute [Authorize]
 
@@ -144,19 +144,6 @@
 
     private async Task ShowDeleteConfirmation()
     {
-        var parameters = new ModalParameters();
-        parameters.Add("Message", "Are you sure you want to delete this task type?");
 
-        var modal = Modal.Show<ConfirmationDialog>("Confirm Deletion", parameters);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            await Archive();
-        }
-        else
-        {
-            Console.WriteLine("Deletion canceled by the user.");
-        }
     }
 }

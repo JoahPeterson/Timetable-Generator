@@ -1,9 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Authorization
+@inject IDialogService DialogService
 @inject ITaskTypeData TaskTypeData
 @inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
-@inject Blazored.Modal.Services.IModalService Modal
 @rendermode InteractiveServer
 @attribute [Authorize]
 
@@ -75,8 +75,23 @@ else
 
     private async Task ShowModal(TaskType taskType)
     {
-        selectedTaskType = taskType;
-        await OnShow.InvokeAsync(taskType);
+        var parameters = new DialogParameters<Confimation_Dialog>
+        {
+            { x => x.ContentText, "Do you really want to delete these records? This process cannot be undone." },
+            { x => x.ButtonText, "Delete" },
+            { x => x.Color, Color.Error }
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialogResult = DialogService.Show<Confimation_Dialog>("Delete", parameters, options);
+
+        var result = await dialogResult.Result;
+
+        if (!result.Canceled)
+        {
+            await Archive(taskType);
+        }
     }
 
     public async Task Archive(TaskType taskType)
@@ -91,6 +106,4 @@ else
 
         StateHasChanged();
     }
-
-
 }
