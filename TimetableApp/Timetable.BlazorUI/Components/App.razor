@@ -19,7 +19,7 @@
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes @rendermode="RenderModeForPage" />
     <script src="_content/TinyMCE.Blazor/tinymce-blazor.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -39,3 +39,13 @@
 
 </body>
 </html>
+
+@code{
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    private IComponentRenderMode? RenderModeForPage =>
+    HttpContext.Request.Path.StartsWithSegments("/Account")
+        ? null
+        : RenderMode.InteractiveServer;
+}
