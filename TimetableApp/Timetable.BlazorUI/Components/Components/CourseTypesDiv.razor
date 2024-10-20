@@ -53,7 +53,7 @@
                 }
             </ul>
         </div>
-        <div class="mt-4 fixed">
+        <div class="mt-4">
             <a href="courseType/create" class="text-black text-decoration-none CardText">
                 <i class="bi bi-plus-circle h5"></i> Add
             </a>
@@ -66,14 +66,6 @@ else
 }
 
 @code {
-    // TODO: Remove Remenants of Old JS
-    // [Parameter]
-    // public EventCallback<CourseType> OnConfirm { get; set; }
-
-    // [Parameter]
-    // public EventCallback<CourseType> OnShow { get; set; }
-    //private bool showConfirmationModal = false;
-
     private List<CourseType>? courseTypes;
     private User? loggedInUser;
     CourseType selectedCourseType = null;
@@ -105,17 +97,6 @@ else
         courseType.AuditInformation.LastModified = DateTime.Now;
         courseType.AuditInformation.IsArchived = true;
         await CourseTypeData.UpdateAsync(courseType);
-        //TODO: Remove Remenants of Old JS
-        // showConfirmationModal = false;
-
-        // if (selectedCourseType == null)
-        //     return;
-
-
-        // if (courseTypes is not null)
-        //     courseTypes.Remove(selectedCourseType);
-
-        //StateHasChanged();
     }
 
     private async Task Restore(CourseType courseType)

@@ -48,7 +48,6 @@
 
     private CourseType courseType = new CourseType();
     private bool isEditMode = false;
-    // private bool showConfirmationModal = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,27 +63,6 @@
             courseType = new CourseType();
         }
     }
-
-    //TODO: This is an old remenant can be removed.
-    // private async Task Archive()
-    // {
-    //     if (isEditMode && !string.IsNullOrEmpty(courseTypeId))
-    //     {
-    //         courseType.AuditInformation.LastModified = DateTime.Now;
-    //         courseType.AuditInformation.IsArchived = true;
-    //         await CourseTypeData.UpdateAsync(courseType);
-    //         Navigation.NavigateTo("/");
-    //     }
-    // }
-
-    // private async Task OnConfirmationResult(bool confirmed)
-    // {
-    //     showConfirmationModal = false; // Hide the modal
-    //     if (confirmed)
-    //     {
-    //         await Archive();
-    //     }
-    // }
 
     private async Task SaveCourseType()
     {
@@ -113,18 +91,4 @@
         Navigation.NavigateTo("/dashboard");
     }
 
-    //TODO: This is an old remenant can be removed.
-    // private async Task ShowModal()
-    // {
-    //     var parameters = new DialogParameters<Confimation_Dialog>
-    //     {
-    //         { x => x.ContentText, "Do you really want to delete these records? This process cannot be undone." },
-    //         { x => x.ButtonText, "Delete" },
-    //         { x => x.Color, Color.Error }
-    //     };
-
-    //     var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
-
-    //     var result = DialogService.ShowAsync<Confimation_Dialog>("Delete", parameters, options).Result;
-    // }
 }

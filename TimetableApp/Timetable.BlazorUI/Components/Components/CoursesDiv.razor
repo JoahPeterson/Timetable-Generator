@@ -35,7 +35,7 @@
                 }
             </ul>
         </div>
-        <div class="mt-4 fixed">
+        <div class="mt-4">
             <a href="course/create" class="text-black text-decoration-none CardText">
                 <i class="bi bi-plus-circle h5"></i> Add
             </a>
@@ -48,14 +48,6 @@ else
 }
 
 @code {
-    //TODO: This was to remove the item from if statement below.
-    // [Parameter]
-    // public EventCallback<Course> OnConfirm { get; set; }
-
-    // [Parameter]
-    // public EventCallback<Course> OnShow { get; set; }
-    // private bool showConfirmationModal = false;
-
     private List<Course>? courses;
     private User? loggedInUser;
     Course selectedCourse = null;

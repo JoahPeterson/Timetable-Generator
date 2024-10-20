@@ -9,12 +9,6 @@
 @inject IUserData UserData
 @inject AuthenticationStateProvider authProvider
 
-@* <div class="work-unit bg-success text-white border border-dark" draggable="true" @onclick="SelectWorkUnit" style="height: @(RowHeightPercentage)vh">
-    <p>@WorkUnit.Name</p>
-    <p>Duration: @WorkUnit.Duration</p>
-</div>
- *@
-@*   *@
  <!-- Droppable Version for Drag n Drop-->
  <div class="work-unit bg-success text-white border border-dark" 
     ondragover="event.preventDefault();"
@@ -81,20 +75,8 @@
         await OnSelected.InvokeAsync(WorkUnit);
     }
 
-    private async Task HandleDragOver(DragEventArgs e)
-    {
-        // Prevent default behavior to allow drop
-        //await JS.InvokeVoidAsync("preventDefault", e);
-    }
-
-    private async Task Drop()
-    {
-
-    }
-
     private async Task HandleDrop(DragEventArgs e, string workUnitId)
     {
-        //draggedTaskId = httpContextAccessor.HttpContext.Session.GetString("taskID");
         draggedTaskId = await JS.InvokeAsync<string>("GetSession", "TaskId");
         workTaskId = await JS.InvokeAsync<string>("GetSession", "WorkTaskId");
 
@@ -152,4 +134,5 @@
         WorkUnit.Tasks.Remove(WorkUnit.Tasks.Where(t => t.Id == taskId).First());
         await WorkUnitData.UpdateAsync(WorkUnit);
     }
+ 
 }
