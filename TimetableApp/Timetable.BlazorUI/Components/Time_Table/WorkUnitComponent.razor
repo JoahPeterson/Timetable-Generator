@@ -10,30 +10,51 @@
 @inject AuthenticationStateProvider authProvider
 
  <!-- Droppable Version for Drag n Drop-->
- <div class="work-unit bg-success text-white border border-dark" 
+ <div class="work-unit border border-dark" 
     ondragover="event.preventDefault();"
      @onclick="SelectWorkUnit" 
      @ondrop="(e) => HandleDrop(e, WorkUnit.Id)"
      style="height: @(RowHeightPercentage)vh">
-    <p>@WorkUnit.Name</p>
-    <p>Duration: @WorkUnit.Duration</p>
-    <ul>
-        @foreach (var task in WorkUnit.Tasks)
-        {
-            <li class="list-group-item CardText text-dark px-3"
-                draggable="true"
-                @ondragstart="(e) => HandleDragStart(e, task.Id, task.TaskId)">
-                @task.TaskId
-            </li>
-        }
-    </ul>
-   
+    <div class="d-flex justify-content-between align-items-start">
+        <div class="TimeTableHeader">
+            <TimetableWorkUnitHeader WorkUnit="@WorkUnit" />
+        </div>
+        <div class="cards-container flex-grow-1">
+            @if (WorkUnit.Tasks.Any())
+            {
+                @foreach (var task in WorkUnit.Tasks)
+                {
+                    var workTask = WorkTasks.FirstOrDefault(t => t.Id == task.TaskId);
+                    <div class="card mstc-gold-btn border border-dark m-2 rounded-1"
+                         draggable="true"
+                         @ondragstart="(e) => HandleDragStart(e, task.Id, task.TaskId)">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="card-title ">@workTask?.Name</div>
+                                <div class="p-0 text-decoration-none" @onclick="() => WorkUnitTaskEditOnClick(task)">
+                                    <i class="bi bi-pencil-square icon-hover"></i>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <p class="m-0">(min): @task.Duration </p>
+                                <p class="m-0">(date): @task.DueDate?.ToString("MM/dd") </p>
+                            </div>
+                            
+                        </div>
+                    </div>
+                }
+            }
+        </div>
 
+    </div>
 </div>
 
 @code {
     [Parameter]
-    public WorkUnit WorkUnit { get; set; }
+    public required WorkUnit WorkUnit { get; set; }
+
+    [Parameter]
+    public required List<WorkTask> WorkTasks { get; set; }
 
     [Parameter]
     public double SingleRowHeightPercentage { get; set; }
@@ -41,7 +62,7 @@
     [Parameter]
     public EventCallback<WorkUnit> OnSelected { get; set; }
 
-    private List<WorkUnitTask> tasks;
+    private List<WorkUnitTask>? tasks;
 
     private User? loggedInUser;
 
@@ -129,6 +150,14 @@
 
     private async Task HandleDragStart(DragEventArgs e, string taskId, string workTaskId)
     {
+        try
+        {
+            e.DataTransfer.Items.SetValue(taskId, 0);
+        }
+        catch (Exception ex)
+        {
+
+        }
         await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
         await JS.InvokeVoidAsync("SetSession", "WorkTaskId", workTaskId);
         WorkUnit.Tasks.Remove(WorkUnit.Tasks.Where(t => t.Id == taskId).First());

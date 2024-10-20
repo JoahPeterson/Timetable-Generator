@@ -1,0 +1,25 @@
+﻿::deep .workUnit-Row:nth-child(odd) {
+    background-color: #F9C545;
+}
+
+::deep .workUnit-Row:nth-child(even) {
+    background-color: #FDDA8B;
+}
+
+::deep .week-column {
+    width: 40px;
+}
+
+::deep .vertical-text {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg); /* This rotates the text */
+    text-align: center;
+}
+
+::deep .work-unit {
+    background-color: #cbcbcc;
+}
+
+.tool-column {
+    width: 300px;
+}
