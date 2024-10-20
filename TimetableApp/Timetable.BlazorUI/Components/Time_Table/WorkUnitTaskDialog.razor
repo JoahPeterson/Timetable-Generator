@@ -1,7 +1,7 @@
-﻿<MudDialog>
+﻿<MudDialog Class="p-4">
     <TitleContent>
         <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1" />
+            <MudIcon Icon="@Icons.Material.Filled.Task" Class="mr-3 mb-n1" />
             Add Work Task Data
         </MudText>
     </TitleContent>
@@ -9,7 +9,7 @@
     <DialogContent>
         <EditForm Model="@workUnitTask" OnValidSubmit="SaveWorkUnitTask">
             <MudCard>
-                <MudCardContent>
+                <MudCardContent Class="mb-1">
                     <DataAnnotationsValidator />
 
                     <MudNumericField @bind-Value="workUnitTask.Duration" Label="Time Requirement (MIN)"
@@ -17,28 +17,23 @@
                                      Required="true" For="@(() => workUnitTask.Duration)" />
                     <ValidationMessage For="@(() => workUnitTask.Duration)" />
 
-                    <MudDatePicker @bind-Date="workUnitTask.DueDate" Label="Due Date"
-                                   Required="true" />
+                    <MudDatePicker @bind-Date="workUnitTask.DueDate" Label="Due Date" Color="Color.Success"
+                                    
+                                    Required="false" />
                     <ValidationMessage For="@(() => workUnitTask.DueDate)" />
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Register</MudButton>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Class="ml-auto mstc-gold-btn">Register</MudButton>
                 </MudCardActions>
             </MudCard>
         </EditForm>
     </DialogContent>
-
-
-@*     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Success" OnClick="SaveWorkUnitTask">Update Task</MudButton>
-    </DialogActions> *@
 </MudDialog>
 
 @code {
     [CascadingParameter] 
     MudDialogInstance MudDialog { get; set; }
-
+    
     [Parameter] 
     public WorkUnitTask workUnitTask { get; set; }
 
@@ -50,13 +45,11 @@
 
     private void SaveWorkUnitTask()
     {
-        // Logic to save the task
-        MudDialog.Close(DialogResult.Ok(workUnitTask)); // Close dialog after save
+        MudDialog.Close(DialogResult.Ok(workUnitTask));
     }
 
     private void Cancel()
     {
-        // Logic for close button click
         MudDialog.Close();
     }
 }
