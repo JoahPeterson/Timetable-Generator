@@ -121,3 +121,15 @@ body {
     background-color: #f8f9fb;
 }
 
+.icon-hover {
+    font-size: 1.1rem; /* Initial size */
+    transition: font-size 0.3s ease; /* Smooth transition */
+}
+
+    .icon-hover:hover {
+        font-size: 1.3rem; /* Resize on hover */
+        transform: rotate(5deg);
+        transform: scale(1.2);
+    }
+
+
