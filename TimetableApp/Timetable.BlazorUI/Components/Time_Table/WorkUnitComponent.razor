@@ -123,7 +123,7 @@
                     WorkUnitId = WorkUnit.Id
                 };
 
-                DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Small, FullWidth = true };
+                DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
                 var parameters = new DialogParameters<WorkUnitTaskDialog> { { x => x.workUnitTask, workUnitTask } };
 
                 var dialog = await DialogService.ShowAsync<WorkUnitTaskDialog>("Delete Server", parameters, _maxWidth);
@@ -139,8 +139,6 @@
                 // Save the updated work unit
                 await WorkUnitData.UpdateAsync(WorkUnit);
 
-                //await JS.InvokeVoidAsync("modalInterop.showModal", "modal-1");
-
                 // Refresh the UI
                 StateHasChanged();
             }
@@ -154,12 +152,4 @@
         WorkUnit.Tasks.Remove(WorkUnit.Tasks.Where(t => t.Id == taskId).First());
         await WorkUnitData.UpdateAsync(WorkUnit);
     }
- 
-    // protected override async Task OnAfterRenderAsync(bool firstRender)
-    // {
-    //     if (firstRender)
-    //     {
-    //         await JS.InvokeVoidAsync("initializeModal");
-    //     }
-    // }
 }

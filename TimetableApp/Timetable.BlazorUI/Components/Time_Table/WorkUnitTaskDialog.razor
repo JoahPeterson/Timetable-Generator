@@ -17,9 +17,9 @@
                                      Required="true" For="@(() => workUnitTask.Duration)" />
                     <ValidationMessage For="@(() => workUnitTask.Duration)" />
 
-                    <MudDatePicker @bind-Date="workUnitTask.DueDate" Label="Due Date" MinDate="@minDate"
-                                   MaxDate="@maxDate"
-                                   Required="true" />
+                    <MudDatePicker @bind-Date="workUnitTask.DueDate" Label="Due Date" Color="Color.Success"
+                                    
+                                    Required="false" />
                     <ValidationMessage For="@(() => workUnitTask.DueDate)" />
                 </MudCardContent>
                 <MudCardActions>
@@ -33,13 +33,9 @@
 @code {
     [CascadingParameter] 
     MudDialogInstance MudDialog { get; set; }
-
+    
     [Parameter] 
     public WorkUnitTask workUnitTask { get; set; }
-
-    private DateTime minDate = DateTime.Now;
-
-    private DateTime maxDate = DateTime.Now.AddDays(5);
 
     private void OnValidSubmit(EditContext context)
     {
