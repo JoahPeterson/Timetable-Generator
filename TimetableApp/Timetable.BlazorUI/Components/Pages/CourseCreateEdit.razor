@@ -47,7 +47,7 @@
                         <div class="form-group row mt-2">
                             <label class="col-sm-4 col-form-label fw-bold" for="TermDuration">Term Duration</label>
                             <div class="col-8">
-                                <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" class="form-control" @onchange="@CalculateEndDate">
+                                <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" class="form-control" onselect="@CalculateEndDate()">
                                     <option>Select Term Duration</option>
                                     @foreach (var duration in termDurations)
                                     {
