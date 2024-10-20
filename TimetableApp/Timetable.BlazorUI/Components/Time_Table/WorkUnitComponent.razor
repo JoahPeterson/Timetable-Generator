@@ -10,7 +10,7 @@
 @inject AuthenticationStateProvider authProvider
 
  <!-- Droppable Version for Drag n Drop-->
- <div class="work-unit bg-success text-white border border-dark" 
+ <div class="work-unit border border-dark" 
     ondragover="event.preventDefault();"
      @onclick="SelectWorkUnit" 
      @ondrop="(e) => HandleDrop(e, WorkUnit.Id)"
@@ -20,29 +20,28 @@
             <TimetableWorkUnitHeader WorkUnit="@WorkUnit" />
         </div>
         <div class="cards-container flex-grow-1">
-            <ul class="d-flex flex-wrap">
-                @if (WorkUnit.Tasks.Any())
+            @if (WorkUnit.Tasks.Any())
+            {
+                @foreach (var task in WorkUnit.Tasks)
                 {
-                    @foreach (var task in WorkUnit.Tasks)
-                    {
-
-                        var workTask = WorkTasks.FirstOrDefault(t => t.Id == task.TaskId);
-                        <div class="cards-container border border-dark m-2 rounded-1 ">
-                            <li class="list-group-item CardText text-dark m-2"
-                                draggable="true"
-                                @ondragstart="(e) => HandleDragStart(e, task.Id, task.TaskId)">
-                                    @workTask.Name
-                                    @task.SequenceNumber
-                            </li>
+                    var workTask = WorkTasks.FirstOrDefault(t => t.Id == task.TaskId);
+                    <div class="card border border-dark m-2 rounded-1 bg-red"
+                         draggable="true"
+                         @ondragstart="(e) => HandleDragStart(e, task.Id, task.TaskId)">
+                        <div class="card-body text-white">
+                            <button class="text-white" @onclick="() => WorkUnitTaskEditOnClick(task)">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <div class="card-title text-white">@workTask?.Name</div>
+                            <p class="text-white">@task.Duration</p>
+                            <p class="text-white">@task.DueDate?.ToString("MM/dd")</p>
                         </div>
-                    }
+                    </div>
                 }
-            </ul>
+            }
         </div>
+
     </div>
-
-   
-
 </div>
 
 @code {
@@ -162,19 +161,37 @@
         }
         catch (Exception ex)
         {
-            
+
         }
         await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
         await JS.InvokeVoidAsync("SetSession", "WorkTaskId", workTaskId);
         WorkUnit.Tasks.Remove(WorkUnit.Tasks.Where(t => t.Id == taskId).First());
         await WorkUnitData.UpdateAsync(WorkUnit);
     }
- 
-    // protected override async Task OnAfterRenderAsync(bool firstRender)
-    // {
-    //     if (firstRender)
-    //     {
-    //         await JS.InvokeVoidAsync("initializeModal");
-    //     }
-    // }
+
+    private async Task WorkUnitTaskEditOnClick(WorkUnitTask workUnitTask)
+    {
+        DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var parameters = new DialogParameters<WorkUnitTaskDialog> { { x => x.workUnitTask, workUnitTask } };
+
+        var dialog = await DialogService.ShowAsync<WorkUnitTaskDialog>("Edit Task", parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data == null)
+            return;
+
+        var existingTask = WorkUnit.Tasks.FirstOrDefault(t => t.Id == workUnitTask.Id);
+
+        if (existingTask != null)
+        {
+            // Update the properties of the existing task
+            existingTask.DueDate = ((WorkUnitTask)result.Data).DueDate;
+            existingTask.Duration = ((WorkUnitTask)result.Data).Duration;
+        }
+
+        await WorkUnitData.UpdateAsync(WorkUnit);
+    }
 }

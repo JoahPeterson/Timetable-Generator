@@ -15,3 +15,11 @@
     transform: rotate(180deg); /* This rotates the text */
     text-align: center;
 }
+
+::deep .work-unit {
+    background-color: #cbcbcc;
+}
+
+.tool-column {
+    width: 300px;
+}
