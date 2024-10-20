@@ -3,7 +3,9 @@
     <div class="workUnit-header col-2 border border-black d-flex justify-content-center align-items-center flex-column">
         <div class="preview-week-number preview-emphasis">Week #@WeekNumber</div>
         <div class="preview-due-date preview-finetext ">@WeekStartDate</div>
-        <div class="timetable-duration preview-finetext">Duration Hrs: @(WorkUnit.Tasks.Sum(Task => string.IsNullOrEmpty(Task.Duration) ? 0 : Convert.ToInt32(Task.Duration)) / 60.0)</div>
+        <div class="timetable-duration preview-finetext">
+            Duration Hrs: @(Math.Ceiling((WorkUnit.Tasks.Sum(Task => string.IsNullOrEmpty(Task.Duration) ? 0 : Convert.ToInt32(Task.Duration)) / 60.0) * 10) / 10)
+        </div>
     </div>
     @if (WorkUnit.Tasks != null && WorkUnit.Tasks.Any())
     {
