@@ -1,9 +1,11 @@
 using Timetable.BlazorUI;
 using Timetable.BlazorUI.Components;
 using Timetable.BlazorUI.SetupServices;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.ConfigureServices();
+
 
 var app = builder.Build();
 

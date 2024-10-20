@@ -1,41 +1,45 @@
 ﻿@page "/coursetype/create/{courseTypeId?}"
+@inject IDialogService DialogService
 @using Microsoft.AspNetCore.Authorization
 @inject ICourseTypeData CourseTypeData
 @inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
-@inject Blazored.Modal.Services.IModalService Modal
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-
-@* Cascading Is Required for Modal to Work *@
-<CascadingBlazoredModal />
-
-<h3>@(isEditMode ? "Edit Course Modality" : "Create Course Modality")</h3>
-
-
 <EditForm Model="courseType" OnValidSubmit="@SaveCourseType" FormName="CourseTypeForm">
     <DataAnnotationsValidator />
-    <ValidationSummary />
-
-    <div>
-        <label for="Name">Modality Name:</label>
-        <InputText id="name" @bind-Value="courseType.Name" class="form-control" />
-        <ValidationMessage For="@(() =>courseType.Name)" />
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="bg-light rounded-2 mt-5 p-3">
+                    <h3 class="text-center mb-3 mt-5 fw-bold">@(isEditMode ? "Edit Modality" : "Create Modality")</h3>
+                    <div class="d-flex flex-column">
+                        <div class="form-group row mt-2">
+                            <label for="Name" class="col-4 col-form-label fw-bold">Modality Name</label>
+                            <div class="col-8">
+                                <InputText id="name" @bind-Value="courseType.Name" class="form-control" placeholder="Modality Name" />
+                                <ValidationMessage For="@(() =>courseType.Name)" />
+                            </div>
+                        </div>
+                        <div class="form-group row mt-2">
+                            <label class="col-sm-4 col-form-label fw-bold" for="ToolTip">Modality Description</label>
+                            <div class="col-8">
+                                <InputTextArea id="toolTip" @bind-Value="courseType.ToolTip" class="form-control" placeholder="Modality Description" />
+                                <ValidationMessage For="@(() => courseType.ToolTip)" />
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center mt-4">
+                            <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
+                                <i class="bi bi-floppy"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <label for="ToolTip">Modality Description:</label>
-        <InputText id="toolTip" @bind-Value="courseType.ToolTip" class="form-control" />
-        <ValidationMessage For="@(() => courseType.ToolTip)" />
-    </div>
-
-    <button type="submit" class="btn btn-primary d-block mt-1">Save</button>
-
-    @if (isEditMode)
-    {
-        <button type="button" @onclick="ShowDeleteConfirmation" class="btn btn-danger d-block mt-1">Delete</button>
-    }
 </EditForm>
 
 
@@ -44,7 +48,7 @@
 
     private CourseType courseType = new CourseType();
     private bool isEditMode = false;
-    private bool showConfirmationModal = false;
+    // private bool showConfirmationModal = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -61,25 +65,26 @@
         }
     }
 
-    private async Task Archive()
-    {
-        if (isEditMode && !string.IsNullOrEmpty(courseTypeId))
-        {
-            courseType.AuditInformation.LastModified = DateTime.Now;
-            courseType.AuditInformation.IsArchived = true;
-            await CourseTypeData.UpdateAsync(courseType);
-            Navigation.NavigateTo("/");
-        }
-    }
+    //TODO: This is an old remenant can be removed.
+    // private async Task Archive()
+    // {
+    //     if (isEditMode && !string.IsNullOrEmpty(courseTypeId))
+    //     {
+    //         courseType.AuditInformation.LastModified = DateTime.Now;
+    //         courseType.AuditInformation.IsArchived = true;
+    //         await CourseTypeData.UpdateAsync(courseType);
+    //         Navigation.NavigateTo("/");
+    //     }
+    // }
 
-    private async Task OnConfirmationResult(bool confirmed)
-    {
-        showConfirmationModal = false; // Hide the modal
-        if (confirmed)
-        {
-            await Archive();
-        }
-    }
+    // private async Task OnConfirmationResult(bool confirmed)
+    // {
+    //     showConfirmationModal = false; // Hide the modal
+    //     if (confirmed)
+    //     {
+    //         await Archive();
+    //     }
+    // }
 
     private async Task SaveCourseType()
     {
@@ -105,24 +110,21 @@
         }
 
         // Redirect to the course type list or home after save
-        Navigation.NavigateTo("/");
+        Navigation.NavigateTo("/dashboard");
     }
 
-    private async Task ShowDeleteConfirmation()
-    {
-        var parameters = new ModalParameters();
-        parameters.Add("Message", "Are you sure you want to delete this course type?");
+    //TODO: This is an old remenant can be removed.
+    // private async Task ShowModal()
+    // {
+    //     var parameters = new DialogParameters<Confimation_Dialog>
+    //     {
+    //         { x => x.ContentText, "Do you really want to delete these records? This process cannot be undone." },
+    //         { x => x.ButtonText, "Delete" },
+    //         { x => x.Color, Color.Error }
+    //     };
 
-        var modal = Modal.Show<ConfirmationDialog>("Confirm Deletion", parameters);
-        var result = await modal.Result;
+    //     var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
 
-        if (!result.Cancelled)
-        {
-            await Archive();
-        }
-        else
-        {
-            Console.WriteLine("Deletion canceled by the user.");
-        }
-    }
+    //     var result = DialogService.ShowAsync<Confimation_Dialog>("Delete", parameters, options).Result;
+    // }
 }

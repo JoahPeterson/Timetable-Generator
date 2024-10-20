@@ -3,7 +3,6 @@
 @inject ICourseData CourseData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
-@inject Blazored.Modal.Services.IModalService Modal
 @inject ICourseTypeData CourseTypeData
 @inject ITermData TermData
 @inject ITermDurationData TermDurationData
@@ -41,19 +40,31 @@
                         <div class="form-group row mt-2">
                             <label class="col-sm-4 col-form-label fw-bold" for="StartDate">Course Start Date</label>
                             <div class="col-8">
-                                <input type="date" id="startDate" @bind="course.StartDate" class="form-control" />
+                                <input type="date" id="startDate" @bind="course.StartDate"  class="form-control" />
                                 <ValidationMessage For="@(() => course.StartDate)" />
                             </div>
                         </div>
                         <div class="form-group row mt-2">
-                            <label class="col-sm-4 col-form-label fw-bold" for="EndDate">Course End Date</label>
+                            <label class="col-sm-4 col-form-label fw-bold" for="TermDuration">Term Duration</label>
                             <div class="col-8">
-                                <input type="date" id="endDate" @bind="course.EndDate" class="form-control" />
-                                <ValidationMessage For="@(() => course.EndDate)" />
+                                <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" onselect="@CalculateEndDate()" class="form-control">
+                                    <option>Select Term Duration</option>
+                                    @foreach (var duration in termDurations)
+                                    {
+                                        <option value="@duration.Length">@duration.Length weeks</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => course.Term.Duration)" />
                             </div>
                         </div>
                         <div class="form-group row mt-2">
-                            <label class="col-sm-4 col-form-label fw-bold" for="CourseTypeId">Course Type</label>
+                            <label class="col-sm-4 col-form-label fw-bold" for="EndDate">Projected End Date</label>
+                            <div class="col-8">
+                                <input type="text" id="endDate" @bind="calculatedEndDate" class="form-control" disabled="true" />
+                            </div>
+                        </div>
+                        <div class="form-group row mt-2">
+                            <label class="col-sm-4 col-form-label fw-bold" for="CourseTypeId">Course Modality</label>
                             <div class="col-8">
                                 <InputSelect id="courseTypeId" @bind-Value="course.CourseTypeId" class="form-control">
                                     <option>Select Course Type</option>
@@ -77,19 +88,6 @@
                                 </InputSelect>
                             </div>
                         </div>
-                        <div class="form-group row mt-2">
-                            <label class="col-sm-4 col-form-label fw-bold" for="TermDuration">Term Duration</label>
-                            <div class="col-8">
-                                <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" class="form-control">
-                                    <option>Select Term Duration</option>
-                                    @foreach (var duration in termDurations)
-                                    {
-                                        <option value="@duration.Length">@duration.Length weeks</option>
-                                    }
-                                </InputSelect>
-                                <ValidationMessage For="@(() => course.Term.Duration)" />
-                            </div>
-                        </div>
                         <div class="d-flex justify-content-center mt-4">
                             <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
                                 <i class="bi bi-floppy"></i> Save
@@ -106,12 +104,13 @@
 @code {
     [Parameter] public string? courseId { get; set; }
 
+    private string? calculatedEndDate;
     private Course course = new Course();
     private List<CourseType> courseTypes = new List<CourseType>();
+    private string courseTypeName = null!;
+    private bool isEditMode = false;
     private List<Term> terms = new List<Term>();
     private List<TermDuration> termDurations = new List<TermDuration>();
-    private bool isEditMode = false;
-    private string courseTypeName = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -128,6 +127,8 @@
             course.EndDate = DateTime.Now;
         }
 
+        calculatedEndDate = course.EndDate.ToString("MM-dd-yyyy");
+
         // Fetch course types from the database
         courseTypes = await CourseTypeData.GetAsync();
 
@@ -136,6 +137,18 @@
 
         // Fetch term durations from the database
         termDurations = await TermDurationData.GetAsync();
+    }
+
+    private async Task CalculateEndDate()
+    {
+        if (course.Term.Duration == null )
+        {
+            course.EndDate = course.StartDate;
+            return;
+        }
+
+        course.EndDate = course.StartDate.AddDays(course.Term.Duration * 7);
+        calculatedEndDate = course.EndDate.ToString("MM-dd-yyyy");
     }
 
     private async Task SaveCourse()
@@ -173,16 +186,26 @@
             course = newCourse;  // Assign the newly created course to the 'course' model
             courseTypeName = courseTypes.FirstOrDefault(ct => ct.Id == newCourse.CourseTypeId)!.Name!;
         }
-
-        // // Show the modal for course preview
         await ShowModal();
     }
 
     private async Task ShowModal()
     {
+        //TODO: Refactor to use MudBlazor Dialog
         await JS.InvokeVoidAsync("modalInterop.showModal", "preview-modal");
     }
 
+    private DateTime StartDate
+    {
+        get => course.StartDate;
+        set
+        {
+            course.StartDate = value;
+            CalculateEndDate();
+        }
+    }
+
+    //TODO: This will be removed when MudBlazor Dialog is implemented.
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

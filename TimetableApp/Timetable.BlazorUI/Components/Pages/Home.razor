@@ -1,20 +1,23 @@
 ﻿@page "/"
 @inject AuthenticationStateProvider authProvider
 @inject IUserData userData
+<link rel="stylesheet" href="/css/background.css" />
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
-@if (loggedInUser != null)
+<div class="row logo">
+    <div class="col-12 text-center">
+        <img src="/images/logo.png" width="551" height="179">
+    </div>
+</div>
+@if(loggedInUser != null)
 {
-    <p>Welcome</p>
-}
-else
-{
-    <p>Welcome, please log in</p>
+    <div class="row">
+        <div class="d-flex justify-content-center mt-4">
+            <a href="/help" class="btn home-btn btn-lg rounded-pill me-2">Learn More</a>
+            <a href="/course/create" class="btn home-btn btn-lg rounded-pill">Get Started</a>
+        </div>
+    </div>
 }
 
 @code {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 using Timetable.BlazorUI.Components.Account;
 using Timetable.BlazorUI.Data;
 
@@ -72,7 +73,7 @@ public static class RegisterServices
             .AddSignInManager()
             .AddDefaultTokenProviders();
 
-        builder.Services.AddBlazoredModal();
+        builder.Services.AddMudServices();
         builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
         builder.Services.AddScoped<UserService>();
 

@@ -1,0 +1,121 @@
+﻿@page "/worktask/create/{TaskId?}"
+@using Microsoft.AspNetCore.Authorization
+@inject IWorkTaskData TaskData
+@inject ITaskTypeData TaskTypeData
+@inject IUserData UserData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
+
+
+@attribute [Authorize]
+<EditForm Model="workTask" OnValidSubmit="@SaveTask" FormName="TaskForm">
+    <DataAnnotationsValidator/>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="bg-light rounded-2 mt-5 p-3">
+                    <h3 class="text-center mb-3 mt-5 fw-bold">@(isEditMode ? "Edit Task" : "Create Task")</h3>
+                    <div class="d-flex flex-column">
+                        <div class="form-group row mt-2">
+                            <label for="Name" class="col-4 col-form-label fw-bold">Task Name</label>
+                            <div class="col-8">
+                                <InputText id="name" @bind-Value="workTask.Name" class="form-control" placeholder="Task Name" />
+                                <ValidationMessage For="@(() => workTask.Name)" />
+                            </div>
+                        </div>
+                        <div class="form-group row mt-2">
+                            <label class="col-sm-4 col-form-label fw-bold" for="ToolTip">Task Description</label>
+                            <div class="col-8">
+                                <InputTextArea id="description" @bind-Value="workTask.Description" class="form-control" placeholder="Task Description" />
+                                <ValidationMessage For="@(() => workTask.Description)" />
+                            </div>
+                        </div>
+                        <div class="form-group row mt-2">
+                            <label class="col-sm-4 col-form-label fw-bold" for="type">Type</label>
+                            <div class="col-8">
+                                <InputSelect id="type" @bind-Value="workTask.TypeId" class="form-control">
+                                    <option>Select Task Type</option>
+                                    @foreach (var type in taskTypes)
+                                    {
+                                        if (type.AuditInformation.IsArchived == false)
+                                        {
+                                            <option value="@type.Id">@type.Name</option>
+                                        }
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => workTask.TypeId)" />
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center mt-4">
+                            <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
+                                <i class="bi bi-floppy"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public string? TaskId { get; set; }
+    private bool isEditMode = false;
+    private User loggedInUser;
+    private List<TaskType> taskTypes = new ();
+    private WorkTask workTask = new WorkTask();
+
+    //TODO: Remove Remenants of JS Modal
+    //private bool showConfirmationModal = false;
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var loggedInUser = await UserData.GetUserFromAuthenticationAsync(user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+        taskTypes = await TaskTypeData.GetUsersTaskTypesAsync(loggedInUser.Id);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(TaskId))
+        {
+            isEditMode = true;
+            workTask = await TaskData.GetByIdAsync(TaskId);
+        }
+        else
+        {
+            isEditMode = false;
+        }
+    }
+
+    private async Task SaveTask()
+    {
+        if (isEditMode)
+        {
+            workTask.AuditInformation.LastModified = DateTime.Now;
+            await TaskData.UpdateAsync(workTask);
+            isEditMode = false;
+        }
+        else
+        {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+            WorkTask newWorkTask = new WorkTask
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = workTask.Name,
+                Description = workTask.Description,
+                TypeId = workTask.TypeId
+            };
+
+            newWorkTask.AuditInformation.CreatedById = mongoUser.Id;
+
+            await TaskData.CreateAsync(newWorkTask);
+        }
+
+        Navigation.NavigateTo("/dashboard");
+    }
+}

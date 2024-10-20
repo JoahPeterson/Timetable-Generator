@@ -9,7 +9,7 @@ public interface ICourseTypeData
 {
     Task CreateAsync(CourseType courseType);
     Task<CourseType?> GetByIdAsync(string id);
-    Task<List<CourseType>> GetAsync();
+    Task<List<CourseType>> GetAsync(bool IncludeArchived = false);
     Task<List<CourseType>> GetUsersCourseTypesAsync(string createdById);
     Task UpdateAsync(CourseType courseType);
 }
