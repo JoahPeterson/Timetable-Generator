@@ -117,6 +117,7 @@ else
     private async Task Promote(User user)
     {
         await UserService.AssignRole(user.EmailAddress, "Admin");
+        Snackbar.Add($"Made User: {user.EmailAddress} An Admin", Severity.Success);
     }
 
     private async Task ShowModal(User user)
