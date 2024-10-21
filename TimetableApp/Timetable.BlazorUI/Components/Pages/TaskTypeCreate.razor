@@ -3,6 +3,7 @@
 @using Timetable.BlazorUI.Components.Pages
 @inject ITaskTypeData TaskTypeData
 @inject IUserData UserData
+@inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @rendermode InteractiveServer
@@ -112,6 +113,7 @@
 
         // Redirect to the task type list or home after save
         taskType = new TaskType();
+        Snackbar.Add("Task Type Created", Severity.Success);
         Navigation.NavigateTo("/dashboard");
     }
 
