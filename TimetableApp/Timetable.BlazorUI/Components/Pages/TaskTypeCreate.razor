@@ -50,6 +50,7 @@
     private TaskType taskType = new TaskType();
     private bool isEditMode = false;
     private User loggedInUser;
+    private string toastMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,6 +94,7 @@
             taskType.AuditInformation.LastModified = DateTime.Now;
             await TaskTypeData.UpdateTaskTypeAsync(taskType);
             isEditMode = false;
+            toastMessage = "Task Type Edited";
         }
         else
         {
@@ -109,11 +111,12 @@
 
             taskTypes.Add(newTaskType);
             await TaskTypeData.CreateTaskTypeAsync(newTaskType);
+            toastMessage = "Task Type Created";
         }
 
         // Redirect to the task type list or home after save
         taskType = new TaskType();
-        Snackbar.Add("Task Type Created", Severity.Success);
+        Snackbar.Add(toastMessage, Severity.Success);
         Navigation.NavigateTo("/dashboard");
     }
 
