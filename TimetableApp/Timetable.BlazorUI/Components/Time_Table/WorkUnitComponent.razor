@@ -163,5 +163,29 @@
         WorkUnit.Tasks.Remove(WorkUnit.Tasks.Where(t => t.Id == taskId).First());
         await WorkUnitData.UpdateAsync(WorkUnit);
     }
- 
+    private async Task WorkUnitTaskEditOnClick(WorkUnitTask workUnitTask)
+    {
+        DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var parameters = new DialogParameters<WorkUnitTaskDialog> { { x => x.workUnitTask, workUnitTask } };
+
+        var dialog = await DialogService.ShowAsync<WorkUnitTaskDialog>("Edit Task", parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data == null)
+            return;
+
+        var existingTask = WorkUnit.Tasks.FirstOrDefault(t => t.Id == workUnitTask.Id);
+
+        if (existingTask != null)
+        {
+            // Update the properties of the existing task
+            existingTask.DueDate = ((WorkUnitTask)result.Data).DueDate;
+            existingTask.Duration = ((WorkUnitTask)result.Data).Duration;
+        }
+
+        await WorkUnitData.UpdateAsync(WorkUnit);
+    }
 }
