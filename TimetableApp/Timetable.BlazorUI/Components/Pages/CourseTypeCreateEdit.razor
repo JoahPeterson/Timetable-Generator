@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Authorization
 @inject ICourseTypeData CourseTypeData
 @inject IUserData UserData
+@inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @rendermode InteractiveServer
@@ -48,6 +49,7 @@
 
     private CourseType courseType = new CourseType();
     private bool isEditMode = false;
+    private string toastMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,6 +72,7 @@
         {
             courseType.AuditInformation.LastModified = DateTime.Now;
             await CourseTypeData.UpdateAsync(courseType);
+            toastMessage = "Course Modality Edited";
         }
         else
         {
@@ -85,9 +88,11 @@
             newCourseType.AuditInformation.CreatedById = mongoUser.Id;
 
             await CourseTypeData.CreateAsync(newCourseType);
+            toastMessage = "Course Modality Created";
         }
 
         // Redirect to the course type list or home after save
+        Snackbar.Add(toastMessage, Severity.Success);
         Navigation.NavigateTo("/dashboard");
     }
 

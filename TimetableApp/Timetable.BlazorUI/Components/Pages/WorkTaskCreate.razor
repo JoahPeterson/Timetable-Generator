@@ -3,6 +3,7 @@
 @inject IWorkTaskData TaskData
 @inject ITaskTypeData TaskTypeData
 @inject IUserData UserData
+@inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
@@ -65,6 +66,7 @@
     private User loggedInUser;
     private List<TaskType> taskTypes = new ();
     private WorkTask workTask = new WorkTask();
+    private string toastMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -95,6 +97,7 @@
             workTask.AuditInformation.LastModified = DateTime.Now;
             await TaskData.UpdateAsync(workTask);
             isEditMode = false;
+            toastMessage = "Task Edited";
         }
         else
         {
@@ -112,8 +115,9 @@
             newWorkTask.AuditInformation.CreatedById = mongoUser.Id;
 
             await TaskData.CreateAsync(newWorkTask);
+            toastMessage = "Task Created";
         }
-
+        Snackbar.Add(toastMessage, Severity.Success);
         Navigation.NavigateTo("/dashboard");
     }
 }
