@@ -2,7 +2,7 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JS
-@inject ITermData TermData
+@inject ITermDurationData TermDurationData
 @inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
@@ -10,7 +10,7 @@
 
 @attribute [Authorize]
 
-@if (terms != null && loggedInUser != null)
+@if (termDurations != null && loggedInUser != null)
 {
     var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2" };
 
@@ -19,7 +19,7 @@
         <hr />
         <div class="card scrollable-card">
             <ul class="list-group list-group-flush">
-                @foreach (var (term, index) in terms.Select((value, i) => (value, i)))
+                @foreach (var (term, index) in termDurations.Select((value, i) => (value, i)))
                 {
                     var colorClass = colorClasses.ElementAtOrDefault(index % colorClasses.Count) ?? "Cardcolor-1";  // Ensure safe access
                     <li class="list-group-item CardText text-black px-3 d-flex justify-content-between @colorClass"
@@ -27,7 +27,7 @@
                         <div>
                             <i class="bi bi-arrows-expand-vertical h4"></i>
                             <a href="/CourseType/Create/@term.Id" class="text-black text-decoration-none fw-bold">
-                                @term.Name
+                                @term.Length Weeks
                                 @if (term.AuditInformation.IsArchived == true)
                                 {
                                     <i class="bi bi-archive-fill px-2 h5"></i>
@@ -58,7 +58,7 @@
                 <i class="bi bi-plus-circle h5"></i> Add
             </a>
             <a href="#" class="text-black text-decoration-none CardText">
-                <i class="bi bi-arrow-right-circle h5"></i> Manage Term Durations
+                <i class="bi bi-arrow-right-circle h5"></i> Manage Terms
             </a>
         </div>
     </div>
@@ -69,9 +69,9 @@ else
 }
 
 @code {
-    private List<Term>? terms;
+    private List<TermDuration>? termDurations;
     private User? loggedInUser;
-    Term selectedTerm = null;
+    TermDuration selectedTermDuration = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -86,28 +86,28 @@ else
 
             if (user.IsInRole("Admin"))
             {
-                terms = await TermData.GetAllAsync();
+                termDurations = await TermDurationData.GetAsync();
             }
         }
     }
 
-    public async Task Archive(Term term)
+    public async Task Archive(TermDuration termDuration)
     {
-        term.AuditInformation.LastModified = DateTime.Now;
-        term.AuditInformation.IsArchived = true;
-        await TermData.UpdateAsync(term);
+        termDuration.AuditInformation.LastModified = DateTime.Now;
+        termDuration.AuditInformation.IsArchived = true;
+        await TermDurationData.UpdateAsync(termDuration);
     }
 
-    private async Task Restore(Term term)
+    private async Task Restore(TermDuration termDuration)
     {
-        term.AuditInformation.LastModified = DateTime.Now;
-        term.AuditInformation.IsArchived = false;
-        await TermData.UpdateAsync(term);
+        termDuration.AuditInformation.LastModified = DateTime.Now;
+        termDuration.AuditInformation.IsArchived = false;
+        await TermDurationData.UpdateAsync(termDuration);
 
         StateHasChanged();
     }
 
-    private async Task ShowModal(Term term)
+    private async Task ShowModal(TermDuration termDuration)
     {
         var parameters = new DialogParameters<Confimation_Dialog>
         {
@@ -124,8 +124,8 @@ else
 
         if (!result.Canceled)
         {
-            await Archive(term);
-            Snackbar.Add("Term Archived", Severity.Success);
+            await Archive(termDuration);
+            Snackbar.Add("Term Duration Archived", Severity.Success);
         }
     }
 }
