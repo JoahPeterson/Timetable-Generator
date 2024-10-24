@@ -61,8 +61,6 @@
     private WorkUnitForm WorkUnitForm;
     private WorkTaskForm WorkTaskForm;
 
-
-
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(courseId))
@@ -88,6 +86,7 @@
 
     private async Task UpdateWorkUnits(WorkUnit workUnit)
     {
+
         var index = workUnits.FindIndex(wUnit => wUnit.Id == workUnit.Id);
 
         if (index != -1)
@@ -100,6 +99,8 @@
         }
 
         course.WorkUnits = workUnits;
+        course = await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course, WorkUnitData);
+        
         await CourseData.UpdateCourseAsync(course);
     }
 

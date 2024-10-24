@@ -104,6 +104,8 @@
 
             newWorkUnit.AuditInformation.CreatedById = mongoUser.Id;
 
+            newWorkUnit = WorkUnitDateService.SetWorkUnitStartAndEndDate(Course, newWorkUnit);
+
             await WorkUnitData.CreateAsync(newWorkUnit);
 
             await HandleSubmit(newWorkUnit);
