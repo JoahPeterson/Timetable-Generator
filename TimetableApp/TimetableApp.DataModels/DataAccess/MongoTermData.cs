@@ -46,7 +46,7 @@ public class MongoTermData : ITermData
     /// <returns>List of Term Objects</returns>
     public async Task<List<Term>> GetAllAsync()
     {
-        var results = await _terms.FindAsync(_ => true);
+        var results = await _terms.FindAsync(term => term.AuditInformation.IsArchived == false);
 
         return results.ToList();
     }

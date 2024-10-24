@@ -86,7 +86,7 @@ else
 
             if (user.IsInRole("Admin"))
             {
-                terms = await TermData.GetAllAsync();
+                terms = await TermData.GetAllWithArchivedAsync();
             }
         }
     }
