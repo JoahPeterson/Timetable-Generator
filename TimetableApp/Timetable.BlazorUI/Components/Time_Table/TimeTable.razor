@@ -92,16 +92,15 @@
         if (index != -1)
         {
             workUnits[index] = workUnit;
+            course.WorkUnits[index] = workUnit;
+            course = await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course, WorkUnitData);
         }
         else
         {
             workUnits.Add(workUnit);
+            course.WorkUnits.Add(workUnit);
+            await CourseData.UpdateCourseAsync(course);
         }
-
-        course.WorkUnits = workUnits;
-        course = await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course, WorkUnitData);
-        
-        await CourseData.UpdateCourseAsync(course);
     }
 
     private async Task UpdateWorkTasks(WorkTask workTask)
