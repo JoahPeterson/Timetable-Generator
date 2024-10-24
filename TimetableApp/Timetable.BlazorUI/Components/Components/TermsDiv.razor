@@ -1,0 +1,131 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+@inject ITermData TermData
+@inject IUserData UserData
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+@if (terms != null && loggedInUser != null)
+{
+    var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2" };
+
+    <div class="darkdiv p-3 rounded-3 shadow">
+        <h2 class="text-center"><i class="bi bi-arrows"></i> Course Terms</h2>
+        <hr />
+        <div class="card scrollable-card">
+            <ul class="list-group list-group-flush">
+                @foreach (var (term, index) in terms.Select((value, i) => (value, i)))
+                {
+                    var colorClass = colorClasses.ElementAtOrDefault(index % colorClasses.Count) ?? "Cardcolor-1";  // Ensure safe access
+                    <li class="list-group-item CardText text-black px-3 d-flex justify-content-between @colorClass"
+                        data-toggle="tooltip" data-placement="top" title="@term.ToolTip">
+                        <div>
+                            <i class="bi bi-arrows-expand-vertical h4"></i>
+                            <a href="/term/create/@term.Id" class="text-black text-decoration-none fw-bold">
+                                @term.Name
+                                @if (term.AuditInformation.IsArchived == true)
+                                {
+                                    <i class="bi bi-archive-fill px-2 h5"></i>
+                                }
+
+                            </a>
+
+                        </div>
+                        @if (term.AuditInformation.IsArchived == false)
+                        {
+                            <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="() => ShowModal(term)">
+                                <i class="bi bi-dash-circle h5"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="() => Restore(term)">
+                                <i class="bi bi-plus-circle-dotted h5"></i>
+                            </a>
+                        }
+
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="d-flex justify-content-between mt-4">
+            <a href="/term/create" class="text-black text-decoration-none CardText">
+                <i class="bi bi-plus-circle h5"></i> Add
+            </a>
+            <div onclick="toggleDivs('termDiv', 'termDurationDiv')" class="text-black text-decoration-none CardText">
+                <i class="bi bi-arrow-right-circle h5"></i> Manage Term Durations
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <p>Loading courses...</p>
+}
+
+@code {
+    private List<Term>? terms;
+    private User? loggedInUser;
+    Term selectedTerm = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
+
+        if (!string.IsNullOrEmpty(userIdClaim))
+        {
+            loggedInUser = await UserData.GetUserFromAuthenticationAsync(userIdClaim);
+
+            if (user.IsInRole("Admin"))
+            {
+                terms = await TermData.GetAllWithArchivedAsync();
+            }
+        }
+    }
+
+    public async Task Archive(Term term)
+    {
+        term.AuditInformation.LastModified = DateTime.Now;
+        term.AuditInformation.IsArchived = true;
+        await TermData.UpdateAsync(term);
+    }
+
+    private async Task Restore(Term term)
+    {
+        term.AuditInformation.LastModified = DateTime.Now;
+        term.AuditInformation.IsArchived = false;
+        await TermData.UpdateAsync(term);
+
+        StateHasChanged();
+    }
+
+    private async Task ShowModal(Term term)
+    {
+        var parameters = new DialogParameters<Confimation_Dialog>
+        {
+            { x => x.ContentText, "Do you really want to delete these records? This process cannot be undone." },
+            { x => x.ButtonText, "Delete" },
+            { x => x.Color, Color.Error }
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialogResult = DialogService.Show<Confimation_Dialog>("Delete", parameters, options);
+
+        var result = await dialogResult.Result;
+
+        if (!result.Canceled)
+        {
+            await Archive(term);
+            Snackbar.Add("Term Archived", Severity.Success);
+        }
+    }
+}

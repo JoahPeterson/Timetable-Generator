@@ -1,0 +1,95 @@
+﻿@page "/term/create/{termId?}"
+@using Microsoft.AspNetCore.Authorization
+@using Timetable.BlazorUI.Components.Pages
+@inject ITermData TermData
+@inject IUserData UserData
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authProvider
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<EditForm Model="term" OnValidSubmit="@SaveTerm" FormName="TermForm">
+    <DataAnnotationsValidator />
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="bg-light rounded-2 mt-5 p-3">
+                    <h3 class="text-center mb-3 mt-5 fw-bold">@(isEditMode ? "Edit Term" : "Create Term")</h3>
+                    <div class="d-flex flex-column">
+                        <div class="form-group row mt-2">
+                            <label for="Name" class="col-4 col-form-label fw-bold">Term Name</label>
+                            <div class="col-8">
+                                <InputText id="name" @bind-Value="term.Name" class="form-control" placeholder="Term Name" />
+                                <ValidationMessage For="@(() => term.Name)" />
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center mt-4">
+                            <button type="submit" class="btn mstc-gold-btn text-dark fw-bold px-4 mx-2">
+                                <i class="bi bi-floppy"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public string? termId { get; set; }
+    private Term term = new Term();
+    private bool isEditMode = false;
+    private User loggedInUser;
+    private string toastMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var loggedInUser = await UserData.GetUserFromAuthenticationAsync(user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+        if (!string.IsNullOrEmpty(termId))
+        {
+
+            isEditMode = true;
+            term = await TermData.GetByIdAsync(termId);
+        }
+        else
+        {
+            isEditMode = false;
+            term = new Term();
+        }
+
+    }
+
+    private async Task SaveTerm()
+    {
+        if (isEditMode)
+        {
+            term.AuditInformation.LastModified = DateTime.Now;
+            await TermData.UpdateAsync(term);
+            isEditMode = false;
+            toastMessage = "Term Edited";
+        }
+        else
+        {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+            Term newTerm = new Term
+                {
+                    Name = term.Name
+                };
+
+            newTerm.AuditInformation.CreatedById = mongoUser.Id;
+
+
+            await TermData.CreateAsync(newTerm);
+            toastMessage = "Term Created";
+        }
+
+        Snackbar.Add(toastMessage, Severity.Success);
+        Navigation.NavigateTo("/dashboard");
+    }
+}
