@@ -15,7 +15,7 @@
     var colorClasses = new List<string> { "Cardcolor-1", "Cardcolor-2" };
 
     <div class="darkdiv p-3 rounded-3 shadow">
-        <h2 class="text-center"><i class="bi bi-arrows"></i> Course Terms</h2>
+        <h2 class="text-center"><i class="bi bi-calendar2-range"></i> Term Durations</h2>
         <hr />
         <div class="card scrollable-card">
             <ul class="list-group list-group-flush">
@@ -25,7 +25,7 @@
                     <li class="list-group-item CardText text-black px-3 d-flex justify-content-between @colorClass"
                         data-toggle="tooltip" data-placement="top" title="@term.ToolTip">
                         <div>
-                            <i class="bi bi-arrows-expand-vertical h4"></i>
+                            <i class="bi bi-calendar4-week h4"></i>
                             <a href="/CourseType/Create/@term.Id" class="text-black text-decoration-none fw-bold">
                                 @term.Length Weeks
                                 @if (term.AuditInformation.IsArchived == true)
@@ -57,7 +57,7 @@
             <a href="#" class="text-black text-decoration-none CardText">
                 <i class="bi bi-plus-circle h5"></i> Add
             </a>
-            <a href="#" class="text-black text-decoration-none CardText">
+            <a onclick="toggleDivs('termDurationDiv', 'termDiv')" class="text-black text-decoration-none CardText">
                 <i class="bi bi-arrow-right-circle h5"></i> Manage Terms
             </a>
         </div>

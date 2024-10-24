@@ -63,3 +63,14 @@ window.showCollapse = (elementId) => {
         bsCollapse.show(); // Only uncollapse (expand) if it's collapsed
     }
 }
+
+function toggleDivs(currentDivId, otherDivId) {
+    const currentDiv = document.getElementById(currentDivId);
+    const otherDiv = document.getElementById(otherDivId);
+
+    currentDiv.classList.remove('d-block');
+    currentDiv.classList.add('d-none');
+
+    otherDiv.classList.remove('d-none');
+    otherDiv.classList.add('d-block');
+}
