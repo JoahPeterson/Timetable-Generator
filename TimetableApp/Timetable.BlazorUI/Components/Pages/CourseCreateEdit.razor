@@ -207,6 +207,7 @@
             bool continueToTimetable = (bool)result.Data;
             if (continueToTimetable)
             {
+                Snackbar.Add("Course Created", Severity.Success);
                 Navigation.NavigateTo($"timetable/{course.Id}");
             }
             else
