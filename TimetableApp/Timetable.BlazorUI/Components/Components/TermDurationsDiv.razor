@@ -26,7 +26,7 @@
                         data-toggle="tooltip" data-placement="top" title="@term.ToolTip">
                         <div>
                             <i class="bi bi-calendar4-week h4"></i>
-                            <a href="/CourseType/Create/@term.Id" class="text-black text-decoration-none fw-bold">
+                            <a href="/termDuration/create/@term.Id" class="text-black text-decoration-none fw-bold">
                                 @term.Length Weeks
                                 @if (term.AuditInformation.IsArchived == true)
                                 {
@@ -54,7 +54,7 @@
             </ul>
         </div>
         <div class="d-flex justify-content-between mt-4">
-            <a href="#" class="text-black text-decoration-none CardText">
+            <a href="termDuration/create" class="text-black text-decoration-none CardText">
                 <i class="bi bi-plus-circle h5"></i> Add
             </a>
             <a onclick="toggleDivs('termDurationDiv', 'termDiv')" class="text-black text-decoration-none CardText">

@@ -1,7 +1,7 @@
-﻿@page "/term/create/{termId?}"
+﻿@page "/termDuration/create/{termDurationId?}"
 @using Microsoft.AspNetCore.Authorization
 @using Timetable.BlazorUI.Components.Pages
-@inject ITermData TermData
+@inject ITermDurationData TermDurationData
 @inject IUserData UserData
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
@@ -9,19 +9,19 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-<EditForm Model="term" OnValidSubmit="@SaveTerm" FormName="TermForm">
+<EditForm Model="termDuration" OnValidSubmit="@SaveTermDuration" FormName="TermDurationForm">
     <DataAnnotationsValidator />
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="bg-light rounded-2 mt-5 p-3">
-                    <h3 class="text-center mb-3 mt-5 fw-bold">@(isEditMode ? "Edit Term" : "Create Term")</h3>
+                    <h3 class="text-center mb-3 mt-5 fw-bold">@(isEditMode ? "Edit Term Duration" : "Create Term Duration")</h3>
                     <div class="d-flex flex-column">
                         <div class="form-group row mt-2">
-                            <label for="Name" class="col-4 col-form-label fw-bold">Term Name</label>
+                            <label for="Name" class="col-4 col-form-label fw-bold">Term Duration Length</label>
                             <div class="col-8">
-                                <InputText id="name" @bind-Value="term.Name" class="form-control" placeholder="Term Name" />
-                                <ValidationMessage For="@(() => term.Name)" />
+                                <InputNumber id="name" @bind-Value="termDuration.Length" class="form-control" placeholder="Term Length" />
+                                <ValidationMessage For="@(() => termDuration.Length)" />
                             </div>
                         </div>
                         <div class="d-flex justify-content-center mt-4">
@@ -37,8 +37,8 @@
 </EditForm>
 
 @code {
-    [Parameter] public string? termId { get; set; }
-    private Term term = new Term();
+    [Parameter] public string? termDurationId { get; set; }
+    private TermDuration termDuration = new TermDuration();
     private bool isEditMode = false;
     private User loggedInUser;
     private string toastMessage;
@@ -49,44 +49,44 @@
         var user = authState.User;
         var loggedInUser = await UserData.GetUserFromAuthenticationAsync(user.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
 
-        if (!string.IsNullOrEmpty(termId))
+        if (!string.IsNullOrEmpty(termDurationId))
         {
 
             isEditMode = true;
-            term = await TermData.GetByIdAsync(termId);
+            termDuration = await TermDurationData.GetByIdAsync(termDurationId);
         }
         else
         {
             isEditMode = false;
-            term = new Term();
+            termDuration = new TermDuration();
         }
 
     }
 
-    private async Task SaveTerm()
+    private async Task SaveTermDuration()
     {
         if (isEditMode)
         {
-            term.AuditInformation.LastModified = DateTime.Now;
-            await TermData.UpdateAsync(term);
+            termDuration.AuditInformation.LastModified = DateTime.Now;
+            await TermDurationData.UpdateAsync(termDuration);
             isEditMode = false;
-            toastMessage = "Term Edited";
+            toastMessage = "Term Duration Edited";
         }
         else
         {
             var authState = await authProvider.GetAuthenticationStateAsync();
             var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
 
-            Term newTerm = new Term
+            TermDuration newTermDuration = new TermDuration
                 {
-                    Name = term.Name
+                    Length = termDuration.Length
                 };
 
-            newTerm.AuditInformation.CreatedById = mongoUser.Id;
+            newTermDuration.AuditInformation.CreatedById = mongoUser.Id;
 
 
-            await TermData.CreateAsync(newTerm);
-            toastMessage = "Term Created";
+            await TermDurationData.CreateAsync(newTermDuration);
+            toastMessage = "Term Duration Created";
         }
 
         Snackbar.Add(toastMessage, Severity.Success);
