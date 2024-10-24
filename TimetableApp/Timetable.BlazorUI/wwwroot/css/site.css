@@ -62,6 +62,7 @@
 
 .CardText {
     font-weight: bold;
+    cursor: pointer;
 }
 
 .CardIcon {
