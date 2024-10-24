@@ -78,6 +78,7 @@ public static class RegisterServices
         builder.Services.AddScoped<UserService>();
 
 
+
         builder.Services.AddSingleton<IDbConnection, DbConnection>();
         builder.Services.AddSingleton<ICourseData, MongoCourseData>();
         builder.Services.AddSingleton<ICourseTypeData, MongoCourseTypeData>();
@@ -87,7 +88,9 @@ public static class RegisterServices
         builder.Services.AddSingleton<ITermDurationData, MongoTermDurationData>();
         builder.Services.AddSingleton<IUserData, MongoUserData>();
         builder.Services.AddSingleton<IWorkTaskData, MongoWorkTaskData>();
-        builder.Services.AddSingleton<IWorkUnitData, MongoWorkUnitData>();
         builder.Services.AddSingleton<IWorkUnitTaskData, MongoWorkUnitTaskData>();
+        builder.Services.AddSingleton<IWorkUnitData, MongoWorkUnitData>();
+        
+        builder.Services.AddSingleton<WorkUnitDateService>();
     }
 }

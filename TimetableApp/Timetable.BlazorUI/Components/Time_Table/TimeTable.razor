@@ -8,6 +8,7 @@
 @inject IUserData UserData
 @inject IWorkUnitData WorkUnitData
 @inject IWorkTaskData WorkTaskData
+@inject WorkUnitDateService WorkUnitDateService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @rendermode InteractiveServer
@@ -93,7 +94,7 @@
         {
             workUnits[index] = workUnit;
             course.WorkUnits[index] = workUnit;
-            course = await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course, WorkUnitData);
+            course = await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
         }
         else
         {
