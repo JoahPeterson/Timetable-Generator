@@ -23,9 +23,7 @@
                         Color="Color.Success"
                         Required="false"
                         MinDate="@workUnit.StartDate"
-                        MaxDate="@workUnit.EndDate" />
-
-                    <ValidationMessage For="@(() => workUnitTask.DueDate)" />
+                        MaxDate="@workUnit.EndDate"/>
                     <ValidationMessage For="@(() => workUnitTask.DueDate)" />
                 </MudCardContent>
                 <MudCardActions>
@@ -39,16 +37,26 @@
 @code {
     [CascadingParameter] 
     MudDialogInstance MudDialog { get; set; }
-    
+
     [Parameter] 
     public WorkUnitTask workUnitTask { get; set; }
 
     [Parameter]
     public WorkUnit workUnit { get; set; }
 
+
+    protected override Task OnParametersSetAsync()
+    {
+
+        if (workUnitTask != null && !workUnitTask.DueDate.HasValue)
+        {
+            workUnitTask.DueDate = workUnit.EndDate;
+        }
+        return base.OnParametersSetAsync();
+    }
+
     private void OnValidSubmit(EditContext context)
     {
-        
         StateHasChanged();
     }
 
