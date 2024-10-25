@@ -41,14 +41,14 @@
                         <div class="form-group row mt-2">
                             <label class="col-sm-4 col-form-label fw-bold" for="StartDate">Course Start Date</label>
                             <div class="col-8">
-                                <input type="date" id="startDate" @bind="course.StartDate" class="form-control" />
+                                <InputDate @bind-Value="course.StartDate" id="startDate" class="form-control" />
                                 <ValidationMessage For="@(() => course.StartDate)" />
                             </div>
                         </div>
                         <div class="form-group row mt-2">
                             <label class="col-sm-4 col-form-label fw-bold" for="TermDuration">Term Duration</label>
                             <div class="col-8">
-                                <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" class="form-control" onselect="@CalculateEndDate()">
+                                <InputSelect id="termDurationId" @bind-Value="course.Term.Duration" class="form-control" onchange="@CalculateEndDate()">
                                     <option>Select Term Duration</option>
                                     @foreach (var duration in termDurations)
                                     {
@@ -110,6 +110,9 @@
     private List<CourseType> courseTypes = new List<CourseType>();
     private string courseTypeName = null!;
     private bool isEditMode = false;
+    private bool isUpdateWorkUnitRequied = false;
+    private DateTime? originalStartDate;
+    private int? originalTermDuration;
     private List<Term> terms = new List<Term>();
     private List<TermDuration> termDurations = new List<TermDuration>();
 
@@ -127,6 +130,9 @@
             course.StartDate = DateTime.Now;
             course.EndDate = DateTime.Now;
         }
+
+        originalStartDate = course.StartDate.Date;
+        originalTermDuration = course.Term.Duration;
 
         calculatedEndDate = course.EndDate.ToString("MM-dd-yyyy");
 
@@ -150,10 +156,17 @@
 
         course.EndDate = course.StartDate.AddDays(course.Term.Duration * 7);
         calculatedEndDate = course.EndDate.ToString("MM-dd-yyyy");
+
+
     }
 
     private async Task SaveCourse()
     {
+        if (originalTermDuration != course.Term.Duration || originalStartDate != course.StartDate.Date)
+        {
+            isUpdateWorkUnitRequied = true;
+        }
+
         if (isEditMode)
         {
             course.AuditInformation.LastModified = DateTime.Now;
@@ -204,25 +217,27 @@
         var dialog = DialogService.Show<Preview_Dialog>("Course Preview", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result.Canceled)
         {
-            bool continueToTimetable = (bool)result.Data;
-            if (continueToTimetable)
+            UpdateToEdit();
+            return;
+        }
+
+        bool continueToTimetable = (bool)result.Data;
+        if (continueToTimetable)
+        {
+            if (isEditMode)
             {
-                if (isEditMode)
+                Snackbar.Add("Updating Timetable", Severity.Info);
+                if (isUpdateWorkUnitRequied)
                 {
-                    Snackbar.Add("Updating Timetable", Severity.Info);
                     await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
                 }
-                else
-                    Snackbar.Add("Course Created", Severity.Success);
-
-                Navigation.NavigateTo($"timetable/{course.Id}");
             }
             else
-            {
-                UpdateToEdit();
-            }
+                Snackbar.Add("Course Created", Severity.Success);
+
+            Navigation.NavigateTo($"timetable/{course.Id}");
         }
     }
 
