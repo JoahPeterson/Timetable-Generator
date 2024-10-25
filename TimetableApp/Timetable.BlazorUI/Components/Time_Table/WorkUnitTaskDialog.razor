@@ -17,9 +17,15 @@
                                      Required="true" For="@(() => workUnitTask.Duration)" />
                     <ValidationMessage For="@(() => workUnitTask.Duration)" />
 
-                    <MudDatePicker @bind-Date="workUnitTask.DueDate" Label="Due Date" Color="Color.Success"
-                                    
-                                    Required="false" />
+                    <MudDatePicker 
+                        @bind-Date="workUnitTask.DueDate"
+                        Label="Due Date"
+                        Color="Color.Success"
+                        Required="false"
+                        MinDate="@workUnit.StartDate"
+                        MaxDate="@workUnit.EndDate" />
+
+                    <ValidationMessage For="@(() => workUnitTask.DueDate)" />
                     <ValidationMessage For="@(() => workUnitTask.DueDate)" />
                 </MudCardContent>
                 <MudCardActions>
@@ -36,6 +42,9 @@
     
     [Parameter] 
     public WorkUnitTask workUnitTask { get; set; }
+
+    [Parameter]
+    public WorkUnit workUnit { get; set; }
 
     private void OnValidSubmit(EditContext context)
     {

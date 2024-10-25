@@ -127,7 +127,7 @@
                 };
 
                 DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
-                var parameters = new DialogParameters<WorkUnitTaskDialog> { { x => x.workUnitTask, workUnitTask } };
+                var parameters = new DialogParameters<WorkUnitTaskDialog> { { x => x.workUnitTask, workUnitTask }, { x => x.workUnit, WorkUnit } };
 
                 var dialog = await DialogService.ShowAsync<WorkUnitTaskDialog>("Delete Server", parameters, _maxWidth);
                 var result = await dialog.Result;
@@ -166,7 +166,7 @@
     private async Task WorkUnitTaskEditOnClick(WorkUnitTask workUnitTask)
     {
         DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Small, FullWidth = true };
-        var parameters = new DialogParameters<WorkUnitTaskDialog> { { x => x.workUnitTask, workUnitTask } };
+        var parameters = new DialogParameters<WorkUnitTaskDialog> { { x => x.workUnitTask, workUnitTask }, {x => x.workUnit, WorkUnit} };
 
         var dialog = await DialogService.ShowAsync<WorkUnitTaskDialog>("Edit Task", parameters, _maxWidth);
         var result = await dialog.Result;
