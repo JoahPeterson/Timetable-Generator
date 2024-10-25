@@ -46,6 +46,9 @@
                 <div class="d-block m-1">
                     <button type="submit" class="btn mstc-gold-btn d-block mt-1"><i class="bi bi-floppy"></i> Save</button>
                 </div>
+                <div class="d-block m-1">
+                    <button @onclick="async () => await HandleWorkUnitDuplication(workUnit)" class="btn mstc-gold-btn d-block mt-1"><i class="bi bi-copy"></i> Duplicate</button>
+                </div>
             </div>
         </EditForm>
     </div>
@@ -132,5 +135,31 @@
         // Update the form with the new WorkUnit
         workUnit = updatedWorkUnit;
         return Task.CompletedTask;
+    }
+
+    private async Task HandleWorkUnitDuplication(WorkUnit workUnitToDuplicate)
+    {
+
+        WorkUnitToEdit = null;
+
+        WorkUnit dupeWorkUnit = new WorkUnit
+            {
+                Name = workUnitToDuplicate.Name.Contains(" -COPY") ? workUnitToDuplicate.Name : workUnitToDuplicate.Name + " -COPY",
+                Duration = workUnitToDuplicate.Duration,
+                CourseId = workUnitToDuplicate.CourseId,
+                SequenceNumber = Course.WorkUnits.Count + 1 
+            };
+
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+
+        dupeWorkUnit.AuditInformation.CreatedById = mongoUser.Id;
+
+        dupeWorkUnit = WorkUnitDateService.SetWorkUnitStartAndEndDate(Course, dupeWorkUnit);
+
+        await WorkUnitData.CreateAsync(dupeWorkUnit);
+
+        await HandleSubmit(dupeWorkUnit);
+        workUnit = new WorkUnit();
     }
 }
