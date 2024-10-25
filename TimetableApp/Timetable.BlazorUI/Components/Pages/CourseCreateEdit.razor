@@ -10,6 +10,7 @@
 @inject IJSRuntime JS
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject WorkUnitDateService WorkUnitDateService
 @rendermode InteractiveServer
 @using TimetableApp.DataModels.Models
 @using MudBlazor
@@ -185,6 +186,7 @@
             await CourseData.CreateCourseAsync(newCourse);
             course = newCourse;  // Assign the newly created course to the 'course' model
             courseTypeName = courseTypes.FirstOrDefault(ct => ct.Id == newCourse.CourseTypeId)!.Name!;
+
         }
         await ShowPreviewDialog(); // Display the MudBlazor dialog after saving
     }
@@ -207,7 +209,14 @@
             bool continueToTimetable = (bool)result.Data;
             if (continueToTimetable)
             {
-                Snackbar.Add("Course Created", Severity.Success);
+                if (isEditMode)
+                {
+                    Snackbar.Add("Updating Timetable", Severity.Info);
+                    await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
+                }
+                else
+                    Snackbar.Add("Course Created", Severity.Success);
+
                 Navigation.NavigateTo($"timetable/{course.Id}");
             }
             else
