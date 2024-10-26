@@ -51,7 +51,7 @@ public class WorkUnitDateService
             if (startDate == workUnit.StartDate && endDate == workUnit.EndDate)
                 continue;
 
-            int differenceInStartDays = (startDate.Date - workUnit.StartDate)?.Days ?? 0;
+            int differenceInStartDays = (startDate.Date - workUnit.StartDate?.Date)?.Days ?? 0;
 
             workUnit.StartDate = startDate.Date;
             workUnit.EndDate = endDate.Date;
@@ -59,10 +59,12 @@ public class WorkUnitDateService
             if (differenceInStartDays != 0)
             {
                 var updatedWorkUnit = await UpdateWorkTask(workUnit, differenceInStartDays);
+                await _workUnitData.UpdateAsync(updatedWorkUnit);
+            }
+            else
+            {
                 await _workUnitData.UpdateAsync(workUnit);
             }
-            
-            await _workUnitData.UpdateAsync(workUnit);
         }
         return course;
     }

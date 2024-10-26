@@ -229,9 +229,9 @@
                 Snackbar.Add("Updating Timetable", Severity.Info);
                 if (isUpdateWorkUnitRequied)
                 {
-                    course = await WorkUnitDateService.UpdateWorkUnitStartAndEndDateAndWorkTask(oldCourse, course);
+                    //course = await WorkUnitDateService.UpdateWorkUnitStartAndEndDateAndWorkTask(oldCourse, course);
                     
-                    //await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
+                    course = await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
                 }
             }
             else
