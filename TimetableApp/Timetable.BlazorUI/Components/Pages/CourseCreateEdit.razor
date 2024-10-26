@@ -12,6 +12,7 @@
 @inject ISnackbar Snackbar
 @inject WorkUnitDateService WorkUnitDateService
 @rendermode InteractiveServer
+@using System.Text.Json
 @using TimetableApp.DataModels.Models
 @using MudBlazor
 @attribute [Authorize]
@@ -107,6 +108,7 @@
 
     private string? calculatedEndDate;
     private Course course = new Course();
+    private Course oldCourse = null;
     private List<CourseType> courseTypes = new List<CourseType>();
     private string courseTypeName = null!;
     private bool isEditMode = false;
@@ -122,6 +124,7 @@
         {
             isEditMode = true;
             course = await CourseData.GetCourseAsync(courseId);
+            oldCourse = JsonSerializer.Deserialize<Course>(JsonSerializer.Serialize(course));
         }
         else
         {
@@ -156,8 +159,6 @@
 
         course.EndDate = course.StartDate.AddDays(course.Term.Duration * 7);
         calculatedEndDate = course.EndDate.ToString("MM-dd-yyyy");
-
-
     }
 
     private async Task SaveCourse()
@@ -174,8 +175,6 @@
             var termFromDb = await TermData.GetByIdAsync(course.Term.Id);
             termFromDb.Duration = course.Term.Duration;
             course.Term = termFromDb;
-
-            await CourseData.UpdateCourseAsync(course);
         }
         else
         {
@@ -199,7 +198,6 @@
             await CourseData.CreateCourseAsync(newCourse);
             course = newCourse;  // Assign the newly created course to the 'course' model
             courseTypeName = courseTypes.FirstOrDefault(ct => ct.Id == newCourse.CourseTypeId)!.Name!;
-
         }
         await ShowPreviewDialog(); // Display the MudBlazor dialog after saving
     }
@@ -231,13 +229,24 @@
                 Snackbar.Add("Updating Timetable", Severity.Info);
                 if (isUpdateWorkUnitRequied)
                 {
-                    await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
+                    course = await WorkUnitDateService.UpdateWorkUnitStartAndEndDateAndWorkTask(oldCourse, course);
+                    
+                    //await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
                 }
             }
             else
-                Snackbar.Add("Course Created", Severity.Success);
+                Snackbar.Add("Creating Course", Severity.Success);
 
-            Navigation.NavigateTo($"timetable/{course.Id}");
+            var updatedSuccess = await CourseData.UpdateCourseAsync(course);
+
+            if (updatedSuccess)
+            {
+                Navigation.NavigateTo($"timetable/{course.Id}");
+            }
+            else
+            {
+                Snackbar.Add("Course update failed, unable to navigate to updated timetable.", Severity.Error);
+            }
         }
     }
 

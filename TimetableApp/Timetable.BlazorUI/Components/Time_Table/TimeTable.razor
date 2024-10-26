@@ -87,7 +87,6 @@
 
     private async Task UpdateWorkUnits(WorkUnit workUnit)
     {
-
         var index = workUnits.FindIndex(wUnit => wUnit.Id == workUnit.Id);
 
         if (index != -1)
@@ -95,6 +94,9 @@
             workUnits[index] = workUnit;
             course.WorkUnits[index] = workUnit;
             course = await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
+
+            workUnits = course.WorkUnits;
+            //StateHasChanged();
         }
         else
         {
