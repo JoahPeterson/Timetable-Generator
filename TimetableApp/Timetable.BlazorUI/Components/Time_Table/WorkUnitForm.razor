@@ -47,7 +47,7 @@
                     <button type="submit" class="btn mstc-gold-btn d-block mt-1"><i class="bi bi-floppy"></i> Save</button>
                 </div>
                 <div class="d-block m-1">
-                    <button @onclick="async () => await HandleWorkUnitDuplication(workUnit)" class="btn btn-light btn-outline-dark d-block mt-1"><i class="bi bi-copy"></i> Duplicate</button>
+                    <button type="button" @onclick="async () => await HandleWorkUnitDuplication(workUnit)" class="btn btn-light btn-outline-dark d-block mt-1"><i class="bi bi-copy"></i> Duplicate</button>
                 </div>
             </div>
         </EditForm>
@@ -149,28 +149,31 @@
                 CourseId = workUnitToDuplicate.CourseId,
                 SequenceNumber = Course.WorkUnits.Count + 1,
             };
-        
-        // Gather info
-        var authState = await authProvider.GetAuthenticationStateAsync();
-        var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
 
-        // Set Audit info
-        dupeWorkUnit.AuditInformation.CreatedById = mongoUser.Id;
+        // // Gather info
+        // var authState = await authProvider.GetAuthenticationStateAsync();
+        // var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
 
-        // Set Dates
-        dupeWorkUnit = WorkUnitDateService.SetWorkUnitStartAndEndDate(Course, dupeWorkUnit);
+        // // Set Audit info
+        // dupeWorkUnit.AuditInformation.CreatedById = mongoUser.Id;
+
+        dupeWorkUnit.AuditInformation.CreatedById = workUnitToDuplicate.AuditInformation.CreatedById;
 
         // Create Work unit in database
         await WorkUnitData.CreateAsync(dupeWorkUnit);
 
-        // Handle the submit
-        await HandleSubmit(dupeWorkUnit);
+        // Set Dates
+        dupeWorkUnit = WorkUnitDateService.SetWorkUnitStartAndEndDate(Course, dupeWorkUnit);
+
 
         // Assign tasks to duplicated work unit
         dupeWorkUnit.Tasks = HandleWorkUnitTaskDuplication(workUnitToDuplicate.Tasks, dupeWorkUnit);
 
         // Update the duplicated work unit to include duplicated tasks
         await WorkUnitData.UpdateAsync(dupeWorkUnit);
+
+        // Handle the submit
+        await HandleSubmit(dupeWorkUnit);
 
         // reset
         workUnit = new WorkUnit();

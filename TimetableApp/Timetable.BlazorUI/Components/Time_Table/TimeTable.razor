@@ -67,13 +67,17 @@
         if (!string.IsNullOrEmpty(courseId))
         {
             course = await CourseData.GetCourseAsync(courseId);
-            var tempWorkUnits = await WorkUnitData.GetAsync();
 
-            if (tempWorkUnits.Any())
-            {
-                workUnits = tempWorkUnits.FindAll(workUnit => workUnit.CourseId == course.Id);
-                workUnits = workUnits.OrderBy(WorkUnit => WorkUnit.SequenceNumber).ToList();
-            }
+            if (course.WorkUnits.Any())
+                workUnits = course.WorkUnits;
+
+            // var tempWorkUnits = await WorkUnitData.GetAsync();
+
+            // if (tempWorkUnits.Any())
+            // {
+            //     workUnits = tempWorkUnits.FindAll(workUnit => workUnit.CourseId == course.Id);
+            //     workUnits = workUnits.OrderBy(WorkUnit => WorkUnit.SequenceNumber).ToList();
+            // }
 
             // Load existing work tasks (if any)
             workTasks = await WorkTaskData.GetAsync();
@@ -96,10 +100,13 @@
             course = await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
 
             workUnits = course.WorkUnits;
+
+            // var tempWorkUnits = await WorkUnitData.GetAsync();
+            // workUnits = tempWorkUnits.FindAll(workUnit => workUnit.CourseId == course.Id);
         }
         else
         {
-            workUnits.Add(workUnit);
+            //workUnits.Add(workUnit);
             course.WorkUnits.Add(workUnit);
             await CourseData.UpdateCourseAsync(course);
         }
