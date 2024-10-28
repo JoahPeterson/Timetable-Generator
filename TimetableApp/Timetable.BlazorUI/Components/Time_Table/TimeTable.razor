@@ -108,6 +108,7 @@
         {
             //workUnits.Add(workUnit);
             course.WorkUnits.Add(workUnit);
+            workUnits = course.WorkUnits;
             await CourseData.UpdateCourseAsync(course);
         }
     }

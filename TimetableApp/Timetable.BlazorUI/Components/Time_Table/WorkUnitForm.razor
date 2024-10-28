@@ -150,21 +150,18 @@
                 SequenceNumber = Course.WorkUnits.Count + 1,
             };
 
-        // // Gather info
-        // var authState = await authProvider.GetAuthenticationStateAsync();
-        // var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+        // Gather info
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
 
-        // // Set Audit info
-        // dupeWorkUnit.AuditInformation.CreatedById = mongoUser.Id;
-
-        dupeWorkUnit.AuditInformation.CreatedById = workUnitToDuplicate.AuditInformation.CreatedById;
+        // Set Audit info
+        dupeWorkUnit.AuditInformation.CreatedById = mongoUser.Id;
 
         // Create Work unit in database
         await WorkUnitData.CreateAsync(dupeWorkUnit);
 
         // Set Dates
         dupeWorkUnit = WorkUnitDateService.SetWorkUnitStartAndEndDate(Course, dupeWorkUnit);
-
 
         // Assign tasks to duplicated work unit
         dupeWorkUnit.Tasks = HandleWorkUnitTaskDuplication(workUnitToDuplicate.Tasks, dupeWorkUnit);
@@ -185,12 +182,15 @@
         List<WorkUnitTask> duplicatedTasks = new List<WorkUnitTask>();
 
         // Loop through the tasks and update them acoordingly 
-        foreach(var task in tasks)
+        foreach (var originalTask in tasks)
         {
-            task.Id = Guid.NewGuid().ToString();
-            task.WorkUnitId = workUnit.Id;
-            task.DueDate = workUnit.EndDate;
-            duplicatedTasks.Add(task);
+            var newTask = new WorkUnitTask
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    WorkUnitId = workUnit.Id,
+                    DueDate = workUnit.EndDate,
+                };
+            duplicatedTasks.Add(newTask);
         }
 
         // Return the updated tasks list
