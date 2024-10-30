@@ -1,4 +1,6 @@
-﻿namespace TimetableApp.DataModels.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TimetableApp.DataModels.Models;
 
 public class WorkUnitTask
 {
@@ -8,6 +10,7 @@ public class WorkUnitTask
 
     public DateTime? DueDate { get; set; }
 
+    [RegularExpression("^[0-9]*$", ErrorMessage = "Only numeric values are allowed.")]
     public string? Duration { get; set; }
 
     public string TaskId { get; set; }
