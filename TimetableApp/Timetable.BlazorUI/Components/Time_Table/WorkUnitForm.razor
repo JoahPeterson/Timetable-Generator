@@ -1,6 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @using Timetable.BlazorUI.Components.Pages
 @inject IWorkUnitData WorkUnitData
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @inject WorkUnitDateService WorkUnitDateService
 @inject IUserData UserData
 @inject IJSRuntime JS
@@ -46,7 +48,7 @@
                         </button>
                     </div>
                     <div class="d-block m-1">
-                        <button type="delete" @onclick="Delete" class="btn btn-danger text-nowrap">
+                        <button type="delete" @onclick="() => ShowModal(workUnit)" class="btn btn-danger text-nowrap">
                             <i class="bi bi-trash"></i> Delete
                         </button>
                     </div>
@@ -101,6 +103,7 @@
 
         // StateHasChanged() wasn't updating the page, so used this instead
         Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+        Snackbar.Add("Work Unit Deleted", Severity.Success);
     }
 
     private async Task SaveWorkUnit()
@@ -213,5 +216,26 @@
 
         // Return the updated tasks list
         return duplicatedTasks;
+    }
+
+    private async Task ShowModal(WorkUnit workUnit)
+    {
+        var parameters = new DialogParameters<Confimation_Dialog>
+        {
+            { x => x.ContentText, "Do you really want to delete these records? This process cannot be undone." },
+            { x => x.ButtonText, "Delete" },
+            { x => x.Color, Color.Error }
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialogResult = DialogService.Show<Confimation_Dialog>("Delete", parameters, options);
+
+        var result = await dialogResult.Result;
+
+        if (!result.Canceled)
+        {
+            Delete();
+        }
     }
 }
