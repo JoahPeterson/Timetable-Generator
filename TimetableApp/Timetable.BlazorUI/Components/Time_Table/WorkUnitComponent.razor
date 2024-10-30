@@ -10,8 +10,8 @@
 @inject AuthenticationStateProvider authProvider
 
  <!-- Droppable Version for Drag n Drop-->
- <div class="work-unit border border-dark" 
-    ondragover="event.preventDefault();"
+<div class="work-unit border border-dark table-row"
+     ondragover="event.preventDefault();"
      @onclick="SelectWorkUnit" 
      @ondrop="(e) => HandleDrop(e, WorkUnit.Id)"
      style="height: @(RowHeightPercentage)vh">

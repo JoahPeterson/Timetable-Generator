@@ -133,4 +133,10 @@ body {
         transform: scale(1.2);
     }
 
+/*Custom color-profile Classes End*/
 
+/*Custom sizing Classes Start*/
+
+.table-row{
+    min-height: 138px!important;
+}
