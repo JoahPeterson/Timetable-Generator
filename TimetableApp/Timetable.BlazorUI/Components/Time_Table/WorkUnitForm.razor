@@ -46,7 +46,7 @@
                         </button>
                     </div>
                     <div class="d-block m-1">
-                        <button class="btn btn-danger text-nowrap">
+                        <button type="delete" @onclick="Delete" class="btn btn-danger text-nowrap">
                             <i class="bi bi-trash"></i> Delete
                         </button>
                     </div>
@@ -92,6 +92,15 @@
             return;
         }
         workUnit = new WorkUnit();
+    }
+
+    private async void Delete()
+    {
+        Course.WorkUnits.Remove(workUnit);
+        await WorkUnitData.DeleteAsync(workUnit.Id!);
+
+        // StateHasChanged() wasn't updating the page, so used this instead
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
     }
 
     private async Task SaveWorkUnit()
