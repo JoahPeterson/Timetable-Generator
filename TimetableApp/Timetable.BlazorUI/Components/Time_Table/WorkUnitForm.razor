@@ -38,18 +38,29 @@
                 </InputSelect>
                 <ValidationMessage For="@(() => workUnit.Duration)" />
             </div>
-
-            <div class="d-flex flex-row mt-3 justify-content-start w-75 mx-3">
-                <div class="d-block m-1">
-                    <button type="reset" @onclick="HandleReset" class="btn btn-secondary d-block mt-1"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+            <div class="d-flex flex-column align-items-center mt-3 w-100">
+                <div class="d-flex flex-row justify-content-center">
+                    <div class="d-block m-1">
+                        <button type="reset" @onclick="HandleReset" class="btn btn-secondary text-nowrap">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reset
+                        </button>
+                    </div>
+                    <div class="d-block m-1">
+                        <button class="btn btn-danger text-nowrap">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
+                    <div class="d-block m-1">
+                        <button @onclick="async () => await HandleWorkUnitDuplication(workUnit)" class="btn btn-light btn-outline-dark text-nowrap">
+                            <i class="bi bi-copy"></i> Copy
+                        </button>
+                    </div>
                 </div>
-                <div class="d-block m-1">
+                <div class="row m-1 w-100 text-center">
                     <button type="submit" class="btn mstc-gold-btn d-block mt-1"><i class="bi bi-floppy"></i> Save</button>
                 </div>
-                <div class="d-block m-1">
-                    <button @onclick="async () => await HandleWorkUnitDuplication(workUnit)" class="btn btn-light btn-outline-dark d-block mt-1"><i class="bi bi-copy"></i> Duplicate</button>
-                </div>
             </div>
+           
         </EditForm>
     </div>
 </div>
