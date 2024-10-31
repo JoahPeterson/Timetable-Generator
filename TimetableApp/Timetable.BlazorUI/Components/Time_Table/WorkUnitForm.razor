@@ -187,8 +187,10 @@
             var newTask = new WorkUnitTask
                 {
                     Id = Guid.NewGuid().ToString(),
-                    WorkUnitId = workUnit.Id,
                     DueDate = workUnit.EndDate,
+                    Duration = originalTask.Duration,
+                    TaskId = originalTask.TaskId,
+                    WorkUnitId = workUnit.Id,
                 };
             duplicatedTasks.Add(newTask);
         }
