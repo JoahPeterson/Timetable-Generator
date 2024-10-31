@@ -18,13 +18,14 @@
 <MudSnackbarProvider />
 
 <link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/timetablePrint.css">
 <div class="page">
     <div class="sidebar d-print-none">
         <NavMenu />
     </div>
    
     <main>
-        <div class="top-row bg-red d-flex justify-content-between align-items-center d-print-none">
+        <div class="top-row bg-red d-flex justify-content-between align-items-center d-print-none hide-print">
             <div class="text-white mx-auto text-center">
                 @{
                     if (Navigation.Uri.Contains("timetable"))
