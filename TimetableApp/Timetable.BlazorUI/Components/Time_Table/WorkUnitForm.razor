@@ -1,6 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @using Timetable.BlazorUI.Components.Pages
 @inject IWorkUnitData WorkUnitData
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @inject WorkUnitDateService WorkUnitDateService
 @inject IUserData UserData
 @inject IJSRuntime JS
@@ -38,18 +40,29 @@
                 </InputSelect>
                 <ValidationMessage For="@(() => workUnit.Duration)" />
             </div>
-
-            <div class="d-flex flex-row mt-3 justify-content-start w-75 mx-3">
-                <div class="d-block m-1">
-                    <button type="reset" @onclick="HandleReset" class="btn btn-secondary d-block mt-1"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+            <div class="d-flex flex-column align-items-center mt-3 w-100">
+                <div class="d-flex flex-row justify-content-center">
+                    <div class="d-block m-1">
+                        <button type="reset" @onclick="HandleReset" class="btn btn-secondary text-nowrap">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reset
+                        </button>
+                    </div>
+                    <div class="d-block m-1">
+                        <button type="delete" @onclick="() => ShowModal(workUnit)" class="btn btn-danger text-nowrap">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
+                    <div class="d-block m-1">
+                        <button @onclick="async () => await HandleWorkUnitDuplication(workUnit)" class="btn btn-light btn-outline-dark text-nowrap">
+                            <i class="bi bi-copy"></i> Copy
+                        </button>
+                    </div>
                 </div>
-                <div class="d-block m-1">
+                <div class="row m-1 w-100 text-center">
                     <button type="submit" class="btn mstc-gold-btn d-block mt-1"><i class="bi bi-floppy"></i> Save</button>
                 </div>
-                <div class="d-block m-1">
-                    <button @onclick="async () => await HandleWorkUnitDuplication(workUnit)" class="btn btn-light btn-outline-dark d-block mt-1"><i class="bi bi-copy"></i> Duplicate</button>
-                </div>
             </div>
+           
         </EditForm>
     </div>
 </div>
@@ -81,6 +94,16 @@
             return;
         }
         workUnit = new WorkUnit();
+    }
+
+    private async void Delete()
+    {
+        Course.WorkUnits.Remove(workUnit);
+        await WorkUnitData.DeleteAsync(workUnit.Id!);
+
+        // StateHasChanged() wasn't updating the page, so used this instead
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+        Snackbar.Add("Work Unit Deleted", Severity.Success);
     }
 
     private async Task SaveWorkUnit()
@@ -193,5 +216,26 @@
 
         // Return the updated tasks list
         return duplicatedTasks;
+    }
+
+    private async Task ShowModal(WorkUnit workUnit)
+    {
+        var parameters = new DialogParameters<Confimation_Dialog>
+        {
+            { x => x.ContentText, "Do you really want to delete these records? This process cannot be undone." },
+            { x => x.ButtonText, "Delete" },
+            { x => x.Color, Color.Error }
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialogResult = DialogService.Show<Confimation_Dialog>("Delete", parameters, options);
+
+        var result = await dialogResult.Result;
+
+        if (!result.Canceled)
+        {
+            Delete();
+        }
     }
 }

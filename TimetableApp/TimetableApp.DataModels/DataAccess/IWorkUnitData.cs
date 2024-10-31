@@ -12,4 +12,5 @@ public interface IWorkUnitData
     Task<WorkUnit?> GetByIdAsync(string id);
     Task<List<WorkUnit>> GetAsync();
     Task UpdateAsync(WorkUnit workUnit);
+    Task DeleteAsync(string Id);
 }
