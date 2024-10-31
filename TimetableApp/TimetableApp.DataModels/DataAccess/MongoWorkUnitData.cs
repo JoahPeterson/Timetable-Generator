@@ -23,6 +23,16 @@ public class MongoWorkUnitData : IWorkUnitData
     }
 
     /// <summary>
+    /// Deletes a work unit from mongo db
+    /// </summary>
+    /// <param name="workUnit">The work unit to delete</param>
+    public async Task DeleteAsync(string Id)
+    {
+        var filter = Builders<WorkUnit>.Filter.Eq("_id", new ObjectId(Id));
+        await _workUnits.DeleteOneAsync(filter);
+    }
+
+    /// <summary>
     /// Create a WorkUnit  in the database and upate the Course's WorkUnits  list.
     /// Created in a transaction so we can rollback if the user update fails.
     /// </summary>
