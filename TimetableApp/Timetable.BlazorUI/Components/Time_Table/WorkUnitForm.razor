@@ -136,21 +136,20 @@
 
             await HandleSubmit(newWorkUnit);
         }
-
-        HandleReset();
     }
 
     private async Task HandleSubmit(WorkUnit workUnit)
     {
-        OnWorkUnitFormSubmit.InvokeAsync(workUnit);
+        await OnWorkUnitFormSubmit.InvokeAsync(workUnit);
+
+        HandleReset();
     }
 
     private async Task HandleReset()
     {
         isEditMode = false;
         workUnit = new WorkUnit();
-
-        //StateHasChanged();
+        JS.InvokeVoidAsync("toggleCollapse", "workUnitCollapse");
     }
 
     private Task HandleWorkUnitChange(WorkUnit updatedWorkUnit)
