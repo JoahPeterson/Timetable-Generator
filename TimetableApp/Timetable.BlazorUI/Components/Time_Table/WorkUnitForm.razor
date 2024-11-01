@@ -78,6 +78,9 @@
     public EventCallback<WorkUnit> OnWorkUnitFormSubmit { get; set; }
 
     [Parameter]
+    public EventCallback<WorkUnit> OnWorkUnitDelete { get; set; }
+
+    [Parameter]
     public Action MyProperty { get; set; }
 
     private bool isEditMode = false;
@@ -98,17 +101,13 @@
 
     private async void Delete()
     {
-        Course.WorkUnits.Remove(workUnit);
         await WorkUnitData.DeleteAsync(workUnit.Id!);
-
-        // StateHasChanged() wasn't updating the page, so used this instead
-        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+        await OnWorkUnitDelete.InvokeAsync(workUnit);
         Snackbar.Add("Work Unit Deleted", Severity.Success);
     }
 
     private async Task SaveWorkUnit()
     {
-
         if (isEditMode)
         {
             workUnit.AuditInformation.LastModified = DateTime.Now;
@@ -173,7 +172,7 @@
                 CourseId = workUnitToDuplicate.CourseId,
                 SequenceNumber = Course.WorkUnits.Count + 1,
             };
-        
+
         // Gather info
         var authState = await authProvider.GetAuthenticationStateAsync();
         var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
@@ -181,20 +180,20 @@
         // Set Audit info
         dupeWorkUnit.AuditInformation.CreatedById = mongoUser.Id;
 
-        // Set Dates
-        dupeWorkUnit = WorkUnitDateService.SetWorkUnitStartAndEndDate(Course, dupeWorkUnit);
-
         // Create Work unit in database
         await WorkUnitData.CreateAsync(dupeWorkUnit);
 
-        // Handle the submit
-        await HandleSubmit(dupeWorkUnit);
+        // Set Dates
+        dupeWorkUnit = WorkUnitDateService.SetWorkUnitStartAndEndDate(Course, dupeWorkUnit);
 
         // Assign tasks to duplicated work unit
         dupeWorkUnit.Tasks = HandleWorkUnitTaskDuplication(workUnitToDuplicate.Tasks, dupeWorkUnit);
 
         // Update the duplicated work unit to include duplicated tasks
         await WorkUnitData.UpdateAsync(dupeWorkUnit);
+
+        // Handle the submit
+        await HandleSubmit(dupeWorkUnit);
 
         // reset
         workUnit = new WorkUnit();
@@ -206,12 +205,17 @@
         List<WorkUnitTask> duplicatedTasks = new List<WorkUnitTask>();
 
         // Loop through the tasks and update them acoordingly 
-        foreach(var task in tasks)
+        foreach (var originalTask in tasks)
         {
-            task.Id = Guid.NewGuid().ToString();
-            task.WorkUnitId = workUnit.Id;
-            task.DueDate = workUnit.EndDate;
-            duplicatedTasks.Add(task);
+            var newTask = new WorkUnitTask
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    DueDate = workUnit.EndDate,
+                    Duration = originalTask.Duration,
+                    TaskId = originalTask.TaskId,
+                    WorkUnitId = workUnit.Id,
+                };
+            duplicatedTasks.Add(newTask);
         }
 
         // Return the updated tasks list

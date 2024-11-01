@@ -33,7 +33,7 @@ namespace TimetableApp.DataModels.DataAccess
         /// </summary>
         /// <param name="course">Course to be added.</param>
         /// <returns>Task</returns>
-        public async Task CreateCourseAsync(Course course)
+        public async Task<bool> CreateCourseAsync(Course course)
         {
             var client = _db.Client;
 
@@ -53,10 +53,12 @@ namespace TimetableApp.DataModels.DataAccess
                 await usersInTransaction.ReplaceOneAsync(session, u => u.Id == user.Id, user);
 
                 await session.CommitTransactionAsync();
+                return true;
             }
             catch (Exception ex)
             {
                 await session.AbortTransactionAsync();
+                return false;
                 throw;
             }
         }
@@ -116,7 +118,7 @@ namespace TimetableApp.DataModels.DataAccess
         /// </summary>
         /// <param name="course">Course to be updated</param>
         /// <returns></returns>
-        public async Task UpdateCourseAsync(Course course)
+        public async Task<bool> UpdateCourseAsync(Course course)
         {
             var client = _db.Client;
             using var session = await client.StartSessionAsync();
@@ -168,10 +170,12 @@ namespace TimetableApp.DataModels.DataAccess
                 }
 
                 await session.CommitTransactionAsync();
+                return true;
             }
             catch (Exception ex)
             {
                 await session.AbortTransactionAsync();
+                return false;
                 // Log the exception or rethrow it
                 throw;
             }
