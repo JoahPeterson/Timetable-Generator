@@ -237,9 +237,9 @@
             else
                 Snackbar.Add("Creating Course", Severity.Success);
 
-            var updatedSuccess = await CourseData.UpdateCourseAsync(course);
+            var updatedCourse = await CourseData.UpdateCourseAsync(course);
 
-            if (updatedSuccess)
+            if (updatedCourse != null)
             {
                 Navigation.NavigateTo($"timetable/{course.Id}");
             }
