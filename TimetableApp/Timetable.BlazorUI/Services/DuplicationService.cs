@@ -1,4 +1,5 @@
-﻿using TimetableApp.DataModels.DataAccess;
+﻿using System.Runtime.CompilerServices;
+using TimetableApp.DataModels.DataAccess;
 using TimetableApp.DataModels.Models;
 using static System.Formats.Asn1.AsnWriter;
 
@@ -61,7 +62,7 @@ public class DuplicationService
         await _workUnitData.CreateAsync(dupeWorkUnit);
 
         // Assign tasks to duplicated work unit
-        dupeWorkUnit.Tasks = HandleWorkUnitTaskDuplication(workUnitToDuplicate.Tasks, dupeWorkUnit);
+        dupeWorkUnit.Tasks = HandleWorkUnitTaskDuplication(workUnitToDuplicate.Tasks, dupeWorkUnit, isCopy );
 
         // Update the duplicated work unit to include duplicated tasks
         await _workUnitData.UpdateAsync(dupeWorkUnit);
@@ -69,18 +70,24 @@ public class DuplicationService
         return dupeWorkUnit;
     }
 
-    private List<WorkUnitTask> HandleWorkUnitTaskDuplication(List<WorkUnitTask> tasks, WorkUnit workUnit)
+    private List<WorkUnitTask> HandleWorkUnitTaskDuplication(List<WorkUnitTask> tasks, WorkUnit workUnit, bool isCopy)
     {
         // List to hold duplicated work unit tasks
         List<WorkUnitTask> duplicatedTasks = new List<WorkUnitTask>();
 
         // Loop through the tasks and update them acoordingly 
-        foreach (var task in tasks)
+        foreach (var originalTask in tasks)
         {
-            task.Id = Guid.NewGuid().ToString();
-            task.WorkUnitId = workUnit.Id;
-            task.DueDate = workUnit.EndDate;
-            duplicatedTasks.Add(task);
+            var newTask = new WorkUnitTask
+            {
+                Id = Guid.NewGuid().ToString(),
+                Duration = originalTask.Duration,
+                TaskId = originalTask.TaskId,
+                WorkUnitId = workUnit.Id,
+            };
+
+            newTask.DueDate = isCopy ? workUnit.EndDate : originalTask.DueDate;
+            duplicatedTasks.Add(newTask);
         }
 
         // Return the updated tasks list
