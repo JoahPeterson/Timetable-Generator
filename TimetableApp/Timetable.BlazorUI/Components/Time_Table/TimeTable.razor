@@ -14,12 +14,12 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-<div class="d-flex">
+<div class="d-flex position-relative timetable-main">
     <!-- Week Column -->
     <div class="week-column d-flex flex-column">
         @for (int i = 1; i <= course.Term.Duration; i++)
         {
-            <div class="workUnit-Row d-flex align-items-center justify-content-center table-row"
+            <div class="workUnit-Row d-flex align-items-center justify-content-center"
                  style="height: @(SingleRowHeightPercentage())vh;">
                 <div class="vertical-text">
                     <div class="preview-week-number preview-emphasis">Week @i</div>
@@ -78,7 +78,18 @@
 
     private double SingleRowHeightPercentage()
     {
-        return tableVhPercentage / course.Term.Duration;
+        if (course.Term.Duration <= 8)
+        {
+            return tableVhPercentage / course.Term.Duration;
+        }
+        else if (course.Term.Duration > 8 && course.Term.Duration <= 12)
+        {
+            return (tableVhPercentage / course.Term.Duration) + 5;
+        }
+        else
+        {
+            return tableVhPercentage / course.Term.Duration + 8;
+        }
     }
 
     private async Task UpdateWorkUnits(WorkUnit workUnit)
