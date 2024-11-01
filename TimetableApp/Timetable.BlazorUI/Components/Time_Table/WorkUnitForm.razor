@@ -4,6 +4,7 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject WorkUnitDateService WorkUnitDateService
+@inject DuplicationService DuplicationService
 @inject IUserData UserData
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
@@ -162,42 +163,45 @@
 
     private async Task HandleWorkUnitDuplication(WorkUnit workUnitToDuplicate)
     {
-        // Make sure we are not editing a task
-        WorkUnitToEdit = null;
-
-        // The new duplicated task
-        WorkUnit dupeWorkUnit = new WorkUnit
-            {
-                Name = workUnitToDuplicate.Name.Contains(" -COPY") ? workUnitToDuplicate.Name : workUnitToDuplicate.Name + " -COPY",
-                Duration = workUnitToDuplicate.Duration,
-                CourseId = workUnitToDuplicate.CourseId,
-                SequenceNumber = Course.WorkUnits.Count + 1,
-            };
-        
-        // Gather info
-        var authState = await authProvider.GetAuthenticationStateAsync();
-        var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
-
-        // Set Audit info
-        dupeWorkUnit.AuditInformation.CreatedById = mongoUser.Id;
-
-        // Set Dates
-        dupeWorkUnit = WorkUnitDateService.SetWorkUnitStartAndEndDate(Course, dupeWorkUnit);
-
-        // Create Work unit in database
-        await WorkUnitData.CreateAsync(dupeWorkUnit);
-
-        // Handle the submit
+        WorkUnit dupeWorkUnit = await DuplicationService.DuplicateWorkUnitAsync(Course, workUnitToDuplicate);
         await HandleSubmit(dupeWorkUnit);
 
-        // Assign tasks to duplicated work unit
-        dupeWorkUnit.Tasks = HandleWorkUnitTaskDuplication(workUnitToDuplicate.Tasks, dupeWorkUnit);
+        // // Make sure we are not editing a task
+        // WorkUnitToEdit = null;
 
-        // Update the duplicated work unit to include duplicated tasks
-        await WorkUnitData.UpdateAsync(dupeWorkUnit);
+        // // The new duplicated task
+        // WorkUnit dupeWorkUnit = new WorkUnit
+        //     {
+        //         Name = workUnitToDuplicate.Name.Contains(" -COPY") ? workUnitToDuplicate.Name : workUnitToDuplicate.Name + " -COPY",
+        //         Duration = workUnitToDuplicate.Duration,
+        //         CourseId = workUnitToDuplicate.CourseId,
+        //         SequenceNumber = Course.WorkUnits.Count + 1,
+        //     };
+        
+        // // Gather info
+        // var authState = await authProvider.GetAuthenticationStateAsync();
+        // var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
 
-        // reset
-        workUnit = new WorkUnit();
+        // // Set Audit info
+        // dupeWorkUnit.AuditInformation.CreatedById = mongoUser.Id;
+
+        // // Set Dates
+        // dupeWorkUnit = WorkUnitDateService.SetWorkUnitStartAndEndDate(Course, dupeWorkUnit);
+
+        // // Create Work unit in database
+        // await WorkUnitData.CreateAsync(dupeWorkUnit);
+
+        // // Handle the submit
+        // await HandleSubmit(dupeWorkUnit);
+
+        // // Assign tasks to duplicated work unit
+        // dupeWorkUnit.Tasks = HandleWorkUnitTaskDuplication(workUnitToDuplicate.Tasks, dupeWorkUnit);
+
+        // // Update the duplicated work unit to include duplicated tasks
+        // await WorkUnitData.UpdateAsync(dupeWorkUnit);
+
+        // // reset
+        // workUnit = new WorkUnit();
     }
 
     private List<WorkUnitTask> HandleWorkUnitTaskDuplication(List<WorkUnitTask> tasks, WorkUnit workUnit)

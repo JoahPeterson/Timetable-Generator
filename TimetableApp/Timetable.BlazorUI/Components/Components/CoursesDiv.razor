@@ -6,6 +6,7 @@
 @inject IUserData UserData
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
+@inject DuplicationService DuplicationService
 @rendermode InteractiveServer
 
 @attribute [Authorize]
@@ -28,9 +29,14 @@
                             <i class="bi bi-journal-bookmark h4"></i>
                             <a href="/timetable/@course.Id" class="text-black text-decoration-none fw-bold">@course.Name</a>
                         </div>
-                        <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="() => ShowModal(course)">
-                            <i class="bi bi-dash-circle h5"></i>
-                        </a>
+                        <div class="justify-content-between">
+                            <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="async () => await HandleCourseDuplication(course)" >
+                                <i class="bi bi-copy"></i>
+                            </a>
+                            <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="() => ShowModal(course)">
+                                <i class="bi bi-dash-circle h5"></i>
+                            </a>
+                        </div>
                     </li>
                 }
             </ul>
@@ -78,6 +84,15 @@ else
 
         if (courses is not null)
             courses.Remove(course);
+    }
+
+    private async Task HandleCourseDuplication(Course course)
+    {
+        Snackbar.Add("Copy course in progress", Severity.Info);
+        Course newCourse = await DuplicationService.DuplicateCourseAsync(course);
+
+        courses.Add(newCourse);
+        Snackbar.Add("Successfully Copied Course", Severity.Success);
     }
 
     private async Task ShowModal(Course course)

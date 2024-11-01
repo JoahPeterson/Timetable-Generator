@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using Timetable.BlazorUI.Components.Account;
 using Timetable.BlazorUI.Data;
+using Timetable.BlazorUI.Services;
 
 namespace Timetable.BlazorUI;
 
@@ -92,5 +93,6 @@ public static class RegisterServices
         builder.Services.AddSingleton<IWorkUnitData, MongoWorkUnitData>();
         
         builder.Services.AddSingleton<WorkUnitDateService>();
+        builder.Services.AddSingleton<DuplicationService>();
     }
 }
