@@ -20,6 +20,31 @@
     background-color: #cbcbcc;
 }
 
+/* Add fixed width to tool column */
 .tool-column {
-    width: 300px;
+    width: 325px;
+    position: fixed;
+    /*top: var(--header-height);*/
+    right: 0;
+    /*height: calc(100vh - var(--header-height));*/
+    overflow-y: auto;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.timetable-main {
+    /*margin-top: var(--header-height);*/
+    width: 100%;
+    padding-right: 325px; /* Same as tool-column width */
+}
+
+/* Ensure the flex container doesn't extend under tool-column */
+.d-flex.position-relative {
+    width: 100%;
+}
+
+/* Make sure the growing column doesn't push content under tool-column */
+.flex-grow-1.d-flex.flex-column {
+    max-width: 100%;
 }
