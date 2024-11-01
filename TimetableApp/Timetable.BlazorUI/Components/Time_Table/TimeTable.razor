@@ -40,7 +40,7 @@
     
     <div class="tool-column d-flex flex-column ml-5">
         <!-- WorkUnit Form -->
-        <WorkUnitForm @ref="WorkUnitForm" Course="@course" WorkUnitToEdit="selectedWorkUnit" OnWorkUnitFormSubmit="UpdateWorkUnits" />
+        <WorkUnitForm @ref="WorkUnitForm" Course="@course" WorkUnitToEdit="selectedWorkUnit" OnWorkUnitFormSubmit="UpdateWorkUnits" OnWorkUnitDelete="RemoveDeletedWorkUnitFromCourse" />
 
         <!-- WorkTask Form -->
         <WorkTaskForm @ref="WorkTaskForm" OnWorkTaskFormSubmit="UpdateWorkTasks" />
@@ -67,13 +67,9 @@
         if (!string.IsNullOrEmpty(courseId))
         {
             course = await CourseData.GetCourseAsync(courseId);
-            var tempWorkUnits = await WorkUnitData.GetAsync();
 
-            if (tempWorkUnits.Any())
-            {
-                workUnits = tempWorkUnits.FindAll(workUnit => workUnit.CourseId == course.Id);
-                workUnits = workUnits.OrderBy(WorkUnit => WorkUnit.SequenceNumber).ToList();
-            }
+            if (course.WorkUnits.Any())
+                workUnits = course.WorkUnits;
 
             // Load existing work tasks (if any)
             workTasks = await WorkTaskData.GetAsync();
@@ -87,7 +83,6 @@
 
     private async Task UpdateWorkUnits(WorkUnit workUnit)
     {
-
         var index = workUnits.FindIndex(wUnit => wUnit.Id == workUnit.Id);
 
         if (index != -1)
@@ -95,11 +90,13 @@
             workUnits[index] = workUnit;
             course.WorkUnits[index] = workUnit;
             course = await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
+
+            workUnits = course.WorkUnits;
         }
         else
         {
-            workUnits.Add(workUnit);
             course.WorkUnits.Add(workUnit);
+            workUnits = course.WorkUnits;
             await CourseData.UpdateCourseAsync(course);
         }
     }
@@ -139,10 +136,10 @@
         selectedWorkUnit = workUnit;
     }
 
-    private async Task OnClose()
+    private async Task RemoveDeletedWorkUnitFromCourse(WorkUnit workUnit)
     {
-      
-
+        course.WorkUnits.Remove(workUnit);
+        await CourseData.UpdateCourseAsync(course);
     }
 }
 

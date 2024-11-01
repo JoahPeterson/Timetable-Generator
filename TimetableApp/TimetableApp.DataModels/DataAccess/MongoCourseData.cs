@@ -53,12 +53,12 @@ namespace TimetableApp.DataModels.DataAccess
                 await usersInTransaction.ReplaceOneAsync(session, u => u.Id == user.Id, user);
 
                 await session.CommitTransactionAsync();
-
                 return course;
             }
             catch (Exception ex)
             {
                 await session.AbortTransactionAsync();
+                return null;
                 throw;
             }
         }
@@ -170,12 +170,12 @@ namespace TimetableApp.DataModels.DataAccess
                 }
 
                 await session.CommitTransactionAsync();
-
                 return course;
             }
             catch (Exception ex)
             {
                 await session.AbortTransactionAsync();
+                return null;
                 // Log the exception or rethrow it
                 throw;
             }
