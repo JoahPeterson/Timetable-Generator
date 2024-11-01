@@ -29,11 +29,11 @@
                             <i class="bi bi-journal-bookmark h4"></i>
                             <a href="/timetable/@course.Id" class="text-black text-decoration-none fw-bold">@course.Name</a>
                         </div>
-                        <div class="justify-content-between">
-                            <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="async () => await HandleCourseDuplication(course)" >
+                        <div class="justify-content-between d-flex gap-3">
+                            <a class="text-black text-decoration-none fw-bold ms-auto icon-hover" @onclick="async () => await HandleCourseDuplication(course)">
                                 <i class="bi bi-copy"></i>
                             </a>
-                            <a class="text-black text-decoration-none fw-bold ms-auto" @onclick="() => ShowModal(course)">
+                            <a class="text-black text-decoration-none fw-bold ms-auto icon-hover" @onclick="() => ShowModal(course)">
                                 <i class="bi bi-dash-circle h5"></i>
                             </a>
                         </div>
