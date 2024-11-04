@@ -32,7 +32,7 @@
         @foreach (WorkUnit workUnit in workUnits)
         {
             <div class="work-unit-container workUnit-Row">
-                <WorkUnitComponent WorkUnit="workUnit" WorkTasks="workTasks" SingleRowHeightPercentage="@SingleRowHeightPercentage()" OnSelected="HandleWorkUnitSelected" Course="@course" />
+                <WorkUnitComponent WorkUnit="workUnit" WorkTasks="workTasks" SingleRowHeightPercentage="@SingleRowHeightPercentage()" OnSelected="HandleWorkUnitSelected" OnWorkUnitTaskMoved="HandleWorkUnitTaskMoved" Course="@course" />
             </div>
         }
     </div>
@@ -68,7 +68,7 @@
     private WorkUnitForm WorkUnitForm;
     private WorkTaskForm WorkTaskForm;
 
-    
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -184,10 +184,16 @@
         selectedWorkUnit = workUnit;
     }
 
+    private async Task HandleWorkUnitTaskMoved()
+    {
+        StateHasChanged();
+    }
+
     private async Task RemoveDeletedWorkUnitFromCourse(WorkUnit workUnit)
     {
         course.WorkUnits.Remove(workUnit);
         await CourseData.UpdateCourseAsync(course);
     }
+
 }
 

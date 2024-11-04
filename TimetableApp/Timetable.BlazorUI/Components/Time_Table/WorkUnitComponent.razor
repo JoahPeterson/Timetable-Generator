@@ -64,6 +64,9 @@
     public EventCallback<WorkUnit> OnSelected { get; set; }
 
     [Parameter]
+    public EventCallback OnWorkUnitTaskMoved { get; set; }
+
+    [Parameter]
     public Course Course { get; set; }
 
     private List<WorkUnitTask>? tasks;
@@ -158,6 +161,8 @@
 
                     // Update the Previous WorkUnit
                     await WorkUnitData.UpdateAsync(previousWorkUnit);
+
+                    await OnWorkUnitTaskMoved.InvokeAsync();
                 }
 
                 // Add the WorkUnitTask to the WorkUnit It was Dragged into
