@@ -151,11 +151,14 @@
                 // Find Prevoius WorkUnit From ID
                 WorkUnit previousWorkUnit = Course.WorkUnits.Where(c => c.Id == previousWorkUnitId).First();
 
-                // Remove the dragged task from the WorkUnit
-                previousWorkUnit.Tasks.Remove(previousWorkUnit.Tasks.Where(t => t.Id == draggedTaskId).First());
+                if (previousWorkUnit != null && draggedTaskId != null)
+                {
+                    // Remove the dragged task from the WorkUnit
+                    previousWorkUnit.Tasks.Remove(previousWorkUnit.Tasks.FirstOrDefault(t => t.Id == draggedTaskId));
 
-                // Update the Previous WorkUnit
-                await WorkUnitData.UpdateAsync(previousWorkUnit);
+                    // Update the Previous WorkUnit
+                    await WorkUnitData.UpdateAsync(previousWorkUnit);
+                }
 
                 // Add the WorkUnitTask to the WorkUnit It was Dragged into
                 WorkUnit.Tasks.Add((WorkUnitTask)result.Data);
