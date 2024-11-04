@@ -1,9 +1,7 @@
 ﻿@page "/timetable/{courseId?}"
 @inject ICourseData CourseData
-
 @using Microsoft.AspNetCore.Authorization
 @using Timetable.BlazorUI.Components.Components
-
 @inject ITaskTypeData TaskTypeData
 @inject IUserData UserData
 @inject IWorkUnitData WorkUnitData
@@ -11,6 +9,7 @@
 @inject WorkUnitDateService WorkUnitDateService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
+@inject IJSRuntime JS
 @rendermode InteractiveServer
 @attribute [Authorize]
 
@@ -33,7 +32,7 @@
         @foreach (WorkUnit workUnit in workUnits)
         {
             <div class="work-unit-container workUnit-Row">
-                <WorkUnitComponent WorkUnit="workUnit" WorkTasks="workTasks" SingleRowHeightPercentage="@SingleRowHeightPercentage()" OnSelected="HandleWorkUnitSelected" />
+                <WorkUnitComponent WorkUnit="workUnit" WorkTasks="workTasks" SingleRowHeightPercentage="@SingleRowHeightPercentage()" OnSelected="HandleWorkUnitSelected" Course="@course" />
             </div>
         }
     </div>
@@ -44,6 +43,13 @@
 
         <!-- WorkTask Form -->
         <WorkTaskForm @ref="WorkTaskForm" OnWorkTaskFormSubmit="UpdateWorkTasks" />
+
+        <div id="trash-bin" style="display: none;" class="justify-content-center align-items-center mt-3"
+             @ondrop="HandleDeleteDrop"
+             ondragover="event.preventDefault();">
+            <i class="bi bi-trash text-danger" style="font-size: 5rem;"></i>
+        </div>
+    
     </div>
 </div>
 
@@ -61,6 +67,8 @@
     private int tableVhPercentage { get; } = 125;
     private WorkUnitForm WorkUnitForm;
     private WorkTaskForm WorkTaskForm;
+
+    
 
     protected override async Task OnInitializedAsync()
     {
@@ -140,6 +148,35 @@
 
         // Update UI
         StateHasChanged();
+    }
+
+    private async Task HandleDeleteDrop(DragEventArgs e)
+    {
+        // Get ID's from session storage
+        string taskId = await JS.InvokeAsync<string>("GetSession", "TaskId");
+        string workUnitId = await JS.InvokeAsync<string>("GetSession", "WorkUnitId");
+
+        // Check if taskIf is null or empty
+        if (!string.IsNullOrEmpty(taskId))
+        {
+            // Find the WorkUnit in the Course
+            WorkUnit workUnit = course.WorkUnits.Where(c => c.Id == workUnitId).First();
+
+            // Find the WorkUnitTask in the WorkUnit
+            WorkUnitTask workUnitTask = workUnit.Tasks.Where(w => w.Id == taskId).First();
+
+            // Remove the WorkUnitTask from the list of tasks on the WorkUnit
+            workUnit.Tasks.Remove(workUnitTask);
+
+            // Update the WorkUnit in the MongoDB
+            WorkUnitData.UpdateAsync(workUnit);
+
+            // Update the page
+            StateHasChanged();
+
+            // Hide Trash Bin
+            await JS.InvokeVoidAsync("HideElement", "trash-bin");
+        }
     }
 
     private void HandleWorkUnitSelected(WorkUnit workUnit)
