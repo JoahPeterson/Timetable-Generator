@@ -49,7 +49,7 @@
                         </button>
                     </div>
                     <div class="d-block m-1">
-                        <button type="delete" @onclick="() => ShowModal(workUnit)" class="btn btn-danger text-nowrap">
+                        <button type="button" @onclick="() => ShowModal(workUnit)" class="btn btn-danger text-nowrap">
                             <i class="bi bi-trash"></i> Delete
                         </button>
                     </div>
@@ -105,6 +105,7 @@
         await WorkUnitData.DeleteAsync(workUnit.Id!);
         await OnWorkUnitDelete.InvokeAsync(workUnit);
         Snackbar.Add("Work Unit Deleted", Severity.Success);
+        HandleReset();
     }
 
     private async Task SaveWorkUnit()
@@ -114,7 +115,6 @@
             workUnit.AuditInformation.LastModified = DateTime.Now;
             await WorkUnitData.UpdateAsync(workUnit);
             await HandleSubmit(workUnit);
-            isEditMode = false;
         }
         else
         {
@@ -136,21 +136,21 @@
             await WorkUnitData.CreateAsync(newWorkUnit);
 
             await HandleSubmit(newWorkUnit);
-            workUnit = new WorkUnit();
         }
     }
 
     private async Task HandleSubmit(WorkUnit workUnit)
     {
-        OnWorkUnitFormSubmit.InvokeAsync(workUnit);
+        await OnWorkUnitFormSubmit.InvokeAsync(workUnit);
+
+        HandleReset();
     }
 
     private async Task HandleReset()
     {
         isEditMode = false;
         workUnit = new WorkUnit();
-
-        StateHasChanged();
+        JS.InvokeVoidAsync("toggleCollapse", "workUnitCollapse");
     }
 
     private Task HandleWorkUnitChange(WorkUnit updatedWorkUnit)

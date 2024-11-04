@@ -53,7 +53,7 @@
             <!-- Inline Buttons -->
             <div class="d-flex flex-row mt-3 justify-content-start w-75 mx-3">
                 <div class="d-block m-1">
-                    <button type="reset" class="btn btn-secondary d-block mt-1"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                    <button type="button" class="btn btn-secondary d-block mt-1"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
                 </div>
                 <div class="d-block m-1">
                     <button type="submit" class="btn mstc-gold-btn d-block mt-1"><i class="bi bi-floppy"></i> Save</button>
@@ -111,32 +111,6 @@
 
     private string? draggedTaskId;
 
-    private async Task HandleDragStart(DragEventArgs e, string taskId)
-    {
-        try
-        {
-            draggedTaskId = taskId;
-            await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
-        }
-        catch(Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-
-    }
-
-
-    protected override void OnParametersSet()
-    {
-        if (WorkTaskToEdit != null)
-        {
-            workTask = WorkTaskToEdit;
-            isEditMode = true;
-            return;
-        }
-        workTask = new WorkTask();
-    }
-
     protected override async Task OnInitializedAsync()
     {
         var authState = await authProvider.GetAuthenticationStateAsync();
@@ -157,6 +131,30 @@
                 // Fetch user's worktasks from the database
                 workTasks = await WorkTaskData.GetUsersWorkTasksAsync(loggedInUser.Id);
             }
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (WorkTaskToEdit != null)
+        {
+            workTask = WorkTaskToEdit;
+            isEditMode = true;
+            return;
+        }
+        workTask = new WorkTask();
+    }
+
+    private async Task HandleDragStart(DragEventArgs e, string taskId)
+    {
+        try
+        {
+            draggedTaskId = taskId;
+            await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
 
@@ -192,8 +190,8 @@
 
             // Make the list current
             await UpdateWorkTaskList(mongoUser.Id);
-
         }
+        HandleReset();
     }
 
 
@@ -207,10 +205,10 @@
         workTasks = tempWorkTasks.Where(tempTask => tempTask.AuditInformation.CreatedById == mongoUserId).ToList();
     }
 
-
     private void HandleReset()
     {
+        isEditMode = false;
         workTask = new WorkTask();
-
+        JS.InvokeVoidAsync("toggleCollapse", "workTaskCollapse");
     }
 }
