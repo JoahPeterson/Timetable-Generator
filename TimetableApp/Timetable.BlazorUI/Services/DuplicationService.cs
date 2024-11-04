@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using MudBlazor.Extensions;
+using System.Runtime.CompilerServices;
 using TimetableApp.DataModels.DataAccess;
 using TimetableApp.DataModels.Models;
 using static System.Formats.Asn1.AsnWriter;
@@ -62,7 +63,7 @@ public class DuplicationService
         await _workUnitData.CreateAsync(dupeWorkUnit);
 
         // Assign tasks to duplicated work unit
-        dupeWorkUnit.Tasks = HandleWorkUnitTaskDuplication(workUnitToDuplicate.Tasks, dupeWorkUnit, isCopy );
+        dupeWorkUnit.Tasks = HandleWorkUnitTaskDuplication(workUnitToDuplicate.Tasks, dupeWorkUnit, workUnitToDuplicate.StartDate, isCopy );
 
         // Update the duplicated work unit to include duplicated tasks
         await _workUnitData.UpdateAsync(dupeWorkUnit);
@@ -70,12 +71,11 @@ public class DuplicationService
         return dupeWorkUnit;
     }
 
-    private List<WorkUnitTask> HandleWorkUnitTaskDuplication(List<WorkUnitTask> tasks, WorkUnit workUnit, bool isCopy)
+    private List<WorkUnitTask> HandleWorkUnitTaskDuplication(List<WorkUnitTask> tasks, WorkUnit workUnit, DateTime? originalWorkUnitStartDate, bool isCopy)
     {
         // List to hold duplicated work unit tasks
         List<WorkUnitTask> duplicatedTasks = new List<WorkUnitTask>();
-
-        // Loop through the tasks and update them acoordingly 
+ 
         foreach (var originalTask in tasks)
         {
             var newTask = new WorkUnitTask
@@ -86,7 +86,15 @@ public class DuplicationService
                 WorkUnitId = workUnit.Id,
             };
 
-            newTask.DueDate = isCopy ? workUnit.EndDate : originalTask.DueDate;
+            if (isCopy)
+            {
+                int differenceInStartDays = (originalTask.DueDate?.Date- originalWorkUnitStartDate?.Date)?.Days ?? 0;
+                newTask.DueDate = workUnit.StartDate?.AddDays(differenceInStartDays);
+            }
+            else
+            {
+                newTask.DueDate = originalTask.DueDate;
+            }
             duplicatedTasks.Add(newTask);
         }
 
