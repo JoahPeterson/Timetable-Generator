@@ -118,6 +118,7 @@ else
     {
         await UserService.AssignRole(user.EmailAddress, "Admin");
         Snackbar.Add($"Made User: {user.EmailAddress} An Admin", Severity.Success);
+        usersWithRoles = await UserService.GetAllUsersAsync();
     }
 
     private async Task ShowModal(User user)
