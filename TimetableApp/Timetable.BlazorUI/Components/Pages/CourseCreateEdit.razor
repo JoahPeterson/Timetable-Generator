@@ -147,6 +147,11 @@
 
         // Fetch term durations from the database
         termDurations = await TermDurationData.GetAsync();
+
+        if (isEditMode)
+        {
+            termDurations = SetTermDurations(termDurations);
+        }
     }
 
     private async Task CalculateEndDate()
@@ -200,6 +205,16 @@
             courseTypeName = courseTypes.FirstOrDefault(ct => ct.Id == newCourse.CourseTypeId)!.Name!;
         }
         await ShowPreviewDialog(); // Display the MudBlazor dialog after saving
+    }
+
+    private List<TermDuration> SetTermDurations(List<TermDuration> allTermDurations)
+    {
+        List<TermDuration> newTermList = new List<TermDuration>();
+        
+        newTermList.AddRange(allTermDurations.Where(td => td.Length >= course.Term.Duration));
+        newTermList.AddRange(allTermDurations.Where(td => td.Length == course.Term.Duration / 2));
+
+        return newTermList;
     }
 
     private async Task ShowPreviewDialog()
