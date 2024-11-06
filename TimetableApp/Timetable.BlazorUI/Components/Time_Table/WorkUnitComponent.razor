@@ -6,6 +6,7 @@
 @inject IWorkUnitData WorkUnitData
 @inject IWorkUnitTaskData WorkUnitTaskData
 @inject IWorkTaskData WorkTaskData
+@inject ICourseData CourseData
 @inject IUserData UserData
 @inject AuthenticationStateProvider authProvider
 
@@ -62,6 +63,12 @@
     [Parameter]
     public EventCallback<WorkUnit> OnSelected { get; set; }
 
+    [Parameter]
+    public EventCallback OnWorkUnitTaskMoved { get; set; }
+
+    [Parameter]
+    public Course Course { get; set; }
+
     private List<WorkUnitTask>? tasks;
 
     private User? loggedInUser;
@@ -69,6 +76,8 @@
     private string? draggedTaskId;
 
     private string? workTaskId;
+
+    private string? previousWorkUnitId;
 
     private double RowHeightPercentage { get => SingleRowHeightPercentage * WorkUnit.Duration; }
 
@@ -98,8 +107,12 @@
 
     private async Task HandleDrop(DragEventArgs e, string workUnitId)
     {
+        // Hide Trash Bin
+        await JS.InvokeVoidAsync("HideElement", "trash-bin");
+
         draggedTaskId = await JS.InvokeAsync<string>("GetSession", "TaskId");
         workTaskId = await JS.InvokeAsync<string>("GetSession", "WorkTaskId");
+        previousWorkUnitId = await JS.InvokeAsync<string>("GetSession", "WorkUnitId");
 
         if (!string.IsNullOrEmpty(draggedTaskId))
         {
@@ -138,7 +151,23 @@
                 if (result.Data == null)
                     return;
 
+                // Find Prevoius WorkUnit From ID
+                WorkUnit previousWorkUnit = Course.WorkUnits.Where(c => c.Id == previousWorkUnitId).First();
+
+                if (previousWorkUnit != null && draggedTaskId != null)
+                {
+                    // Remove the dragged task from the WorkUnit
+                    previousWorkUnit.Tasks.Remove(previousWorkUnit.Tasks.FirstOrDefault(t => t.Id == draggedTaskId));
+
+                    // Update the Previous WorkUnit
+                    await WorkUnitData.UpdateAsync(previousWorkUnit);
+
+                    await OnWorkUnitTaskMoved.InvokeAsync();
+                }
+
+                // Add the WorkUnitTask to the WorkUnit It was Dragged into
                 WorkUnit.Tasks.Add((WorkUnitTask)result.Data);
+
                 // Save the updated work unit
                 await WorkUnitData.UpdateAsync(WorkUnit);
 
@@ -160,8 +189,10 @@
         }
         await JS.InvokeVoidAsync("SetSession", "TaskId", taskId);
         await JS.InvokeVoidAsync("SetSession", "WorkTaskId", workTaskId);
-        WorkUnit.Tasks.Remove(WorkUnit.Tasks.Where(t => t.Id == taskId).First());
-        await WorkUnitData.UpdateAsync(WorkUnit);
+        await JS.InvokeVoidAsync("SetSession", "WorkUnitId", WorkUnit.Id);
+        await JS.InvokeVoidAsync("toggleCollapse", "workUnitCollapse");
+        await JS.InvokeVoidAsync("toggleCollapse", "workTaskCollapse");
+        await JS.InvokeVoidAsync("ShowElement", "trash-bin");
     }
     private async Task WorkUnitTaskEditOnClick(WorkUnitTask workUnitTask)
     {

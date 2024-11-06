@@ -47,10 +47,21 @@ function GetSession(name)
     return localStorage.getItem(name);
 }
 
+function ShowElement(elementId)
+{
+    var element = document.getElementById(elementId);
+    element.style.display = 'flex';
+}
+
+function HideElement(elementId)
+{
+    var element = document.getElementById(elementId);
+    element.style.display = 'none';
+}
 
 window.toggleCollapse = (elementId) => {
     var element = document.getElementById(elementId);
-    if (element) {
+    if (element && element.classList.contains('show')) {
         var bsCollapse = new bootstrap.Collapse(element);
         bsCollapse.toggle();
     }
