@@ -152,7 +152,7 @@
                     return;
 
                 // Find Prevoius WorkUnit From ID
-                WorkUnit previousWorkUnit = Course.WorkUnits.Where(c => c.Id == previousWorkUnitId).First();
+                WorkUnit previousWorkUnit = Course.WorkUnits.FirstOrDefault(c => c.Id == previousWorkUnitId);
 
                 if (previousWorkUnit != null && draggedTaskId != null)
                 {
@@ -171,6 +171,8 @@
                 // Save the updated work unit
                 await WorkUnitData.UpdateAsync(WorkUnit);
 
+                // Set the WorkUnitId back to string.empty
+                await JS.InvokeVoidAsync("SetSession", "WorkUnitId", string.Empty);
                 // Refresh the UI
                 StateHasChanged();
             }
