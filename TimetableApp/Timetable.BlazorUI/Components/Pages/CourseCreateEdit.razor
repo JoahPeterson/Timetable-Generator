@@ -11,6 +11,7 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject WorkUnitDateService WorkUnitDateService
+@inject DuplicationService DuplicationService
 @rendermode InteractiveServer
 @using System.Text.Json
 @using TimetableApp.DataModels.Models
@@ -230,7 +231,10 @@
                 if (isUpdateWorkUnitRequied)
                 {
                     //course = await WorkUnitDateService.UpdateWorkUnitStartAndEndDateAndWorkTask(oldCourse, course);
-                    
+                    if (originalTermDuration > course.Term.Duration)
+                    {
+                        course.WorkUnits = await DuplicationService.CombineWorkUnits(course.WorkUnits);
+                    }
                     course = await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
                 }
             }

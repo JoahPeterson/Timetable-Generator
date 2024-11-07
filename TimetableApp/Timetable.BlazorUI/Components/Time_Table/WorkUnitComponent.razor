@@ -23,7 +23,7 @@
         <div class="cards-container flex-grow-1">
             @if (WorkUnit.Tasks.Any())
             {
-                @foreach (var task in WorkUnit.Tasks)
+                @foreach (var task in WorkUnit.Tasks.OrderBy(t => t.DueDate))
                 {
                     var workTask = WorkTasks.FirstOrDefault(t => t.Id == task.TaskId);
                     <div class="card mstc-gold-btn border border-dark m-2 rounded-1"
