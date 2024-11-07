@@ -12,10 +12,7 @@
         int currentWeek = 1;
         for (int i = 0; i < course.WorkUnits.Count; i++)
         {
-            <TimetablePreviewWorkUnit CourseDuration="course.Term.Duration"
-                                      WorkUnit="course.WorkUnits[i]"
-                                      WeekNumber="currentWeek"
-                                      CourseStartDate="course.StartDate" />
+            <TimetablePreviewWorkUnit CourseDuration="course.Term.Duration" WorkUnit="course.WorkUnits[i]" WeekNumber="currentWeek"CourseStartDate="course.StartDate" />
             currentWeek += course.WorkUnits[i].Duration;
         }
     }
