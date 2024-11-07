@@ -1,24 +1,29 @@
 ﻿@page "/timetable/preview/{courseId}"
 @using Microsoft.AspNetCore.Authorization
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
-
 @inject ICourseData CourseData
 
 <div class="timetable-main">
     <TimetablePreviewHeader />
-    <div class="preview-course-name bg-red  row d-flex justify-content-center align-items-center flex-column">
+    <div class="preview-course-name bg-red row d-flex justify-content-center align-items-center flex-column">
         @course.Name
     </div>
-    @for (int i = 0; i < course.WorkUnits.Count; i++)
-    {
-        <TimetablePreviewWorkUnit WorkUnit="course.WorkUnits[i]" WeekNumber="i + 1" CourseStartDate="course.StartDate" />
+    @{
+        int currentWeek = 1;
+        for (int i = 0; i < course.WorkUnits.Count; i++)
+        {
+            <TimetablePreviewWorkUnit CourseDuration="course.Term.Duration"
+                                      WorkUnit="course.WorkUnits[i]"
+                                      WeekNumber="currentWeek"
+                                      CourseStartDate="course.StartDate" />
+            currentWeek += course.WorkUnits[i].Duration;
+        }
     }
 </div>
 
 @code {
     [Parameter]
     public required string CourseId { get; set; }
-
     private Course course = new Course();
 
     protected override async Task OnInitializedAsync()

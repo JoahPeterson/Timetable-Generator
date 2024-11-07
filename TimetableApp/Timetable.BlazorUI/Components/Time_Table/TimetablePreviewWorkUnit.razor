@@ -1,8 +1,12 @@
-﻿
-<div class="row previewWorkUnit-Row">
+﻿<div class="row previewWorkUnit-Row">
     <div class="workUnit-header col-2 border border-black d-flex justify-content-center align-items-center flex-column">
-        <div class="preview-week-number preview-emphasis">Week #@WeekNumber</div>
-        <div class="preview-due-date preview-finetext ">@WeekStartDate</div>
+
+
+        @foreach (var weekDetail in GenerateWeekDetails())
+        {
+            @weekDetail
+        }
+
         <div class="timetable-duration preview-finetext">
             Duration Hrs: @(Math.Ceiling((WorkUnit.Tasks.Sum(Task => string.IsNullOrEmpty(Task.Duration) ? 0 : Convert.ToInt32(Task.Duration)) / 60.0) * 10) / 10)
         </div>
@@ -15,9 +19,9 @@
 
             </div>
 
-            @foreach(WorkUnitTask workTask in WorkUnit.Tasks)
+            @foreach (WorkUnitTask workTask in WorkUnit.Tasks)
             {
-                <TimetablePreviewWorkTask WorkUnitTask="workTask"/>
+                <TimetablePreviewWorkTask WorkUnitTask="workTask" />
             }
         </div>
     }
@@ -32,7 +36,43 @@
     public required int WeekNumber { get; set; }
 
     [Parameter]
+    public int CourseDuration { get; set; }
+
+    [Parameter]
     public DateTime CourseStartDate { get; set; }
 
     public string WeekStartDate { get => CourseStartDate.AddDays(7 * (WeekNumber - 1)).ToString("MM/dd/yy"); }
+
+    /// <summary>
+    /// TEST CODE
+    /// </summary>
+    /// <returns></returns>
+    private List<RenderFragment> GenerateWeekDetails()
+    {
+        var weekDetails = new List<RenderFragment>();
+
+        // Use the WorkUnit's Duration property
+        int weeksToShow = Math.Min(WorkUnit.Duration, CourseDuration - WeekNumber + 1);
+
+        for (int i = 0; i < weeksToShow; i++)
+        {
+            int currentWeekNumber = WeekNumber + i;
+            DateTime currentWeekStartDate = CourseStartDate.AddDays(7 * (currentWeekNumber - 1));
+
+            weekDetails.Add(builder =>
+            {
+                builder.OpenElement(0, "div");
+                builder.AddAttribute(1, "class", "preview-week-number preview-emphasis");
+                builder.AddContent(2, $"Week #{currentWeekNumber}");
+                builder.CloseElement();
+
+                builder.OpenElement(3, "div");
+                builder.AddAttribute(4, "class", "preview-due-date preview-finetext");
+                builder.AddContent(5, currentWeekStartDate.ToString("MM/dd/yy"));
+                builder.CloseElement();
+            });
+        }
+
+        return weekDetails;
+    }
 }
