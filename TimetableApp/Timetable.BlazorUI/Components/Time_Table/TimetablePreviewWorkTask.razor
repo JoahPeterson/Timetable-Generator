@@ -9,14 +9,12 @@
         </div>
 
         <div class="row workUnitTask-details">
-            @if (TaskType != null)
-            {
-                <div class="col-4 preview-finetext">
-                    @TaskType.Name
-                </div>  
-            }
+
+            <div class="col-4 preview-finetext">
+                Task Category: @(TaskType == null || string.IsNullOrEmpty(TaskType.Name) ? "N/A" : TaskType.Name)
+            </div>
             <div class="col-4 text-nowrap preview-finetext">
-                Minutes: @WorkUnitTask.Duration
+                Minutes: @(string.IsNullOrEmpty(@WorkUnitTask.Duration) ? "N/A" : @WorkUnitTask.Duration)
             </div>
             <div class="col-4 preview-finetext">
                 Due Date: @(WorkUnitTask.DueDate?.ToString("MM/dd/yy") ?? "N/A")
