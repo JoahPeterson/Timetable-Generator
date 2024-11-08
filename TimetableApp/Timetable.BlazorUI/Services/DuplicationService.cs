@@ -101,4 +101,48 @@ public class DuplicationService
         // Return the updated tasks list
         return duplicatedTasks;
     }
+
+    public async Task<List<WorkUnit>> CombineWorkUnits(List<WorkUnit> workUnits)
+    {
+        workUnits.Sort((wu1, wu2) =>
+            (wu1?.StartDate ?? DateTime.MinValue).CompareTo(wu2?.StartDate ?? DateTime.MinValue));
+
+        List<WorkUnit> combinedWorkUnits = new List<WorkUnit>();
+        List<WorkUnit> workUnitsToRemove = new List<WorkUnit>();
+
+        // Process pairs of work units
+        for (int i = 0; i < workUnits.Count - 1; i += 2)
+        {
+            WorkUnit currentWorkUnit = workUnits[i];
+            WorkUnit nextWorkUnit = workUnits[i + 1];
+
+            currentWorkUnit.Tasks?.AddRange(
+                HandleWorkUnitTaskDuplication(
+                    nextWorkUnit.Tasks,
+                    currentWorkUnit,
+                    nextWorkUnit.StartDate,
+                    true));
+
+            await _workUnitData.UpdateAsync(currentWorkUnit);
+
+            // Add to our lists
+            combinedWorkUnits.Add(currentWorkUnit);
+            workUnitsToRemove.Add(nextWorkUnit);
+        }
+
+        // Handle the last work unit if there's an odd number
+        if (workUnits.Count % 2 != 0)
+        {
+            combinedWorkUnits.Add(workUnits.Last());
+        }
+
+        // Remove the unneeded work units
+        foreach (WorkUnit workUnit in workUnitsToRemove)
+        {
+            await _workUnitData.DeleteAsync(workUnit.Id);
+        }
+
+        return combinedWorkUnits;
+    }
+
 }

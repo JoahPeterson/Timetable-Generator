@@ -11,6 +11,7 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject WorkUnitDateService WorkUnitDateService
+@inject DuplicationService DuplicationService
 @rendermode InteractiveServer
 @using System.Text.Json
 @using TimetableApp.DataModels.Models
@@ -147,6 +148,11 @@
 
         // Fetch term durations from the database
         termDurations = await TermDurationData.GetAsync();
+
+        if (isEditMode)
+        {
+            termDurations = SetTermDurations(termDurations);
+        }
     }
 
     private async Task CalculateEndDate()
@@ -202,6 +208,16 @@
         await ShowPreviewDialog(); // Display the MudBlazor dialog after saving
     }
 
+    private List<TermDuration> SetTermDurations(List<TermDuration> allTermDurations)
+    {
+        List<TermDuration> newTermList = new List<TermDuration>();
+        
+        newTermList.AddRange(allTermDurations.Where(td => td.Length >= course.Term.Duration));
+        newTermList.AddRange(allTermDurations.Where(td => td.Length == course.Term.Duration / 2));
+
+        return newTermList;
+    }
+
     private async Task ShowPreviewDialog()
     {
         var parameters = new DialogParameters
@@ -230,7 +246,10 @@
                 if (isUpdateWorkUnitRequied)
                 {
                     //course = await WorkUnitDateService.UpdateWorkUnitStartAndEndDateAndWorkTask(oldCourse, course);
-                    
+                    if (originalTermDuration > course.Term.Duration)
+                    {
+                        course.WorkUnits = await DuplicationService.CombineWorkUnits(course.WorkUnits);
+                    }
                     course = await WorkUnitDateService.UpdateWorkUnitsStartAndEndDate(course);
                 }
             }
