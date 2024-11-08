@@ -19,7 +19,7 @@
                 Minutes: @WorkUnitTask.Duration
             </div>
             <div class="col-4 preview-finetext">
-                Due Date: Bummy Data
+                Due Date: @(WorkUnitTask.DueDate?.ToString("MM/dd/yy") ?? "N/A")
             </div>
         </div>
     </div>
