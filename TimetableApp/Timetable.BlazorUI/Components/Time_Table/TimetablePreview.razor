@@ -4,8 +4,12 @@
 @inject ICourseData CourseData
 
 <div class="timetable-main">
-    <TimetablePreviewHeader />
-    <div class="preview-course-name bg-red row d-flex justify-content-center align-items-center flex-column">
+    <div class="d-flex justify-content-between">
+        <div> <TimetablePreviewHeader /></div>
+        <div class="d-print-none"><button onclick="window.print();" class="btn mstc-gold-btn px-3"><i class="bi bi-printer"></i> Print</button></div>
+    </div>
+   
+    <div class="preview-course-name bg-red  row d-flex justify-content-center align-items-center flex-column course-name">
         @course.Name
     </div>
     @{
