@@ -107,9 +107,6 @@
 
     private async Task HandleDrop(DragEventArgs e, string workUnitId)
     {
-        // Hide Trash Bin
-        await JS.InvokeVoidAsync("HideElement", "trash-bin");
-
         draggedTaskId = await JS.InvokeAsync<string>("GetSession", "TaskId");
         workTaskId = await JS.InvokeAsync<string>("GetSession", "WorkTaskId");
         previousWorkUnitId = await JS.InvokeAsync<string>("GetSession", "WorkUnitId");
@@ -194,7 +191,6 @@
         await JS.InvokeVoidAsync("SetSession", "WorkUnitId", WorkUnit.Id);
         await JS.InvokeVoidAsync("toggleCollapse", "workUnitCollapse");
         await JS.InvokeVoidAsync("toggleCollapse", "workTaskCollapse");
-        await JS.InvokeVoidAsync("ShowElement", "trash-bin");
     }
     private async Task WorkUnitTaskEditOnClick(WorkUnitTask workUnitTask)
     {

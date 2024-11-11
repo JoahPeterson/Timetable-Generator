@@ -44,7 +44,7 @@
         <!-- WorkTask Form -->
         <WorkTaskForm @ref="WorkTaskForm" OnWorkTaskFormSubmit="UpdateWorkTasks" />
 
-        <div id="trash-bin" style="display: none;" class="justify-content-center align-items-center mt-3"
+        <div id="trash-bin" class="justify-content-center align-items-center mt-3 text-center"
              @ondrop="HandleDeleteDrop"
              ondragover="event.preventDefault();">
             <i class="bi bi-trash text-danger" style="font-size: 5rem;"></i>
@@ -173,9 +173,6 @@
 
             // Update the page
             StateHasChanged();
-
-            // Hide Trash Bin
-            await JS.InvokeVoidAsync("HideElement", "trash-bin");
         }
     }
 
