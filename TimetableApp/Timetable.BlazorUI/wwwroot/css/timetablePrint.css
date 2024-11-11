@@ -1,5 +1,9 @@
 ﻿
 @media print {
+    body{
+        background-color: #ffffff;
+    }
+
     .hide-print
     {
         display: none!important;
