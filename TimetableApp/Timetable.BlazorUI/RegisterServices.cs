@@ -94,5 +94,18 @@ public static class RegisterServices
         
         builder.Services.AddSingleton<WorkUnitDateService>();
         builder.Services.AddSingleton<DuplicationService>();
+
+        builder.Services.AddScoped(sp => {
+            var client = new HttpClient
+            {
+                BaseAddress = new Uri("https://localhost:7293")
+            };
+
+            // Add the API key as a custom header
+            client.DefaultRequestHeaders.Add("x-api-key", builder.Configuration["ExcelWebApiKey"]);
+
+            return client;
+        });
+
     }
 }

@@ -24,12 +24,19 @@ public class ExcelExportController : ControllerBase
     {
         try
         {
-            var data = JsonSerializer.Deserialize<Course>(jsonData);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            var data = JsonSerializer.Deserialize<Course>(jsonData, options);
 
             if (data == null)
             {
                 return BadRequest("Invalid or empty JSON data");
             }
+
+
 
             var fileContents = _excelManager.ProcessCourse(data);
 
