@@ -44,12 +44,6 @@
         <!-- WorkTask Form -->
         <WorkTaskForm @ref="WorkTaskForm" OnWorkTaskFormSubmit="UpdateWorkTasks" />
 
-        <div id="trash-bin" class="justify-content-center align-items-center mt-3 text-center"
-             @ondrop="HandleDeleteDrop"
-             ondragover="event.preventDefault();">
-            <i class="bi bi-trash text-danger" style="font-size: 5rem;"></i>
-        </div>
-    
     </div>
 </div>
 
@@ -148,32 +142,6 @@
 
         // Update UI
         StateHasChanged();
-    }
-
-    private async Task HandleDeleteDrop(DragEventArgs e)
-    {
-        // Get ID's from session storage
-        string taskId = await JS.InvokeAsync<string>("GetSession", "TaskId");
-        string workUnitId = await JS.InvokeAsync<string>("GetSession", "WorkUnitId");
-
-        // Check if taskIf is null or empty
-        if (!string.IsNullOrEmpty(taskId))
-        {
-            // Find the WorkUnit in the Course
-            WorkUnit workUnit = course.WorkUnits.Where(c => c.Id == workUnitId).First();
-
-            // Find the WorkUnitTask in the WorkUnit
-            WorkUnitTask workUnitTask = workUnit.Tasks.Where(w => w.Id == taskId).First();
-
-            // Remove the WorkUnitTask from the list of tasks on the WorkUnit
-            workUnit.Tasks.Remove(workUnitTask);
-
-            // Update the WorkUnit in the MongoDB
-            WorkUnitData.UpdateAsync(workUnit);
-
-            // Update the page
-            StateHasChanged();
-        }
     }
 
     private void HandleWorkUnitSelected(WorkUnit workUnit)
