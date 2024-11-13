@@ -1,5 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 using Timetable.ExcelApi.Authentication;
+using Timetable.ExcelApi.Services;
 
 namespace Timetable.ExcelApi;
 
@@ -39,6 +40,7 @@ public static class RegisterServices
             c.AddSecurityRequirement(requirement);
         });
 
+        builder.Services.AddTransient<ExcelDocumentManager>();
         builder.Configuration.AddUserSecrets<Program>();
     }
 }
