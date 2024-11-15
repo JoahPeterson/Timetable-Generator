@@ -23,7 +23,13 @@
         <EditForm FormName="WorkUnitForm" Model="workUnit" OnValidSubmit="@SaveWorkUnit" class="form-inline">
             <DataAnnotationsValidator />
             <ValidationSummary />
-
+            <div class="text-end">
+                <MudTooltip Text="To schedule a holiday or break in your timetable, add a work unit that covers the break period and label it as 'Break Week' or similar. This way, the break will be clearly marked in your schedule, and no tasks will be assigned for that period." Color="Color.Dark" Placement="Placement.Top">
+                    @* <MudButton Class="py-0 px-0 button-text-normal">Holiday<i class="bi bi-question-circle"></i></MudButton> *@
+                    Holiday Break <i class="bi bi-question-circle"></i>
+                </MudTooltip>
+            </div>
+            
             <!-- Inline Form Fields -->
             <div class="form-group mx-sm-3 mb-2">
                 <label class="fw-bold" for="Name">Work Unit Name</label>
