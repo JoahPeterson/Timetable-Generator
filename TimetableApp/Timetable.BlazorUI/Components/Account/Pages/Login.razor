@@ -12,56 +12,68 @@
 
 <PageTitle>Login</PageTitle>
 
-<div class="d-flex justify-content-center">
-    <div class="col-md-4">
-        <section class="mt-5">
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-sm" style="max-width: 400px; width: 100%">
+        <div class="card-body p-4">
+            <h1 class="text-center mb-4">Login</h1>
+
             <StatusMessage Message="@errorMessage" />
             <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label for="email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Email" />
                 </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger" />
+                <ValidationMessage For="() => Input.Email" class="text-danger" />
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">
+                        <i class="bi bi-lock"></i>
+                    </span>
+                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Password" />
                 </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
+                <ValidationMessage For="() => Input.Password" class="text-danger" />
+
+                <div class="mb-3">
+                    <label class="form-label d-flex align-items-center gap-2">
                         <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
                         Remember me
                     </label>
                 </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+
+                <button type="submit" class="btn mstc-gold-btn w-100 mb-3">Login</button>
+
+                <div class="position-relative my-4">
+                    <hr class="my-2" />
+                    <div class="position-absolute top-50 start-50 translate-middle px-3 bg-white">
+                        or
+                    </div>
                 </div>
             </EditForm>
-            <div class="col-md-6 col-md-offset-2 mt-3">
+
+            <div class="text-center mt-3">
                 <ExternalLoginPicker />
             </div>
-            <div>
-                <p>
+
+            <div class="mt-4 text-center">
+                @* TODO *@
+                @* Commented Links out for now we may implement at a later time *@
+@*                 <p class="mb-2">
                     <a href="Account/ForgotPassword">Forgot your password?</a>
-                </p>
-                <p>
+                </p> *@
+                <p class="mb-2">
                     <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
                 </p>
-                <p>
+@*                 <p class="mb-2">
                     <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                </p>
+                </p> *@
             </div>
-        </section>
+        </div>
     </div>
-@*     <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div> *@
 </div>
 
 @code {

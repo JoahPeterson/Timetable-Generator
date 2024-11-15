@@ -35,6 +35,9 @@
                                 <div class="p-0 text-decoration-none" @onclick="() => WorkUnitTaskEditOnClick(task)">
                                     <i class="bi bi-pencil-square icon-hover"></i>
                                 </div>
+                                <div class="p-0 text-decoration-none" @onclick="() => HandleDelete(WorkUnit.Id, task.Id)">
+                                    <i class="bi bi-trash icon-hover"></i>
+                                </div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <p class="m-0">(min): @task.Duration </p>
@@ -105,6 +108,28 @@
         await OnSelected.InvokeAsync(WorkUnit);
     }
 
+    private async Task HandleDelete(string workUnitId, string taskId)
+    {
+       
+        // Check if taskIf is null or empty
+        if (!string.IsNullOrEmpty(taskId))
+        {
+            // Find the WorkUnit in the Course
+            WorkUnit workUnit = Course.WorkUnits.Where(c => c.Id == workUnitId).First();
+
+            // Find the WorkUnitTask in the WorkUnit
+            WorkUnitTask workUnitTask = workUnit.Tasks.Where(w => w.Id == taskId).First();
+
+            // Remove the WorkUnitTask from the list of tasks on the WorkUnit
+            workUnit.Tasks.Remove(workUnitTask);
+
+            // Update the WorkUnit in the MongoDB
+            WorkUnitData.UpdateAsync(workUnit);
+
+            // Update the page
+            StateHasChanged();
+        }
+    }
     private async Task HandleDrop(DragEventArgs e, string workUnitId)
     {
         draggedTaskId = await JS.InvokeAsync<string>("GetSession", "TaskId");
