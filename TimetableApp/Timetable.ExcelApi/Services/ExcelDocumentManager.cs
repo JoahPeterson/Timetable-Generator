@@ -1,34 +1,77 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Http;
+using TimetableApp.DataModels.DataAccess;
 using TimetableApp.DataModels.Models;
 
 namespace Timetable.ExcelApi.Services;
 
 public class ExcelDocumentManager
 {
-    public byte[] ProcessCourse(Course course)
+    private readonly ITaskTypeData _taskTypeData;
+    private readonly IWorkTaskData _workTaskData;
+
+    public ExcelDocumentManager(ITaskTypeData taskTypeData, IWorkTaskData workTaskData)
     {
+        _taskTypeData = taskTypeData;
+        _workTaskData = workTaskData;
+    }
+    public async Task<byte[]> ProcessCourse(Course course)
+    {
+        var getTaskData = _workTaskData.GetUsersWorkTasksAsync(course.AuditInformation.CreatedById);
+        var getTaskTypeData = _taskTypeData.GetUsersTaskTypesAsync(course.AuditInformation.CreatedById);
+
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Timetable");
 
-        // Create top row with Course details
-
+        // Create Header
+        int currentRow = 1;
         // Add title in merged cells (first row)
-        worksheet.Range("A1:E1").Merge();
-        worksheet.Cell("A1").Value = "Course Timetable";
-        worksheet.Range("A1:E1").Style
+        worksheet.Range($"A{currentRow}:E{currentRow}").Merge();
+        worksheet.Cell($"A{currentRow}").Value = "Course Timetable";
+        worksheet.Range($"A{currentRow}:E{currentRow}").Style
             .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
             .Font.SetBold(true)
             .Font.SetFontSize(16)
-            .Fill.SetBackgroundColor(XLColor.LightGray);
+            .Font.SetFontColor(XLColor.White)
+            .Fill.SetBackgroundColor(XLColor.FromHtml("#F79646"));
 
-        worksheet.Cell(2, 2).Value = "Start Date";
-        worksheet.Cell(2, 3).Value = course.StartDate;
+        // Drop down a row
+        currentRow++;
+        
+        // Create the Course details section
+        var tempColumnIndex = 1;
+        worksheet.Cell(currentRow, tempColumnIndex).Value = "Start Date";
+        worksheet.Cell(currentRow + 1, tempColumnIndex).Value = course.StartDate.ToString("d");
 
-        worksheet.Range("A3:E3").Merge();
-        worksheet.Range("A3:E3").Style
-            .Fill.SetBackgroundColor(XLColor.AntiqueBrass)
-            .Font.SetFontSize(6);
+        tempColumnIndex++;
+        worksheet.Cell(currentRow, tempColumnIndex).Value = "Course Duration";
+        worksheet.Cell(currentRow + 1, tempColumnIndex).Value = course.Term.Duration;
+
+        tempColumnIndex++;
+        worksheet.Cell(currentRow, tempColumnIndex).Value = "Term";
+        worksheet.Cell(currentRow + 1, tempColumnIndex).Value = course.Term.Name;
+
+        worksheet.Range($"A{currentRow}:E{currentRow}").Style
+            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+            .Font.SetBold(true)
+            .Font.SetFontSize(10);
+
+        // Drop down a row
+        currentRow++;
+        worksheet.Range($"A{currentRow}:E{currentRow}").Style
+            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+            .Font.SetItalic(true)
+            .Font.SetFontSize(8);
+
+        // Add Border to the Course Details Section
+        worksheet.Range($"A{currentRow - 1}:E{currentRow}").Style
+            .Border.SetOutsideBorder(XLBorderStyleValues.Thin);
+
+        // Drop down a row
+        currentRow++;
+
+        var tableHeaderRow = currentRow;
 
         // Define headers
         var headers = new[]
@@ -43,28 +86,47 @@ public class ExcelDocumentManager
         //// Add headers
         for (int i = 0; i < headers.Length; i++)
         {
-            worksheet.Cell(4, i + 1).Value = headers[i];
-            worksheet.Cell(4, i + 1).Style.Font.Bold = true;
+            worksheet.Cell(currentRow, i + 1).Value = headers[i];
+            worksheet.Cell(currentRow, i + 1).Style.Font.Bold = true;
         }
 
-        List<WorkUnitTask> workUnitTasks = TaskListFlattened(course);
+        // Drop down a row
+        currentRow++;
 
-        //// Add data
-        for (int row = 0; row < workUnitTasks.Count; row++)
+        // Run both tasks in parallel and wait for completion
+        await Task.WhenAll(getTaskData, getTaskTypeData);
+        var taskDataResult = await getTaskData;
+        var taskTypeDataResult = await getTaskTypeData;
+
+        foreach (WorkUnit workUnit in course.WorkUnits)
         {
-            var task = workUnitTasks[row];
-            worksheet.Cell(row + 5, 1).Value = task.WorkUnitId;
-            worksheet.Cell(row + 5, 2).Value = task.TaskId;
-            worksheet.Cell(row + 5, 3).Value = task.Duration;
-            worksheet.Cell(row + 5, 4).Value = task.DueDate;
-            worksheet.Cell(row + 5, 5).Value = "NEEDS HELP";
+            if (workUnit.Tasks == null)
+                continue;
+
+            foreach (WorkUnitTask task in workUnit.Tasks)
+            {
+                WorkTask? workTask = taskDataResult.FirstOrDefault(td => td.Id == task.TaskId);
+                worksheet.Cell(currentRow, 1).Value = workUnit.Name;
+                worksheet.Cell(currentRow, 2).Value = workTask?.Name ?? "Task Name not found";
+                worksheet.Cell(currentRow, 3).Value = Convert.ToInt32(task.Duration);
+                worksheet.Cell(currentRow, 4).Value = task.DueDate?.ToString("d") ?? "N/A";
+                worksheet.Cell(currentRow, 5).Value =
+                    workTask != null
+                        ? (workTask.TypeId != null
+                            ? taskTypeDataResult.FirstOrDefault(tt => tt.Id == workTask.TypeId)?.Name ?? "Task Type not found"
+                            : "N/A")
+                        : "Work Task not found";
+                currentRow++;
+            }
         }
 
-        //// Style the worksheet
-        //var dataRange = worksheet.Range(1, 1, sessions.Count + 1, headers.Length);
-        //dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-        //dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        // Style the worksheet
+        var dataRange = worksheet.Range(tableHeaderRow,1, currentRow -1, headers.Length);
 
+        var table = dataRange.CreateTable();
+        table.ShowHeaderRow = true;
+        table.Theme = XLTableTheme.TableStyleMedium7;
+        
         // Auto-fit columns
         worksheet.Columns().AdjustToContents();
 
@@ -72,19 +134,5 @@ public class ExcelDocumentManager
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
         return stream.ToArray();
-    }
-
-
-    private List<WorkUnitTask> TaskListFlattened(Course course)
-    {
-        List<WorkUnitTask> flattenedList = new();
-
-        foreach(WorkUnit workUnit in course.WorkUnits)
-        {
-            if (workUnit.Tasks != null && workUnit.Tasks.Any())
-                flattenedList.AddRange(workUnit.Tasks);
-        }
-
-        return flattenedList;
     }
 }

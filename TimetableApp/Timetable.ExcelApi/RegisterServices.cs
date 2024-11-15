@@ -1,6 +1,7 @@
 ﻿using Microsoft.OpenApi.Models;
 using Timetable.ExcelApi.Authentication;
 using Timetable.ExcelApi.Services;
+using TimetableApp.DataModels.DataAccess;
 
 namespace Timetable.ExcelApi;
 
@@ -39,6 +40,18 @@ public static class RegisterServices
             };
             c.AddSecurityRequirement(requirement);
         });
+
+        builder.Services.AddSingleton<IDbConnection, DbConnection>();
+        builder.Services.AddSingleton<ICourseData, MongoCourseData>();
+        builder.Services.AddSingleton<ICourseTypeData, MongoCourseTypeData>();
+        builder.Services.AddSingleton<IHelpArticleData, MongoHelpArticleData>();
+        builder.Services.AddSingleton<ITaskTypeData, MongoTaskTypeData>();
+        builder.Services.AddSingleton<ITermData, MongoTermData>();
+        builder.Services.AddSingleton<ITermDurationData, MongoTermDurationData>();
+        builder.Services.AddSingleton<IUserData, MongoUserData>();
+        builder.Services.AddSingleton<IWorkTaskData, MongoWorkTaskData>();
+        builder.Services.AddSingleton<IWorkUnitTaskData, MongoWorkUnitTaskData>();
+        builder.Services.AddSingleton<IWorkUnitData, MongoWorkUnitData>();
 
         builder.Services.AddTransient<ExcelDocumentManager>();
         builder.Configuration.AddUserSecrets<Program>();

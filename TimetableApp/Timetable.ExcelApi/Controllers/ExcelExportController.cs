@@ -20,7 +20,7 @@ public class ExcelExportController : ControllerBase
     }
 
     [HttpPost("export")]
-    public IActionResult Export([FromBody] JsonDocument jsonData)
+    public async Task<IActionResult> Export([FromBody] JsonDocument jsonData)
     {
         try
         {
@@ -36,9 +36,7 @@ public class ExcelExportController : ControllerBase
                 return BadRequest("Invalid or empty JSON data");
             }
 
-
-
-            var fileContents = _excelManager.ProcessCourse(data);
+            var fileContents = await _excelManager.ProcessCourse(data);
 
             return File(
                 fileContents,
