@@ -60,15 +60,17 @@
             </div>
 
             <div class="mt-4 text-center">
-                <p class="mb-2">
+                @* TODO *@
+                @* Commented Links out for now we may implement at a later time *@
+@*                 <p class="mb-2">
                     <a href="Account/ForgotPassword">Forgot your password?</a>
-                </p>
+                </p> *@
                 <p class="mb-2">
                     <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
                 </p>
-                <p class="mb-2">
+@*                 <p class="mb-2">
                     <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                </p>
+                </p> *@
             </div>
         </div>
     </div>
