@@ -9,18 +9,24 @@ namespace Timetable.ExcelApi.Services;
 
 public class ExcelDocumentManager
 {
+    private readonly ICourseTypeData _courseTypeData;
     private readonly ITaskTypeData _taskTypeData;
+    private readonly ITermData _termData;
     private readonly IUserData _userData;
     private readonly IWorkTaskData _workTaskData;
 
     private readonly int _courseHeaderRow = 2;
-    private readonly string[] _courseHeaders = { "Start Date", "Course Duration", "Term", "Name", "Description" };
+    private readonly string[] _courseHeaders = { "Start Date", "Course Duration", "Term", "Name",  "Course Modality", "Description" };
     private readonly int _workUnitHeaderRow = 4;
-    private readonly string[] _workUnitHeaders = { "Work Unit", "Task Name", "Duration Min", "Due Date", "Category" };
+    private readonly string[] _workUnitHeaders = { "Work Unit", "Task Name", "Duration Min", "Due Date", "Category", "Description"};
 
-    public ExcelDocumentManager(ITaskTypeData taskTypeData, IUserData userData, IWorkTaskData workTaskData)
+    private User _user;
+
+    public ExcelDocumentManager(ITaskTypeData taskTypeData, IUserData userData, IWorkTaskData workTaskData, ICourseTypeData courseTypeData, ITermData termData)
     {
+        _courseTypeData = courseTypeData;
         _taskTypeData = taskTypeData;
+        _termData = termData;
         _userData = userData;
         _workTaskData = workTaskData;
     }
@@ -28,6 +34,7 @@ public class ExcelDocumentManager
     {
         var getTaskData = _workTaskData.GetUsersWorkTasksAsync(course.AuditInformation.CreatedById);
         var getTaskTypeData = _taskTypeData.GetUsersTaskTypesAsync(course.AuditInformation.CreatedById);
+        var courseType = await _courseTypeData.GetByIdAsync(course.CourseTypeId);
 
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Timetable");
@@ -35,9 +42,9 @@ public class ExcelDocumentManager
         // Create Header
         int currentRow = 1;
         // Add title in merged cells (first row)
-        worksheet.Range($"A{currentRow}:E{currentRow}").Merge();
+        worksheet.Range($"A{currentRow}:F{currentRow}").Merge();
         worksheet.Cell($"A{currentRow}").Value = "Course Timetable";
-        worksheet.Range($"A{currentRow}:E{currentRow}").Style
+        worksheet.Range($"A{currentRow}:F{currentRow}").Style
             .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
             .Font.SetBold(true)
             .Font.SetFontSize(16)
@@ -66,22 +73,26 @@ public class ExcelDocumentManager
 
         tempColumnIndex++;
         worksheet.Cell(currentRow, tempColumnIndex).Value = _courseHeaders[4];
+        worksheet.Cell(currentRow + 1, tempColumnIndex).Value = courseType?.Name ?? "N/A";
+
+        tempColumnIndex++;
+        worksheet.Cell(currentRow, tempColumnIndex).Value = _courseHeaders[5];
         worksheet.Cell(currentRow + 1, tempColumnIndex).Value = course.Description;
 
-        worksheet.Range($"A{currentRow}:E{currentRow}").Style
+        worksheet.Range($"A{currentRow}:F{currentRow}").Style
             .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
             .Font.SetBold(true)
             .Font.SetFontSize(10);
 
         // Drop down a row
         currentRow++;
-        worksheet.Range($"A{currentRow}:E{currentRow}").Style
+        worksheet.Range($"A{currentRow}:F{currentRow}").Style
             .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
             .Font.SetItalic(true)
             .Font.SetFontSize(8);
 
         // Add Border to the Course Details Section
-        worksheet.Range($"A{currentRow - 1}:E{currentRow}").Style
+        worksheet.Range($"A{currentRow - 1}:F{currentRow}").Style
             .Border.SetOutsideBorder(XLBorderStyleValues.Thin);
 
         // Drop down a row
@@ -122,6 +133,8 @@ public class ExcelDocumentManager
                             ? taskTypeDataResult.FirstOrDefault(tt => tt.Id == workTask.TypeId)?.Name ?? "Task Type not found"
                             : "N/A")
                         : "Work Task not found";
+                worksheet.Cell(currentRow, 6).Value = workTask?.Description;
+
                 currentRow++;
             }
         }
@@ -167,31 +180,29 @@ public class ExcelDocumentManager
             throw new Exception("User ID is not valid.");
         }
 
-        User user = await _userData.GetByIdAsync(userId);
+        _user = await _userData.GetByIdAsync(userId);
 
-        if (user == null)
+        if (_user == null)
         {
             throw new Exception("User not found.");
         }
 
         List<TaskType> taskTypes = await _taskTypeData.GetUsersTaskTypesAsync(userId);
         List<WorkTask> workTasks = await _workTaskData.GetUsersWorkTasksAsync(userId);
+        List<CourseType> courseTypes = await _courseTypeData.GetAsync();
 
         // Extract Course details
         var course = new Course
         {
-            Description = worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, "Description")).GetString(),
-            Name = worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, "Name")).GetString(),
-            StartDate = DateTime.Parse(worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, "Start Date")).GetString()),
-            Term = new Term
-            {
-                Duration = int.Parse(worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, "Course Duration")).GetString()),
-                Name = worksheet.Cell(3, 3).GetString() // Assuming term name at (3, 3)
-            },
+            Description = GetValueFromCell(worksheet, _courseHeaderRow + 1, "Description"),
+            Name = GetValueFromCell(worksheet, _courseHeaderRow + 1, "Name"),
+            StartDate = DateTime.Parse(GetValueFromCell(worksheet, _courseHeaderRow + 1, "Start Date")),
+            CourseTypeId = GetCourseIdType(worksheet, _courseHeaderRow + 1, "Course Modality"),
+            Term = GetTerm(worksheet),
             WorkUnits = new List<WorkUnit>()
         };
 
-
+        course.AuditInformation.CreatedById = userId;
 
         // Parse work units and tasks from the worksheet, starting from row 6
         int currentRow = 6;
@@ -230,6 +241,31 @@ public class ExcelDocumentManager
         }
 
         return course;
+    }
+
+    private Term GetTerm(IXLWorksheet worksheet)
+    {
+        var termName = worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, "Term") + 1).GetString();
+        var termDuration = int.Parse(worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, "Course Duration") + 1).GetString());
+
+        var term = _termData.GetAllAsync().Result.FirstOrDefault(t => t.Name == termName);
+        term.Name = termName;
+        term.Duration = termDuration;
+
+        return term;
+    }
+
+    private string GetCourseIdType(IXLWorksheet worksheet, int row, string columnHeaderName)
+    {
+        var courseTypeName = worksheet.Cell(row, Array.IndexOf(_courseHeaders, columnHeaderName) + 1).GetString();
+        var returnValue = _courseTypeData.GetAsync().Result.FirstOrDefault(ct => ct.Name == courseTypeName)?.Id ?? string.Empty;
+        return returnValue;
+    }
+
+    private string GetValueFromCell(IXLWorksheet worksheet, int row, string columnHeaderName)
+    {
+        var returnValue = worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, columnHeaderName) + 1).GetString();
+        return returnValue;
     }
 
     private void VerifyTaskCategories(IEnumerable<string> taskCategories)
