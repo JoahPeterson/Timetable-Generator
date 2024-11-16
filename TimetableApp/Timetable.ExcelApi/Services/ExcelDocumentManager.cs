@@ -9,11 +9,13 @@ namespace Timetable.ExcelApi.Services;
 
 public class ExcelDocumentManager
 {
+    private readonly ICourseData _courseData;
     private readonly ICourseTypeData _courseTypeData;
     private readonly ITaskTypeData _taskTypeData;
     private readonly ITermData _termData;
     private readonly IUserData _userData;
     private readonly IWorkTaskData _workTaskData;
+    private readonly IWorkUnitData _workUnitData;
 
     private readonly int _courseHeaderRow = 2;
     private readonly string[] _courseHeaders = { "Start Date", "Course Duration", "Term", "Name",  "Course Modality", "Description" };
@@ -21,14 +23,26 @@ public class ExcelDocumentManager
     private readonly string[] _workUnitHeaders = { "Work Unit", "Task Name", "Duration Min", "Due Date", "Category", "Description"};
 
     private User _user;
+    private List<TaskType> _taskTypes;
+    private List<WorkTask> _workTasks;
+    List<CourseType> _courseTypes;
 
-    public ExcelDocumentManager(ITaskTypeData taskTypeData, IUserData userData, IWorkTaskData workTaskData, ICourseTypeData courseTypeData, ITermData termData)
+    public ExcelDocumentManager(
+        ITaskTypeData taskTypeData, 
+        IUserData userData,
+        IWorkTaskData workTaskData,
+        ICourseTypeData courseTypeData,
+        ITermData termData,
+        ICourseData courseData,
+        IWorkUnitData workUnitData)
     {
+        _courseData = courseData;
         _courseTypeData = courseTypeData;
         _taskTypeData = taskTypeData;
         _termData = termData;
         _userData = userData;
         _workTaskData = workTaskData;
+        _workUnitData = workUnitData;
     }
     public async Task<byte[]> ProcessCourse(Course course)
     {
@@ -187,9 +201,9 @@ public class ExcelDocumentManager
             throw new Exception("User not found.");
         }
 
-        List<TaskType> taskTypes = await _taskTypeData.GetUsersTaskTypesAsync(userId);
-        List<WorkTask> workTasks = await _workTaskData.GetUsersWorkTasksAsync(userId);
-        List<CourseType> courseTypes = await _courseTypeData.GetAsync();
+        _taskTypes = await _taskTypeData.GetUsersTaskTypesAsync(userId);
+        _workTasks = await _workTaskData.GetUsersWorkTasksAsync(userId);
+        _courseTypes = await _courseTypeData.GetAsync();
 
         // Extract Course details
         var course = new Course
@@ -201,47 +215,130 @@ public class ExcelDocumentManager
             Term = GetTerm(worksheet),
             WorkUnits = new List<WorkUnit>()
         };
-
         course.AuditInformation.CreatedById = userId;
+        course = await _courseData.CreateCourseAsync(course);
 
-        // Parse work units and tasks from the worksheet, starting from row 6
-        int currentRow = 6;
-        while (!worksheet.Cell(currentRow, 1).IsEmpty())
+        var newWorkUnits = await ProcessWorkUnits(worksheet, course);
+
+        foreach (var workUnit in newWorkUnits)
         {
-            var workUnitName = worksheet.Cell(currentRow, 1).GetString();
-            var workUnit = course.WorkUnits.FirstOrDefault(w => w.Name == workUnitName) ?? new WorkUnit
-            {
-                Name = workUnitName,
-                Tasks = new List<WorkUnitTask>()
-            };
-
-            var taskName = worksheet.Cell(currentRow, 2).GetString();
-            var duration = int.Parse(worksheet.Cell(currentRow, 3).GetString());
-            var dueDate = DateTime.TryParse(worksheet.Cell(currentRow, 4).GetString(), out var parsedDate)
-                ? parsedDate
-                : (DateTime?)null;
-            var category = worksheet.Cell(currentRow, 5).GetString();
-
-            //workUnit.Tasks.Add(new WorkUnitTask
-            //{
-            //    TaskId = Guid.NewGuid().ToString(), // Generate a new ID if not available
-            //    Name = taskName,
-            //    Duration = duration,
-            //    DueDate = dueDate,
-            //    Category = category
-            //});
-
-            //// Ensure the work unit is added only once
-            //if (!course.WorkUnits.Contains(workUnit))
-            //{
-            //    course.WorkUnits.Add(workUnit);
-            //}
-
-            //currentRow++;
+            await _workUnitData.CreateAsync(workUnit);
+            course.WorkUnits.Add(workUnit);
         }
 
-        return course;
+        
+        return await _courseData.UpdateCourseAsync(course);
     }
+
+    public async Task<List<WorkUnit>> ProcessWorkUnits(IXLWorksheet worksheet, Course course)
+    {
+        var workUnits = new Dictionary<string, WorkUnit>();
+
+        // Find the table in the worksheet
+        var table = worksheet.Tables.First();
+        var dataRange = table.DataRange;
+
+        // Skip the header row
+        foreach (var row in dataRange.RowsUsed())
+        {
+            // Extract values from each cell
+            var workUnitName = row.Cell(1).GetString().Trim();
+            var taskName = row.Cell(2).GetString().Trim();
+            var duration = row.Cell(3).GetString().Trim();
+            var dueDateStr = row.Cell(4).GetString().Trim();
+            var category = row.Cell(5).GetString().Trim();
+            var description = row.Cell(6).GetString().Trim();
+
+            // Parse the due date
+            DateTime? dueDate = null;
+            if (DateTime.TryParse(dueDateStr, out DateTime parsedDate))
+            {
+                dueDate = parsedDate;
+            }
+
+            // Get or create work unit
+            if (!workUnits.ContainsKey(workUnitName))
+            {
+                workUnits[workUnitName] = new WorkUnit
+                {
+                    Name = workUnitName,
+                    CourseId = course.Id,
+                    Tasks = new List<WorkUnitTask>(),
+                    AuditInformation = new Auditable
+                    {
+                        CreatedById = _user.Id,
+                    }
+                };
+            }
+
+            var workTask = await GetWorkTask(taskName, category, description);
+            // Create and add the task
+            var workUnitTask = new WorkUnitTask
+            {
+                Duration = duration,
+                DueDate = dueDate,
+                AuditInformation = new Auditable { CreatedById = _user.Id },
+                TaskId = workTask.Id
+            };
+
+
+            workUnits[workUnitName].Tasks.Add(workUnitTask);
+        }
+
+        return workUnits.Values.ToList();
+    }
+
+    private async Task<WorkTask> GetWorkTask(string name, string category, string description)
+    {
+        var workTask = _workTasks.FirstOrDefault(t => t.Name.Trim() == name.Trim());
+
+        if (workTask != null)
+            return workTask;
+
+
+        var taskType = await GetTaskType(category);
+
+        var taskId = taskType?.Id ?? null;
+
+        workTask = new WorkTask()
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = name,
+            TypeId = taskType.Id,
+            Description = description,
+            AuditInformation = new Auditable
+            {
+                CreatedById = _user.Id,
+            }
+        };
+        await _workTaskData.CreateAsync(workTask);
+
+        return workTask;
+    }
+
+    private async Task<TaskType> GetTaskType(string category)
+    {
+        if (category == "N/A")
+            return null;
+
+        var taskType = _taskTypes.FirstOrDefault(t => t.Name == category);
+
+        if (taskType != null)
+            return taskType;
+      
+        taskType = new TaskType
+        {
+            Name = category,
+            AuditInformation = new Auditable
+            {
+                CreatedById = _user.Id,
+            }
+        };
+
+        await _taskTypeData.CreateTaskTypeAsync(taskType);
+        return taskType;
+    }
+
 
     private Term GetTerm(IXLWorksheet worksheet)
     {
