@@ -49,4 +49,40 @@ public class ExcelExportController : ControllerBase
             return BadRequest($"Error processing request: {ex.Message}");
         }
     }
+
+    [HttpPost("import")]
+    public async Task<IActionResult> Import([FromHeader(Name = "X-User-Id")] string userId, IFormFile file)
+    {
+        if (string.IsNullOrEmpty(userId))
+            return BadRequest("User ID is missing in the header.");
+
+        if (file == null || file.Length == 0)
+            return BadRequest("No file was uploaded or the file is empty.");
+
+        if (!file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) ||
+                file.ContentType != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        {
+            return BadRequest("The uploaded file must be an Excel (.xlsx) file.");
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream();
+
+            // Assuming _excelManager has a method to read and create a Course object from the Excel file
+            var course = await _excelManager.CreateCourseFromExcel(stream, userId);
+
+            if (course == null)
+            {
+                return BadRequest("Invalid or improperly formatted Excel file.");
+            }
+
+            // You can return a result based on your needs, such as a confirmation message or the parsed data
+            return Ok(course); // Or return relevant response based on your use case
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Error processing file: {ex.Message}");
+        }
+    }
 }
