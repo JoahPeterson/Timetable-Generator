@@ -9,7 +9,7 @@ namespace TimetableApp.DataModels.DataAccess
     public interface ILogData
     {
         Task CreateAsync(Log log);
-        Task<Log?> GetByUserIdAsync(string loggedInUserId);
+        Task<List<Log>> GetByUserIdAsync(string loggedInUserId);
         Task<List<Log>> GetLogsAsync();
     }
 }

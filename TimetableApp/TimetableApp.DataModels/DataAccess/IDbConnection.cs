@@ -22,6 +22,9 @@ public interface IDbConnection
     IMongoCollection<HelpArticle> HelpArticleCollection { get; }
     string HelpArticleCollectionName { get; }
 
+    IMongoCollection<Log> LogCollection { get; }
+    string LogCollectionName { get; }
+
     IMongoCollection<TaskType> TaskTypeCollection { get; }
 
     string TaskTypeCollectionName { get; }
