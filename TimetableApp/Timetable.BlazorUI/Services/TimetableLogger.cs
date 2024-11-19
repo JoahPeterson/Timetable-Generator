@@ -1,24 +1,24 @@
-﻿namespace Timetable.ExcelApi.Services
+﻿namespace Timetable.BlazorUI.Services
 {
-    using Microsoft.AspNetCore.Components.Authorization;
     using Microsoft.Extensions.Logging;
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
+    using Timetable.BlazorUI.Services;
     using TimetableApp.DataModels.DataAccess;
     using TimetableApp.DataModels.Models;
 
     public class TimetableLogger : ILogger
     {
-
         private readonly ILogData _logData;
         private readonly IUserData _userData;
-        private readonly AuthenticationStateProvider _authProvider;
+        private readonly CurrentUserService _currentUserService;
 
-        public TimetableLogger(ILogData logData, IUserData userData, AuthenticationStateProvider authProvider)
+        public TimetableLogger(ILogData logData, IUserData userData, CurrentUserService currentUserService)
         {
             _logData = logData;
             _userData = userData;
-            _authProvider = authProvider;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -51,9 +51,7 @@
             var message = formatter(state, exception);
 
             // Get logged-in user 
-            var authState = await _authProvider.GetAuthenticationStateAsync();
-            var userId = authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value;
-
+            var userId = _currentUserService.GetUserId();
             var mongoUser = userId != null ? await _userData.GetUserFromAuthenticationAsync(userId) : null;
 
             // Create a new Log with details of the log entry
@@ -69,8 +67,6 @@
             // Asynchronously save the log to the database
             _ = _logData.CreateAsync(log);
         }
-
-
     }
 
     /// <summary>
@@ -79,30 +75,22 @@
     /// </summary>
     public class TimetableLoggerProvider : ILoggerProvider
     {
-        /// <summary>
-        /// Data access layer for storing logs.
-        /// </summary>
         private readonly ILogData _logData;
         private readonly IUserData _userData;
-        private readonly AuthenticationStateProvider _authProvider;
+        private readonly CurrentUserService _currentUserService;
 
-        /// <summary>
-        /// Initializes a new instance of the TimetableLoggerProvider.
-        /// </summary>
-        /// <param name="logData">Interface for log data persistence</param>
-        public TimetableLoggerProvider(ILogData logData, IUserData userData,
-        AuthenticationStateProvider authProvider)
+        public TimetableLoggerProvider(ILogData logData, IUserData userData, CurrentUserService currentUserService)
         {
             _logData = logData;
             _userData = userData;
-            _authProvider = authProvider;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
         /// Creates a new TimetableLogger instance.
         /// </summary>
         public ILogger CreateLogger(string categoryName) =>
-            new TimetableLogger(_logData, _userData, _authProvider);
+            new TimetableLogger(_logData, _userData, _currentUserService);
 
         public void Dispose() { }
     }
@@ -118,15 +106,16 @@
         /// <param name="loggingBuilder">The logging builder to configure</param>
         /// <param name="logData">Data access layer for logs</param>
         /// <param name="userData">Data access layer for users</param>
-        /// <param name="authProvider">Authentication state provider</param>
+        /// <param name="currentUserService">Current user service for getting user details</param>
         public static ILoggingBuilder AddTimetableLogger(
             this ILoggingBuilder loggingBuilder,
             ILogData logData,
             IUserData userData,
-            AuthenticationStateProvider authProvider)
+            CurrentUserService currentUserService)
         {
-            loggingBuilder.AddProvider(new TimetableLoggerProvider(logData, userData, authProvider));
+            loggingBuilder.AddProvider(new TimetableLoggerProvider(logData, userData, currentUserService));
             return loggingBuilder;
         }
     }
 }
+

@@ -5,7 +5,7 @@ using MudBlazor.Services;
 using Timetable.BlazorUI.Components.Account;
 using Timetable.BlazorUI.Data;
 using Timetable.BlazorUI.Services;
-using Timetable.ExcelApi.Services;
+using TimetableApp.DataModels.DataAccess;
 
 namespace Timetable.BlazorUI;
 
@@ -75,10 +75,11 @@ public static class RegisterServices
             .AddSignInManager()
             .AddDefaultTokenProviders();
 
+        builder.Services.AddHttpContextAccessor();
         builder.Services.AddMudServices();
         builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
         builder.Services.AddScoped<UserService>();
-
+        builder.Services.AddScoped<CurrentUserService>();
 
 
         builder.Services.AddSingleton<IDbConnection, DbConnection>();
@@ -97,14 +98,16 @@ public static class RegisterServices
         builder.Services.AddSingleton<WorkUnitDateService>();
         builder.Services.AddSingleton<DuplicationService>();
 
-        builder.Services.AddLogging(configure =>
+
+        builder.Services.AddLogging(loggingBuilder =>
         {
-            configure.AddTimetableLogger(
+            loggingBuilder.AddProvider(new TimetableLoggerProvider(
                 builder.Services.BuildServiceProvider().GetRequiredService<ILogData>(),
                 builder.Services.BuildServiceProvider().GetRequiredService<IUserData>(),
-        builder.Services.BuildServiceProvider().GetRequiredService<AuthenticationStateProvider>()
-            );
+                builder.Services.BuildServiceProvider().GetRequiredService<CurrentUserService>()
+            ));
         });
+
 
         builder.Services.AddScoped(sp => {
             var client = new HttpClient

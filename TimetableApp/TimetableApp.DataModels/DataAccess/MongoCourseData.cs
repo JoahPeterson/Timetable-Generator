@@ -1,4 +1,5 @@
 ﻿using Amazon.Runtime.Internal.Util;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +17,13 @@ namespace TimetableApp.DataModels.DataAccess
         private readonly IDbConnection _db;
         private readonly IMongoCollection<Course> _courses;
         private readonly IUserData _userData;
-        private readonly ILogger _logger;
+        private readonly ILogger<MongoCourseData> _logger;
 
         /// <summary>
         /// Intantiates a new instance of the Mongo Course data class.
         /// </summary>
         /// <param name="db">Instance of a Mongo DB Connection</param>
-        public MongoCourseData(IDbConnection db, IUserData userData, ILogger logger)
+        public MongoCourseData(IDbConnection db, IUserData userData, ILogger<MongoCourseData> logger)
         {
             _db = db;
             _courses = db.CourseCollection;
@@ -60,7 +61,8 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to create course for user {UserId}", course.AuditInformation.CreatedById);
+                
+                _logger.LogError(ex, "Failed to create course for user {UserId}", course.AuditInformation.CreatedById);
                 await session.AbortTransactionAsync();
                 return null;
             }
@@ -81,7 +83,7 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch(Exception ex)
             {
-                _logger.Error(ex, "Failed to get courses for user {UserId}", createdById);
+                _logger.LogError(ex, "Failed to get courses for user {UserId}", createdById);
                 return null;
             }
         }
@@ -100,7 +102,7 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to get all courses");
+                _logger.LogError(ex, "Failed to get all courses");
                 return null;
             }
           
@@ -121,7 +123,7 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch(Exception ex)
             {
-                _logger.Error(ex, "Failed to get course with the Id {CourseId}", id);
+                _logger.LogError(ex, "Failed to get course with the Id {CourseId}", id);
                 return null;
             }
            
@@ -188,7 +190,7 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to update course with the Id {CourseId}", course.Id);
+                _logger.LogError(ex, "Failed to update course with the Id {CourseId}", course.Id);
                 await session.AbortTransactionAsync();
                 return null;
             }
