@@ -30,6 +30,7 @@ public class DbConnection : IDbConnection
         _db = Client.GetDatabase(DbName);
 
         HelpArticleCollection = _db.GetCollection<HelpArticle>(HelpArticleCollectionName);
+        LogCollection = _db.GetCollection<Log>(LogCollectionName);
         TaskTypeCollection = _db.GetCollection<TaskType>(TaskTypeCollectionName);
         UserCollection = _db.GetCollection<User>(UserCollectionName);
         CourseTypeCollection = _db.GetCollection<CourseType>(CourseTypeCollectionName);
@@ -54,6 +55,10 @@ public class DbConnection : IDbConnection
     public string HelpArticleCollectionName { get; private set; } = "helpArticles";
 
     public IMongoCollection<HelpArticle> HelpArticleCollection { get; private set; }
+
+    public string LogCollectionName { get; private set; } = "logs";
+
+    public IMongoCollection<Log> LogCollection { get; private set; }
 
     public string TaskTypeCollectionName { get; private set; } = "taskTypes";
 
