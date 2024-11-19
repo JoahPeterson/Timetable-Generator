@@ -1,4 +1,6 @@
-﻿namespace TimetableApp.DataModels.DataAccess;
+﻿using Microsoft.Extensions.Logging;
+
+namespace TimetableApp.DataModels.DataAccess;
 
 /// <summary>
 /// Class the handles the Mongo DAL functions for TaskType
@@ -8,16 +10,18 @@ public class MongoTaskTypeData : ITaskTypeData
     private readonly IDbConnection _db;
     private readonly IMongoCollection<TaskType> _taskTypes;
     private readonly IUserData _userData;
+    private readonly ILogger<MongoTaskTypeData> _logger;
 
     /// <summary>
     /// Intantiates a new instance of the Mongo TaskType data class.
     /// </summary>
     /// <param name="db">Instance of a Mongo DB Connection</param>
-    public MongoTaskTypeData(IDbConnection db, IUserData userData)
+    public MongoTaskTypeData(IDbConnection db, IUserData userData, ILogger<MongoTaskTypeData> logger)
     {
         _db = db;
         _taskTypes = db.TaskTypeCollection;
         _userData = userData;
+        _logger = logger;
     }
 
     /// <summary>
@@ -49,8 +53,8 @@ public class MongoTaskTypeData : ITaskTypeData
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to create task type for user {UserId}", type.AuditInformation.CreatedById);
             await session.AbortTransactionAsync();
-            throw;
         }
     }
 
@@ -61,9 +65,18 @@ public class MongoTaskTypeData : ITaskTypeData
     /// <returns>List of TaskTypes</returns>
     public async Task<List<TaskType>> GetUsersTaskTypesAsync(string createdById)
     {
-        var results = await _taskTypes.FindAsync(tt => tt.AuditInformation.CreatedById == createdById && tt.AuditInformation.IsArchived == false);
+        try
+        {
+            var results = await _taskTypes.FindAsync(tt => tt.AuditInformation.CreatedById == createdById && tt.AuditInformation.IsArchived == false);
 
-        return results.ToList();
+            return results.ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get task types for user {UserId}", createdById);
+            return null;
+        }
+        
     }
 
     /// <summary>
@@ -72,9 +85,18 @@ public class MongoTaskTypeData : ITaskTypeData
     /// <returns>List of NON archived TaskTypes</returns>
     public async Task<List<TaskType>> GetTaskTypesAsync()
     {
-        var results = await _taskTypes.FindAsync(tt => tt.AuditInformation.IsArchived == false);
+        try
+        {
+            var results = await _taskTypes.FindAsync(tt => tt.AuditInformation.IsArchived == false);
 
-        return results.ToList();
+            return results.ToList();
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get task types");
+            return null;
+        }
+        
     }
 
     /// <summary>
@@ -84,9 +106,18 @@ public class MongoTaskTypeData : ITaskTypeData
     /// <returns>Task Type by Id or null.</returns>
     public async Task<TaskType?> GetTaskTypeAsync(string id)
     {
-        var result = await _taskTypes.FindAsync(tt => tt.Id == id);
+        try
+        {
+            var result = await _taskTypes.FindAsync(tt => tt.Id == id);
 
-        return result.FirstOrDefault();
+            return result.FirstOrDefault();
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get task type with Id of {TaskTypeId}", id);
+            return null;
+        }
+        
     }
 
     /// <summary>
@@ -149,9 +180,8 @@ public class MongoTaskTypeData : ITaskTypeData
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to update task type with Id of {TaskTypeId}", type.Id);
             await session.AbortTransactionAsync();
-            // Log the exception or rethrow it
-            throw;
         }
     }
 
