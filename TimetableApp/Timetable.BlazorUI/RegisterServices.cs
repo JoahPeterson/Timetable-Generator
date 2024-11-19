@@ -5,6 +5,7 @@ using MudBlazor.Services;
 using Timetable.BlazorUI.Components.Account;
 using Timetable.BlazorUI.Data;
 using Timetable.BlazorUI.Services;
+using Timetable.ExcelApi.Services;
 
 namespace Timetable.BlazorUI;
 
@@ -95,6 +96,13 @@ public static class RegisterServices
         
         builder.Services.AddSingleton<WorkUnitDateService>();
         builder.Services.AddSingleton<DuplicationService>();
+
+        builder.Services.AddLogging(configure =>
+        {
+            configure.AddTimetableLogger(
+                builder.Services.BuildServiceProvider().GetRequiredService<ILogData>()
+            );
+        });
 
         builder.Services.AddScoped(sp => {
             var client = new HttpClient

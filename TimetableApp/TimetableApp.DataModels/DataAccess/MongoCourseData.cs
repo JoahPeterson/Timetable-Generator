@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Amazon.Runtime.Internal.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,16 +16,18 @@ namespace TimetableApp.DataModels.DataAccess
         private readonly IDbConnection _db;
         private readonly IMongoCollection<Course> _courses;
         private readonly IUserData _userData;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Intantiates a new instance of the Mongo Course data class.
         /// </summary>
         /// <param name="db">Instance of a Mongo DB Connection</param>
-        public MongoCourseData(IDbConnection db, IUserData userData)
+        public MongoCourseData(IDbConnection db, IUserData userData, ILogger logger)
         {
             _db = db;
             _courses = db.CourseCollection;
             _userData = userData;
+            _logger = logger;
         }
 
         /// <summary>
@@ -57,9 +60,9 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, "Failed to create course for user {UserId}", course.AuditInformation.CreatedById);
                 await session.AbortTransactionAsync();
                 return null;
-                throw;
             }
         }
 
