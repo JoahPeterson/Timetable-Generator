@@ -1,0 +1,82 @@
+﻿@page "/web"
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Headers
+@inject AuthenticationStateProvider authProvider
+@inject IUserData UserData
+
+<h3>Inject Timetable</h3>
+
+<InputFile OnChange="HandleFileSelected" />
+<button @onclick="Submit" disabled="@isUploading">Submit</button>
+
+<p>@statusMessage</p>
+
+@code {
+    private IBrowserFile? selectedFile;
+    private bool isUploading = false;
+    private string statusMessage = string.Empty;
+    private string userId = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Retrieve the authenticated user's ID
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+        userId = mongoUser.Id;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            statusMessage = "Unable to retrieve user ID.";
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        statusMessage = string.Empty;
+    }
+
+    private async Task Submit()
+    {
+        if (selectedFile == null)
+        {
+            statusMessage = "Please select a file before submitting.";
+            return;
+        }
+
+        try
+        {
+            isUploading = true;
+
+            using var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)); // Limit to 10 MB
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(selectedFile.ContentType);
+
+            content.Add(fileContent, "file", selectedFile.Name);
+
+            // Add X-User-Id header
+            Http.DefaultRequestHeaders.Remove("X-User-Id");
+            Http.DefaultRequestHeaders.Add("X-User-Id", userId);
+
+            var response = await Http.PostAsync("api/ExcelExport/import", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                statusMessage = "File uploaded successfully!";
+            }
+            else
+            {
+                statusMessage = $"Upload failed: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isUploading = false;
+        }
+    }
+}
