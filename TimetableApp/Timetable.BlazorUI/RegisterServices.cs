@@ -100,7 +100,9 @@ public static class RegisterServices
         builder.Services.AddLogging(configure =>
         {
             configure.AddTimetableLogger(
-                builder.Services.BuildServiceProvider().GetRequiredService<ILogData>()
+                builder.Services.BuildServiceProvider().GetRequiredService<ILogData>(),
+                builder.Services.BuildServiceProvider().GetRequiredService<IUserData>(),
+        builder.Services.BuildServiceProvider().GetRequiredService<AuthenticationStateProvider>()
             );
         });
 

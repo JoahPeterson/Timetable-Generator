@@ -81,6 +81,7 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch(Exception ex)
             {
+                _logger.Error(ex, "Failed to get courses for user {UserId}", createdById);
                 return null;
             }
         }
@@ -99,6 +100,7 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, "Failed to get all courses");
                 return null;
             }
           
@@ -111,9 +113,18 @@ namespace TimetableApp.DataModels.DataAccess
         /// <returns>Course by Id or null.</returns>
         public async Task<Course?> GetCourseAsync(string id)
         {
-            var result = await _courses.FindAsync(course => course.Id == id);
+            try
+            {
+                var result = await _courses.FindAsync(course => course.Id == id);
 
-            return result.FirstOrDefault();
+                return result.FirstOrDefault();
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex, "Failed to get course with the Id {CourseId}", id);
+                return null;
+            }
+           
         }
 
         /// <summary>
@@ -177,10 +188,9 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, "Failed to update course with the Id {CourseId}", course.Id);
                 await session.AbortTransactionAsync();
                 return null;
-                // Log the exception or rethrow it
-                throw;
             }
         }
     }
