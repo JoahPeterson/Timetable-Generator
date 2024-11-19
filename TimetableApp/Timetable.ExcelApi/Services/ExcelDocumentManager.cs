@@ -44,6 +44,7 @@ public class ExcelDocumentManager
         _workTaskData = workTaskData;
         _workUnitData = workUnitData;
     }
+
     public async Task<byte[]> ProcessCourse(Course course)
     {
         var getTaskData = _workTaskData.GetUsersWorkTasksAsync(course.AuditInformation.CreatedById);
@@ -225,12 +226,112 @@ public class ExcelDocumentManager
             await _workUnitData.CreateAsync(workUnit);
             course.WorkUnits.Add(workUnit);
         }
-
         
         return await _courseData.UpdateCourseAsync(course);
     }
 
-    public async Task<List<WorkUnit>> ProcessWorkUnits(IXLWorksheet worksheet, Course course)
+    private bool AreTaskHeadersValid(IXLWorksheet worksheet)
+    {
+        for (int i = 0; i < _workUnitHeaders.Length; i++)
+        {
+            if (!worksheet.Cell(_workUnitHeaderRow, i + 1).GetString().Equals(_workUnitHeaders[i], StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private bool AreCourseHeadersValid(IXLWorksheet worksheet)
+    {
+        for (int i = 0; i < _courseHeaders.Length; i++)
+        {
+            if (!worksheet.Cell(_courseHeaderRow, i + 1).GetString().Equals(_courseHeaders[i], StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private async Task<WorkTask> GetWorkTask(string name, string category, string description)
+    {
+        var workTask = _workTasks.FirstOrDefault(t => t.Name.Trim() == name.Trim());
+
+        if (workTask != null)
+            return workTask;
+
+
+        var taskType = await GetTaskType(category);
+
+        var taskId = taskType?.Id ?? null;
+
+        workTask = new WorkTask()
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = name,
+            TypeId = taskType.Id,
+            Description = description,
+            AuditInformation = new Auditable
+            {
+                CreatedById = _user.Id,
+            }
+        };
+        await _workTaskData.CreateAsync(workTask);
+
+        return workTask;
+    }
+
+    private string GetCourseIdType(IXLWorksheet worksheet, int row, string columnHeaderName)
+    {
+        var courseTypeName = worksheet.Cell(row, Array.IndexOf(_courseHeaders, columnHeaderName) + 1).GetString();
+        var returnValue = _courseTypeData.GetAsync().Result.FirstOrDefault(ct => ct.Name == courseTypeName)?.Id ?? string.Empty;
+        return returnValue;
+    }
+    private Term GetTerm(IXLWorksheet worksheet)
+    {
+        var termName = worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, "Term") + 1).GetString();
+        var termDuration = int.Parse(worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, "Course Duration") + 1).GetString());
+
+        var term = _termData.GetAllAsync().Result.FirstOrDefault(t => t.Name == termName);
+        term.Name = termName;
+        term.Duration = termDuration;
+
+        return term;
+    }
+
+    private string GetValueFromCell(IXLWorksheet worksheet, int row, string columnHeaderName)
+    {
+        var returnValue = worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, columnHeaderName) + 1).GetString();
+        return returnValue;
+    }
+
+    private async Task<TaskType> GetTaskType(string category)
+    {
+        if (category == "N/A")
+            return null;
+
+        var taskType = _taskTypes.FirstOrDefault(t => t.Name == category);
+
+        if (taskType != null)
+            return taskType;
+      
+        taskType = new TaskType
+        {
+            Name = category,
+            AuditInformation = new Auditable
+            {
+                CreatedById = _user.Id,
+            }
+        };
+
+        await _taskTypeData.CreateTaskTypeAsync(taskType);
+        return taskType;
+    }
+
+    private async Task<List<WorkUnit>> ProcessWorkUnits(IXLWorksheet worksheet, Course course)
     {
         var workUnits = new Dictionary<string, WorkUnit>();
 
@@ -288,114 +389,11 @@ public class ExcelDocumentManager
         return workUnits.Values.ToList();
     }
 
-    private async Task<WorkTask> GetWorkTask(string name, string category, string description)
-    {
-        var workTask = _workTasks.FirstOrDefault(t => t.Name.Trim() == name.Trim());
-
-        if (workTask != null)
-            return workTask;
-
-
-        var taskType = await GetTaskType(category);
-
-        var taskId = taskType?.Id ?? null;
-
-        workTask = new WorkTask()
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = name,
-            TypeId = taskType.Id,
-            Description = description,
-            AuditInformation = new Auditable
-            {
-                CreatedById = _user.Id,
-            }
-        };
-        await _workTaskData.CreateAsync(workTask);
-
-        return workTask;
-    }
-
-    private async Task<TaskType> GetTaskType(string category)
-    {
-        if (category == "N/A")
-            return null;
-
-        var taskType = _taskTypes.FirstOrDefault(t => t.Name == category);
-
-        if (taskType != null)
-            return taskType;
-      
-        taskType = new TaskType
-        {
-            Name = category,
-            AuditInformation = new Auditable
-            {
-                CreatedById = _user.Id,
-            }
-        };
-
-        await _taskTypeData.CreateTaskTypeAsync(taskType);
-        return taskType;
-    }
-
-
-    private Term GetTerm(IXLWorksheet worksheet)
-    {
-        var termName = worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, "Term") + 1).GetString();
-        var termDuration = int.Parse(worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, "Course Duration") + 1).GetString());
-
-        var term = _termData.GetAllAsync().Result.FirstOrDefault(t => t.Name == termName);
-        term.Name = termName;
-        term.Duration = termDuration;
-
-        return term;
-    }
-
-    private string GetCourseIdType(IXLWorksheet worksheet, int row, string columnHeaderName)
-    {
-        var courseTypeName = worksheet.Cell(row, Array.IndexOf(_courseHeaders, columnHeaderName) + 1).GetString();
-        var returnValue = _courseTypeData.GetAsync().Result.FirstOrDefault(ct => ct.Name == courseTypeName)?.Id ?? string.Empty;
-        return returnValue;
-    }
-
-    private string GetValueFromCell(IXLWorksheet worksheet, int row, string columnHeaderName)
-    {
-        var returnValue = worksheet.Cell(_courseHeaderRow + 1, Array.IndexOf(_courseHeaders, columnHeaderName) + 1).GetString();
-        return returnValue;
-    }
-
     private void VerifyTaskCategories(IEnumerable<string> taskCategories)
     {
         if (taskCategories == null || !taskCategories.Any())
         {
             throw new Exception("Task categories are not valid.");
         }
-    }
-
-    private bool AreCourseHeadersValid(IXLWorksheet worksheet)
-    {
-        for (int i = 0; i < _courseHeaders.Length; i++)
-        {
-            if (!worksheet.Cell(_courseHeaderRow, i + 1).GetString().Equals(_courseHeaders[i], StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private bool AreTaskHeadersValid(IXLWorksheet worksheet)
-    {
-        for (int i = 0; i < _workUnitHeaders.Length; i++)
-        {
-            if (!worksheet.Cell(_workUnitHeaderRow, i + 1).GetString().Equals(_workUnitHeaders[i], StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

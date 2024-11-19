@@ -98,7 +98,7 @@ public static class RegisterServices
         builder.Services.AddScoped(sp => {
             var client = new HttpClient
             {
-                BaseAddress = new Uri("https://localhost:7293")
+                BaseAddress = new Uri("https://localhost:44316")
             };
 
             // Add the API key as a custom header
