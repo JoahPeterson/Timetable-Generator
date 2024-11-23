@@ -1,4 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Authorization
+@using System.Net.Http.Headers
+@inject HttpClient Http
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JS
@@ -7,7 +9,7 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authProvider
 @inject DuplicationService DuplicationService
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 @attribute [Authorize]
 
@@ -24,7 +26,7 @@
                 {
                     var colorClass = colorClasses.ElementAtOrDefault(index % colorClasses.Count) ?? "Cardcolor-1";  // Ensure safe access
                     <li class="list-group-item CardText text-black px-3 d-flex justify-content-between @colorClass"
-                        data-toggle="tooltip" data-placement="top" title="@course.Description">
+                    data-toggle="tooltip" data-placement="top" title="@course.Description">
                         <div>
                             <i class="bi bi-journal-bookmark h4"></i>
                             <a href="/timetable/@course.Id" class="text-black text-decoration-none fw-bold">@course.Name</a>
@@ -41,10 +43,20 @@
                 }
             </ul>
         </div>
-        <div class="mt-4">
+        <div class="mt-4 d-flex justify-content-between">
             <a href="course/create" class="text-black text-decoration-none CardText">
                 <i class="bi bi-plus-circle h5"></i> Add
             </a>
+
+            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles" MaximumFileCount="1" Accept=".xlsx">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Text"
+                    Color="Color.Default"
+                    StartIcon="@Icons.Material.Filled.CloudUpload">
+                        Import
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
         </div>
     </div>
 }
@@ -53,9 +65,17 @@ else
     <p>Loading courses...</p>
 }
 
+@if(isProcessing)
+{
+    <div class="progress-container">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    </div>
+} 
+
 @code {
     private List<Course>? courses;
     private User? loggedInUser;
+    private bool isProcessing = false;
     Course selectedCourse = null;
 
     protected override async Task OnInitializedAsync()
@@ -88,12 +108,63 @@ else
 
     private async Task HandleCourseDuplication(Course course)
     {
+        isProcessing = true;
         Snackbar.Add("Copy course in progress", Severity.Info);
         Course newCourse = await DuplicationService.DuplicateCourseAsync(course);
 
         courses.Add(newCourse);
         Snackbar.Add("Successfully Copied Course", Severity.Success);
+        isProcessing = false;
     }
+
+    private async Task CallImportEndpoint(IBrowserFile selectedFile)
+    {
+        if (selectedFile == null)
+        {
+            Snackbar.Add("No file selected for upload.", Severity.Error);
+            return;
+        }
+
+        try
+        {
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var mongoUser = await UserData.GetUserFromAuthenticationAsync(authState.User.Claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"))?.Value);
+            var userId = mongoUser.Id;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                Snackbar.Add("Unable to retrieve user ID.", Severity.Error);
+                return;
+            }
+
+            using var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)); // Limit to 10 MB
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(selectedFile.ContentType);
+
+            content.Add(fileContent, "file", selectedFile.Name);
+
+            // Add X-User-Id header
+            Http.DefaultRequestHeaders.Remove("X-User-Id");
+            Http.DefaultRequestHeaders.Add("X-User-Id", userId);
+
+            var response = await Http.PostAsync("api/ExcelExport/import", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("File uploaded successfully!", Severity.Success);
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"Upload failed: {errorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
 
     private async Task ShowModal(Course course)
     {
@@ -115,6 +186,15 @@ else
             await Archive(course);
             Snackbar.Add("Timetable Deleted", Severity.Success);
         }
+    }
+
+    private async Task UploadFiles(IBrowserFile file)
+    {
+        isProcessing = true;
+        Snackbar.Add("Processing Import", Severity.Normal);
+
+        await CallImportEndpoint(file);
+        isProcessing = false;
     }
 }
 
