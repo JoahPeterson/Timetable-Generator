@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,27 +11,56 @@ namespace TimetableApp.DataModels.DataAccess
     public class MongoLogData : ILogData
     {
         private readonly IMongoCollection<Log> _logs;
+        private readonly ILogger<MongoLogData> _logger;
 
-        public MongoLogData(IDbConnection db)
+        public MongoLogData(IDbConnection db, ILogger<MongoLogData> logger)
         {
             _logs = db.LogCollection;
+            _logger = logger;
         }
         public Task CreateAsync(Log log)
         {
-            return _logs.InsertOneAsync(log);
+            try
+            {
+                return _logs.InsertOneAsync(log);
+            }
+            catch(Exception ex)
+            {
+                // Not sure if this one is needed here ¯\_(ツ)_/¯
+                _logger.LogError(ex, "Failed to create log");
+                return null;
+            }
+            
         }
 
         public async Task<List<Log>> GetByUserIdAsync(string loggedInUserId)
         {
-            var results = await _logs.FindAsync(l => l.LoggedInUserId == loggedInUserId);
-            return results.ToList();
+            try
+            {
+                var results = await _logs.FindAsync(l => l.LoggedInUserId == loggedInUserId);
+                return results.ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get log with a user Id of {UserId}", loggedInUserId);
+                return null;
+            }
+           
         }
 
         public async Task<List<Log>> GetLogsAsync()
         {
-            var results = await _logs.FindAsync(_ => true);
+            try
+            {
+                var results = await _logs.FindAsync(_ => true);
 
-            return results.ToList();    
+                return results.ToList();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get logs");
+                return null;
+            }
         }
     }
 }

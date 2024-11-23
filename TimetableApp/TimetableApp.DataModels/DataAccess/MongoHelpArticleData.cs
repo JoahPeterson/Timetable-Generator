@@ -1,4 +1,7 @@
-﻿namespace TimetableApp.DataModels.DataAccess;
+﻿using Microsoft.Extensions.Logging;
+using TimetableApp.DataModels.Models;
+
+namespace TimetableApp.DataModels.DataAccess;
 
 /// <summary>
 /// Class the handles the Mongo DAL functions for HelpArticle
@@ -7,16 +10,18 @@ public class MongoHelpArticleData : IHelpArticleData
 {
     private readonly IDbConnection _db;
     private readonly IMongoCollection<HelpArticle> _helpArticles;
+    private readonly ILogger<MongoHelpArticleData> _logger;
 
     /// <summary>
     /// Instatiates a new instance of the Mongo Help Article data class.
     /// </summary>
     /// <param name="db">Instance of a Mongo DB Connection</param>
     /// <param name="userData"></param>
-    public MongoHelpArticleData(IDbConnection db)
+    public MongoHelpArticleData(IDbConnection db, ILogger<MongoHelpArticleData> logger)
     {
         _db = db;
         _helpArticles = db.HelpArticleCollection;
+        _logger = logger;
     }
     /// <summary>
     /// Inserts a HelpArticle in the database.
@@ -44,8 +49,9 @@ public class MongoHelpArticleData : IHelpArticleData
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to create help article for user {UserId}", helpArticle.AuditInformation.CreatedById);
             await session.AbortTransactionAsync();
-            throw;
+            return null;
         }
     }
 
@@ -61,6 +67,7 @@ public class MongoHelpArticleData : IHelpArticleData
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to get help articles");
             return null;
         }
     }
@@ -77,6 +84,7 @@ public class MongoHelpArticleData : IHelpArticleData
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to get help articles");
             return null;
         }
     }
@@ -94,6 +102,7 @@ public class MongoHelpArticleData : IHelpArticleData
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to get help article with Id of {HelpArticleId}", id);
             return null;
         }
 
@@ -106,17 +115,26 @@ public class MongoHelpArticleData : IHelpArticleData
     /// <returns>The newly inserted HelpArticle.</returns>
     public async Task<HelpArticle> UpdateAsync(HelpArticle article)
     {
-        // Define the filter to find the HelpArticle by its ID
-        var filter = Builders<HelpArticle>.Filter.Eq(a => a.Id, article.Id);
-
-        // Options to return the document after the replacement
-        var options = new FindOneAndReplaceOptions<HelpArticle>
+        try
         {
-            ReturnDocument = ReturnDocument.After // Return the updated document after replacement
-        };
+            // Define the filter to find the HelpArticle by its ID
+            var filter = Builders<HelpArticle>.Filter.Eq(a => a.Id, article.Id);
 
-        var replacedArticle = await _helpArticles.FindOneAndReplaceAsync(filter, article, options);
+            // Options to return the document after the replacement
+            var options = new FindOneAndReplaceOptions<HelpArticle>
+            {
+                ReturnDocument = ReturnDocument.After // Return the updated document after replacement
+            };
 
-        return replacedArticle;
+            var replacedArticle = await _helpArticles.FindOneAndReplaceAsync(filter, article, options);
+
+            return replacedArticle;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update help article with Id of {HelpArticleId}", article.Id);
+            return null;
+        }
+       
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace TimetableApp.DataModels.DataAccess;
+﻿using Microsoft.Extensions.Logging;
+using TimetableApp.DataModels.Models;
+
+namespace TimetableApp.DataModels.DataAccess;
 
 /// <summary>
 /// Class that handles mongo DAL functions for Term.
@@ -7,15 +10,17 @@ public class MongoTermData : ITermData
 {
     private readonly IDbConnection _db;
     private readonly IMongoCollection<Term> _terms;
+    private readonly ILogger<MongoTermData> _logger;
 
     /// <summary>
     /// Instantiates a new instance of the Mongo Term data class.
     /// </summary>
     /// <param name="db"></param>
-    public MongoTermData(IDbConnection db)
+    public MongoTermData(IDbConnection db, ILogger<MongoTermData> logger)
     {
         _db = db;
         _terms = db.TermCollection;
+        _logger = logger;
     }
 
     /// <summary>
@@ -25,7 +30,15 @@ public class MongoTermData : ITermData
     /// <returns></returns>
     public async Task CreateAsync(Term term)
     {
-        await _terms.InsertOneAsync(term);
+        try
+        {
+            await _terms.InsertOneAsync(term);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create term for user {UserId}", term.AuditInformation.CreatedById);
+        }
+       
     }
 
     /// <summary>
@@ -35,9 +48,18 @@ public class MongoTermData : ITermData
     /// <returns>Term object</returns>
     public async Task<Term?> GetByIdAsync(string id)
     {
-        var results = await _terms.FindAsync(t => t.Id == id);
+        try
+        {
+            var results = await _terms.FindAsync(t => t.Id == id);
 
-        return results.FirstOrDefault();
+            return results.FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get term with Id of {TermId}", id);
+            return null;
+        }
+       
     }
 
     /// <summary>
@@ -46,9 +68,18 @@ public class MongoTermData : ITermData
     /// <returns>List of Term Objects</returns>
     public async Task<List<Term>> GetAllAsync()
     {
-        var results = await _terms.FindAsync(term => term.AuditInformation.IsArchived == false);
+        try
+        {
+            var results = await _terms.FindAsync(term => term.AuditInformation.IsArchived == false);
 
-        return results.ToList();
+            return results.ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get terms");
+            return null;
+        }
+        
     }
 
     /// <summary>
@@ -57,9 +88,18 @@ public class MongoTermData : ITermData
     /// <returns>List of Term Objects</returns>
     public async Task<List<Term>> GetAllWithArchivedAsync()
     {
-        var results = await _terms.FindAsync(_ => true);
+        try
+        {
+            var results = await _terms.FindAsync(_ => true);
 
-        return results.ToList();
+            return results.ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get archived terms");
+            return null;
+        }
+        
     }
 
     /// <summary>
@@ -69,7 +109,16 @@ public class MongoTermData : ITermData
     /// <returns>Task</returns>
     public Task UpdateAsync(Term term)
     {
-        var filter = Builders<Term>.Filter.Eq("Id", term.Id);
-        return _terms.ReplaceOneAsync(filter, term, new ReplaceOptions { IsUpsert = true });
+        try
+        {
+            var filter = Builders<Term>.Filter.Eq("Id", term.Id);
+            return _terms.ReplaceOneAsync(filter, term, new ReplaceOptions { IsUpsert = true });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update term with Id of {TermId}", term.Id);
+            return null;
+        }
+       
     }
 }

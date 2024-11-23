@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TimetableApp.DataModels.Models;
 
 namespace TimetableApp.DataModels.DataAccess
 {
@@ -14,15 +16,17 @@ namespace TimetableApp.DataModels.DataAccess
     {
         private readonly IDbConnection _db;
         private readonly IMongoCollection<WorkUnitTask> _tasks;
+        private readonly ILogger<MongoWorkUnitTaskData> _logger;
 
         /// <summary>
         /// Instantiates a new instance of the Mongo WorkUnitTask data class.
         /// </summary>
         /// <param name="db"></param>
-        public MongoWorkUnitTaskData(IDbConnection db)
+        public MongoWorkUnitTaskData(IDbConnection db, ILogger<MongoWorkUnitTaskData> logger)
         {
             _db = db;
             _tasks = db.WorkUnitTaskCollection;
+            _logger = logger;
         }
 
         /// <summary>
@@ -32,7 +36,15 @@ namespace TimetableApp.DataModels.DataAccess
         /// <returns></returns>
         public async Task CreateAsync(WorkUnitTask task)
         {
-            await _tasks.InsertOneAsync(task);
+            try
+            {
+                await _tasks.InsertOneAsync(task);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create work unit task for user {UserId}", task.AuditInformation.CreatedById);
+            }
+            
         }
 
         /// <summary>
@@ -42,9 +54,18 @@ namespace TimetableApp.DataModels.DataAccess
         /// <returns>WorkUnitTask object</returns>
         public async Task<WorkUnitTask?> GetByIdAsync(string id)
         {
-            var results = await _tasks.FindAsync(t => t.Id == id);
+            try
+            {
+                var results = await _tasks.FindAsync(t => t.Id == id);
 
-            return results.FirstOrDefault();
+                return results.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get work unit task with the Id of {WorkUnitTaskId}", id);
+                return null;
+            }
+            
         }
 
         /// <summary>
@@ -53,9 +74,18 @@ namespace TimetableApp.DataModels.DataAccess
         /// <returns>List of WorkUnitTask Objects</returns>
         public async Task<List<WorkUnitTask>> GetAsync()
         {
-            var results = await _tasks.FindAsync(_ => true);
+            try
+            {
+                var results = await _tasks.FindAsync(_ => true);
 
-            return results.ToList();
+                return results.ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get work unit tasks");
+                return null;
+            }
+            
         }
 
         /// <summary>
@@ -65,9 +95,18 @@ namespace TimetableApp.DataModels.DataAccess
         /// <returns>List of WorkUnitTasks</returns>
         public async Task<List<WorkUnitTask>> GetUsersWorkUnitTasksAsync(string createdById)
         {
-            var results = await _tasks.FindAsync(tt => tt.AuditInformation.CreatedById == createdById);
+            try
+            {
+                var results = await _tasks.FindAsync(tt => tt.AuditInformation.CreatedById == createdById);
 
-            return results.ToList();
+                return results.ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get work unit tasks for user {UserId}", createdById);
+                return null;
+            }
+           
         }
 
         /// <summary>
@@ -77,8 +116,17 @@ namespace TimetableApp.DataModels.DataAccess
         /// <returns>WorkUnitTask</returns>
         public Task UpdateAsync(WorkUnitTask task)
         {
-            var filter = Builders<WorkUnitTask>.Filter.Eq("Id", task.Id);
-            return _tasks.ReplaceOneAsync(filter, task, new ReplaceOptions { IsUpsert = true });
+            try
+            {
+                var filter = Builders<WorkUnitTask>.Filter.Eq("Id", task.Id);
+                return _tasks.ReplaceOneAsync(filter, task, new ReplaceOptions { IsUpsert = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to update work unit task with the Id of {WorkUnitTaskId}", task.Id);
+                return null;
+            }
+            
         }
     }
 }

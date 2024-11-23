@@ -1,4 +1,8 @@
-﻿namespace TimetableApp.DataModels.DataAccess;
+﻿using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
+using TimetableApp.DataModels.Models;
+
+namespace TimetableApp.DataModels.DataAccess;
 
 /// <summary>
 /// Class the handles the Mongo DAL functions for TaskType
@@ -9,17 +13,19 @@ public class MongoWorkUnitData : IWorkUnitData
     private readonly IMongoCollection<Course> _courses;
     private readonly ICourseData _courseData;
     private readonly IMongoCollection<WorkUnit> _workUnits;
+    private readonly ILogger<MongoWorkUnitData> _logger;
 
     /// <summary>
     /// Intantiates a new instance of the Mongo TaskType data class.
     /// </summary>
     /// <param name="db">Instance of a Mongo DB Connection</param>
-    public MongoWorkUnitData(IDbConnection db, ICourseData courseData)
+    public MongoWorkUnitData(IDbConnection db, ICourseData courseData, ILogger<MongoWorkUnitData> logger)
     {
         _db = db;
         _courseData = courseData;
         _workUnits = db.WorkUnitCollection;
         _courses = db.CourseCollection;
+        _logger = logger;
     }
 
     /// <summary>
@@ -28,8 +34,16 @@ public class MongoWorkUnitData : IWorkUnitData
     /// <param name="workUnit">The work unit to delete</param>
     public async Task DeleteAsync(string Id)
     {
-        var filter = Builders<WorkUnit>.Filter.Eq("_id", new ObjectId(Id));
-        await _workUnits.DeleteOneAsync(filter);
+        try
+        {
+            var filter = Builders<WorkUnit>.Filter.Eq("_id", new ObjectId(Id));
+            await _workUnits.DeleteOneAsync(filter);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete work unit with Id of {WorkUnitId}", Id);
+        }
+       
     }
 
     /// <summary>
@@ -67,8 +81,8 @@ public class MongoWorkUnitData : IWorkUnitData
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to create work unit for user {UserId}", workUnit.AuditInformation.CreatedById);
             await session.AbortTransactionAsync();
-            throw;
         }
     }
 
@@ -79,9 +93,18 @@ public class MongoWorkUnitData : IWorkUnitData
     /// <returns>List of TaskTypes</returns>
     public async Task<List<WorkUnit>> GetUsersAsync(string createdById)
     {
-        var results = await _workUnits.FindAsync(workUnit => workUnit.AuditInformation.CreatedById == createdById);
+        try
+        {
+            var results = await _workUnits.FindAsync(workUnit => workUnit.AuditInformation.CreatedById == createdById);
 
-        return results.ToList();
+            return results.ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get work units for user {UserId}", createdById);
+            return null;
+        }
+       
     }
 
     /// <summary>
@@ -90,9 +113,18 @@ public class MongoWorkUnitData : IWorkUnitData
     /// <returns>List of NON archived Work Units</returns>
     public async Task<List<WorkUnit>> GetAsync()
     {
-        var results = await _workUnits.FindAsync(workUnit => workUnit.AuditInformation.IsArchived == false);
+        try
+        {
+            var results = await _workUnits.FindAsync(workUnit => workUnit.AuditInformation.IsArchived == false);
 
-        return results.ToList();
+            return results.ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get work units");
+            return null;
+        }
+        
     }
 
     /// <summary>
@@ -102,9 +134,18 @@ public class MongoWorkUnitData : IWorkUnitData
     /// <returns>Work Unit by Id or null.</returns>
     public async Task<WorkUnit?> GetByIdAsync(string id)
     {
-        var result = await _workUnits.FindAsync(c => c.Id == id);
+        try
+        {
+            var result = await _workUnits.FindAsync(c => c.Id == id);
 
-        return result.FirstOrDefault();
+            return result.FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get work unit with the Id of {WorkUnitId}", id);
+            return null;
+        }
+      
     }
 
     /// <summary>
@@ -167,9 +208,8 @@ public class MongoWorkUnitData : IWorkUnitData
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to update work unit with the Id of {WorkUnitId}", workUnit.Id);
             await session.AbortTransactionAsync();
-            // Log the exception or rethrow it
-            throw;
         }
     }
 

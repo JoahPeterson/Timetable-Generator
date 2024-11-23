@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Amazon.Runtime.Internal.Util;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,16 +17,18 @@ namespace TimetableApp.DataModels.DataAccess
         private readonly IDbConnection _db;
         private readonly IMongoCollection<Course> _courses;
         private readonly IUserData _userData;
+        private readonly ILogger<MongoCourseData> _logger;
 
         /// <summary>
         /// Intantiates a new instance of the Mongo Course data class.
         /// </summary>
         /// <param name="db">Instance of a Mongo DB Connection</param>
-        public MongoCourseData(IDbConnection db, IUserData userData)
+        public MongoCourseData(IDbConnection db, IUserData userData, ILogger<MongoCourseData> logger)
         {
             _db = db;
             _courses = db.CourseCollection;
             _userData = userData;
+            _logger = logger;
         }
 
         /// <summary>
@@ -57,9 +61,10 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch (Exception ex)
             {
+                
+                _logger.LogError(ex, "Failed to create course for user {UserId}", course.AuditInformation.CreatedById);
                 await session.AbortTransactionAsync();
                 return null;
-                throw;
             }
         }
 
@@ -78,6 +83,7 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch(Exception ex)
             {
+                _logger.LogError(ex, "Failed to get courses for user {UserId}", createdById);
                 return null;
             }
         }
@@ -96,6 +102,7 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to get all courses");
                 return null;
             }
           
@@ -108,9 +115,18 @@ namespace TimetableApp.DataModels.DataAccess
         /// <returns>Course by Id or null.</returns>
         public async Task<Course?> GetCourseAsync(string id)
         {
-            var result = await _courses.FindAsync(course => course.Id == id);
+            try
+            {
+                var result = await _courses.FindAsync(course => course.Id == id);
 
-            return result.FirstOrDefault();
+                return result.FirstOrDefault();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get course with the Id {CourseId}", id);
+                return null;
+            }
+           
         }
 
         /// <summary>
@@ -174,10 +190,9 @@ namespace TimetableApp.DataModels.DataAccess
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to update course with the Id {CourseId}", course.Id);
                 await session.AbortTransactionAsync();
                 return null;
-                // Log the exception or rethrow it
-                throw;
             }
         }
     }
