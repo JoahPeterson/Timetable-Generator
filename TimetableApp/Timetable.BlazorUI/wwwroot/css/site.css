@@ -101,7 +101,7 @@
 /*Custom color-profile Classes Start*/
 
 .mstc-gold-btn {
-    background-color: #F8B62A;
+    background-color: #F8B62A!important;
     color: black;
 }
 
