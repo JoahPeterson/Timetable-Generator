@@ -5,7 +5,8 @@
 @inject IJSRuntime JS
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
 
-<div class="container">
+<AuthorizeView Policy="RegularUser">
+    <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-4 col-sm-12 mb-sm-3 mb-2 col-md-12">
             <CoursesDiv/>
@@ -18,6 +19,7 @@
         </div>
     </div>
 </div>
+</AuthorizeView>
 
 <AuthorizeView Roles="Admin">
 <div class="container">

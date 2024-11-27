@@ -39,6 +39,7 @@ public static class RegisterServices
         builder.Services.AddAuthorizationCore(config =>
         {
             config.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+            config.AddPolicy("RegularUser", policy => policy.RequireAssertion(context => !context.User.IsInRole("Admin")));
         });
 
         builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
