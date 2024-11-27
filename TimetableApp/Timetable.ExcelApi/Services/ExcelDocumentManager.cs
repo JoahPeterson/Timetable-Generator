@@ -280,7 +280,7 @@ public class ExcelDocumentManager
             }
         };
         await _workTaskData.CreateAsync(workTask);
-
+        _workTasks.Add(workTask);
         return workTask;
     }
 
@@ -328,6 +328,7 @@ public class ExcelDocumentManager
         };
 
         await _taskTypeData.CreateTaskTypeAsync(taskType);
+        _taskTypes.Add(taskType);
         return taskType;
     }
 

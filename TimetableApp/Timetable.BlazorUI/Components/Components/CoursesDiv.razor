@@ -152,6 +152,7 @@ else
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("File uploaded successfully!", Severity.Success);
+                Navigation.NavigateTo("/dashboard", forceLoad: true);
             }
             else
             {
@@ -163,6 +164,7 @@ else
         {
             Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
         }
+
     }
 
 
