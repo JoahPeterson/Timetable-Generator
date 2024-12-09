@@ -114,33 +114,8 @@
         }
     }
 
-    private async Task UpdateWorkTasks(WorkTask workTask)
+    private async Task UpdateWorkTasks()
     {
-        // Check if the task already exists in the list
-        var index = workTasks.FindIndex(t => t.Id == workTask.Id);
-
-        if (index != -1)
-        {
-            // Update existing task
-            workTasks[index] = workTask;
-        }
-        else
-        {
-            // Add new task
-            workTasks.Add(workTask);
-        }
-
-        // Save or update task in database
-        if (index == -1)
-        {
-            await WorkTaskData.CreateAsync(workTask);
-        }
-        else
-        {
-            await WorkTaskData.UpdateAsync(workTask);
-        }
-
-        // Update UI
         StateHasChanged();
     }
 

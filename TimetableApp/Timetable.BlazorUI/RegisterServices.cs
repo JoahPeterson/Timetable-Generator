@@ -42,7 +42,7 @@ public static class RegisterServices
             config.AddPolicy("RegularUser", policy => policy.RequireAssertion(context => !context.User.IsInRole("Admin")));
         });
 
-        builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+        builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddSignInManager()
@@ -71,10 +71,10 @@ public static class RegisterServices
             options.UseSqlServer(connectionString));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-        builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddSignInManager()
-            .AddDefaultTokenProviders();
+        //builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+        //    .AddEntityFrameworkStores<ApplicationDbContext>()
+        //    .AddSignInManager()
+        //    .AddDefaultTokenProviders();
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddMudServices();

@@ -74,7 +74,7 @@ public class ExcelExportController : ControllerBase
 
             if (course == null)
             {
-                return BadRequest("Invalid or improperly formatted Excel file.");
+                return BadRequest("Excel formatting error, please see help page for guidance.");
             }
 
             // You can return a result based on your needs, such as a confirmation message or the parsed data

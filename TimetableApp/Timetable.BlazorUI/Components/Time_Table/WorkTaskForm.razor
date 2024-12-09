@@ -39,6 +39,7 @@
             <div class="form-group mx-sm-3 mb-2">
                 <label class="fw-bold" for="type">Type</label>
                 <InputSelect id="type" @bind-Value="workTask.TypeId" class="form-control">
+                    <option>Select Task Type</option>
                     @foreach (var type in taskTypes)
                     {
                         if (type.AuditInformation.IsArchived == false)
@@ -66,8 +67,8 @@
 
 @if (workTasks != null && loggedInUser != null)
 {
-     <div class="bg-light p-3 border border-1 rounded-3 mt-2 shadow">
-         <h4 class="text-center">My Tasks</h4>
+    <div class="bg-light p-3 border border-1 rounded-3 mt-2 shadow">
+        <h4 class="text-center">My Tasks</h4>
         <div class="card scrollable-card">
             <ul class="list-group list-group-flush">
                 @foreach (var task in workTasks)
@@ -75,9 +76,9 @@
                     if (task != null && !task.AuditInformation.IsArchived)
                     {
                         <li class="list-group-item CardText text-dark px-3"
-                            draggable="true"
-                            @ondragstart="(e) => HandleDragStart(e, task.Id)"
-                            data-toggle="tooltip" data-placement="top" title="@task.Description">
+                        draggable="true"
+                        @ondragstart="(e) => HandleDragStart(e, task.Id)"
+                        data-toggle="tooltip" data-placement="top" title="@task.Description">
                             <i class="bi bi-clipboard h4"></i>
                             @task.Name
                         </li>
@@ -127,9 +128,11 @@
             {
                 // Fetch user's tasktypes from the database
                 taskTypes = await TaskTypeData.GetUsersTaskTypesAsync(loggedInUser.Id);
+                taskTypes = taskTypes.OrderBy(t => t.Name).ToList();
 
                 // Fetch user's worktasks from the database
                 workTasks = await WorkTaskData.GetUsersWorkTasksAsync(loggedInUser.Id);
+                workTasks = workTasks.OrderBy(t => t.Name).ToList();
             }
         }
     }
@@ -210,5 +213,6 @@
         isEditMode = false;
         workTask = new WorkTask();
         JS.InvokeVoidAsync("toggleCollapse", "workTaskCollapse");
+        OnWorkTaskFormSubmit.InvokeAsync();
     }
 }

@@ -23,7 +23,7 @@
                 {
                     var colorClass = colorClasses.ElementAtOrDefault(index % colorClasses.Count) ?? "Cardcolor-1";  // Ensure safe access
                     <li class="list-group-item CardText text-black px-3 d-flex justify-content-between @colorClass"
-                        data-toggle="tooltip" data-placement="top" title="@term.ToolTip">
+                    data-toggle="tooltip" data-placement="top" title="@term.ToolTip">
                         <div>
                             <i class="bi bi-calendar4-week h4"></i>
                             <a href="/termDuration/create/@term.Id" class="text-black text-decoration-none fw-bold">
@@ -86,7 +86,8 @@ else
 
             if (user.IsInRole("Admin"))
             {
-                termDurations = await TermDurationData.GetAsync();
+                List<TermDuration> durations = await TermDurationData.GetAsync();
+                termDurations = durations.OrderByDescending(td => td.Length).ToList();
             }
         }
     }

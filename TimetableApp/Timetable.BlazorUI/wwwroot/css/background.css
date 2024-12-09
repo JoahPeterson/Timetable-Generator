@@ -6,6 +6,18 @@
     background-size: cover !important;
 }
 
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: black; /* Adjust the color if needed */
+        opacity: 0.5; /* Change this value to set the opacity level */
+        z-index: -1; /* Ensure the overlay stays behind all content */
+    }
+
 .logo
 {
     margin-top: 100px;

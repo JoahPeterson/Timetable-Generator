@@ -191,7 +191,8 @@
                 WorkUnit.Tasks.Add((WorkUnitTask)result.Data);
 
                 // Save the updated work unit
-                await WorkUnitData.UpdateAsync(WorkUnit);
+                await WorkUnitData.UpdateAsync(WorkUnit); 
+                WorkTasks = await WorkTaskData.GetAsync();
 
                 // Set the WorkUnitId back to string.empty
                 await JS.InvokeVoidAsync("SetSession", "WorkUnitId", string.Empty);

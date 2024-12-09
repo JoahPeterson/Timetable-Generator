@@ -94,6 +94,8 @@
             // the login page if we get here some other way.
             RedirectManager.RedirectTo("Account/Login");
         }
+
+
     }
 
     private async Task OnLoginCallbackAsync()
@@ -123,6 +125,8 @@
         {
             Input.Email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? "";
         }
+
+        OnValidSubmitAsync();
     }
 
     private async Task OnValidSubmitAsync()
@@ -153,7 +157,7 @@
                 // If account confirmation is required, we need to show the link if we don't have a real email sender
                 if (UserManager.Options.SignIn.RequireConfirmedAccount)
                 {
-                    RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
+                    //RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
                 }
 
                 await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);

@@ -147,7 +147,8 @@
         terms = await TermData.GetAllAsync();
 
         // Fetch term durations from the database
-        termDurations = await TermDurationData.GetAsync();
+        List<TermDuration> durations = await TermDurationData.GetAsync();   
+        termDurations = durations.OrderByDescending(td => td.Length).ToList();
 
         if (isEditMode)
         {

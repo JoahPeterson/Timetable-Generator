@@ -22,7 +22,7 @@
                 {
                     var colorClass = colorClasses.ElementAtOrDefault(index % colorClasses.Count) ?? "Cardcolor-1";  // Ensure safe access
                     <li class="list-group-item CardText text-black px-3 d-flex justify-content-between @colorClass"
-                        data-toggle="tooltip" data-placement="top" title="@workTask.Description">
+                    data-toggle="tooltip" data-placement="top" title="@workTask.Description">
                         <div>
                             <i class="bi bi-clipboard h4"></i>
                             <a href="worktask/create/@workTask.Id" class="text-decoration-none text-black fw-bold">@workTask.Name</a>
@@ -65,7 +65,8 @@ else
             if (loggedInUser != null)
             {
                 // Fetch task types for the logged-in user
-                workTasks = await TaskData.GetUsersWorkTasksAsync(loggedInUser.Id);
+                List<WorkTask> tasks = await TaskData.GetUsersWorkTasksAsync(loggedInUser.Id);
+                workTasks = tasks.OrderBy(task => task.Name).ToList();
             }
         }
     }
